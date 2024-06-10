@@ -4,7 +4,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setdAppsNav } from '../store/dAppsNavSlice';
 import styles from "../styles/global.module.css";
 import Image from 'next/image';
-import {useState} from 'react';
 import Detail from './detail'
 
 interface RootState {
