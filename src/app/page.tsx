@@ -3,23 +3,28 @@
 import styles from "../styles/global.module.css";
 import {useState} from 'react';
 import Dapps from '../dapps/index';
+import Marketing from '../marketing/index';
+import Exchanges from '../exchanges/index';
 import { useSelector, useDispatch } from 'react-redux';
-import { setdAppsNav } from '../store/dAppsNavSlice';
+import { setdAppsNav, setMarketingNav, setExchangesNav } from '../store/globalSlice';
 
 interface RootState {
-  dAppsNav: string; // Adjust the type according to your actual state structure
-  // Add other slices if you have them
+  global: {
+    dAppsNav: string;
+    marketingNav: string;
+    exchangesNav: string;
+  };
 }
 
 export default function Home() {
 
-  const dAppsNav = useSelector((state: RootState) => state.dAppsNav);
+  const dAppsNav = useSelector((state: RootState) => state.global.dAppsNav);
+  const marketingNav = useSelector((state: RootState) => state.global.marketingNav);
+  const exchangesNav = useSelector((state: RootState) => state.global.exchangesNav);
   const dispatch = useDispatch();
 
   const [nav, setnav] = useState("Home");
   const [Loading, setLoading] = useState(0);
-
-
 
 
 
@@ -65,6 +70,9 @@ export default function Home() {
                                                                        if ( nav !== "marketing" ) {
                                                                         setnav("marketing")
                                                                       } 
+                                                                      if ( marketingNav === "detail" ) {
+                                                                        dispatch(setMarketingNav('Home'));
+                                                                      }
 
                                                                      }  }>Marketing
           </button>
@@ -78,6 +86,9 @@ export default function Home() {
                                                                if ( nav !== "exchanges" ) {
                                                                 setnav("exchanges")
                                                               } 
+                                                              if ( exchangesNav === "detail" ) {
+                                                                dispatch(setExchangesNav('Home'));
+                                                              }
 
                                                              }  }>Exchange Listings
   </button>
@@ -111,8 +122,7 @@ export default function Home() {
 
 {nav === "marketing" && (
           <>
-          <h2>Kilopi Proof of Development dApp</h2>
-          <h2>Marketing</h2>
+          <Marketing/>
 
 
           </>
@@ -121,8 +131,7 @@ export default function Home() {
 
 {nav === "exchanges" && (
           <>
-          <h2>Kilopi Proof of Development dApp</h2>
-          <h2>Exchange Listings</h2>
+          <Exchanges/>
 
 
           </>

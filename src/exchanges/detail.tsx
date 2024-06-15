@@ -3,7 +3,7 @@
 import styles from "../styles/global.module.css";
 import Image from 'next/image';
 import { useDispatch } from 'react-redux';
-import { setdAppsNav } from '../store/globalSlice';
+import { setExchangesNav } from '../store/globalSlice';
 
 export default function Detail() {
 
@@ -46,7 +46,7 @@ export default function Detail() {
 
           <button className={styles.buttonG} onClick={(event) => {
                                                                        event.preventDefault()
-                                                                       dispatch(setdAppsNav('Home'));
+                                                                       dispatch(setExchangesNav('Home'));
 
                                                                      }  }>Back to Decentralized Apps
           </button>

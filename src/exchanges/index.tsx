@@ -1,14 +1,15 @@
 // use client
 'use client';
 import { useSelector, useDispatch } from 'react-redux';
-import { setdAppsNav } from '../store/globalSlice';
+import { setExchangesNav } from '../store/globalSlice';
 import styles from "../styles/global.module.css";
 import Image from 'next/image';
 import Detail from './detail'
 
 interface RootState {
   global: {
-    dAppsNav: string;
+    MarketingNav: string;
+    ExchangesNav: string;
   };
 }
 
@@ -16,7 +17,7 @@ export default function Dapps() {
 
 
 
-  const dAppsNav = useSelector((state: RootState) => state.global.dAppsNav);
+  const ExchangesNav = useSelector((state: RootState) => state.global.ExchangesNav);
   const dispatch = useDispatch();
 
 
@@ -27,7 +28,7 @@ export default function Dapps() {
     <div className={styles.main}>
       
 
-        {dAppsNav === "Home" && (
+        {ExchangesNav === "Home" && (
             <>
 
       <h2>Kilopi Proof of Development dApp</h2>
@@ -36,7 +37,7 @@ export default function Dapps() {
           <div className={styles.dApps} >
           <button className={styles.buttondApps} onClick={(event) => {
                                                                        event.preventDefault()
-                                                                       dispatch(setdAppsNav('detail'));
+                                                                       dispatch(setExchangesNav('detail'));
                                                                      }  }>
 
           <div className={styles.carddApps}>
@@ -131,19 +132,15 @@ export default function Dapps() {
           <button className={styles.buttonG} onClick={(event) => {
                                                                        event.preventDefault()
 
-                                                                     }  }>Add Your Project
+                                                                     }  }>Add New Exchange
           </button>
-
-        
-
-
 
 
           </>
 )}
 
 
-{dAppsNav === "detail" && (
+{ExchangesNav === "detail" && (
 <>
 
 <Detail />

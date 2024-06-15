@@ -1,9 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
-import dAppsNavReducer from './dAppsNavSlice';
+import globalSliceReducer from './globalSlice';
 
 const store = configureStore({
   reducer: {
-    dAppsNav: dAppsNavReducer,
+    global: globalSliceReducer,
   },
 });
 
