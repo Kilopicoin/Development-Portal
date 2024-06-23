@@ -28,6 +28,7 @@ export default function Dapps() {
   const [exchangeName, setExchangeName] = useState('');
   const [supportedChains, setSupportedChains] = useState('');
   const [fundingGoal, setFundingGoal] = useState('');
+  const [logoImageUrl, setLogoImageUrl] = useState(''); // Add this state
 
   useEffect(() => {
     const loadCampaigns = async () => {
@@ -70,7 +71,8 @@ export default function Dapps() {
       const tx = await contract.createCampaign(
         exchangeName,
         supportedChains,
-        ethers.parseUnits(fundingGoal, 18)
+        ethers.parseUnits(fundingGoal, 18),
+        logoImageUrl // Pass the logo image URL
       );
       await tx.wait();
       // Reload campaigns after creating a new one
@@ -102,7 +104,7 @@ export default function Dapps() {
               {fundingPhase.map((campaign, index) => (
                 <button key={index} className={styles.buttondApps} onClick={() => dispatch(setExchangesNav('detail'))}>
                   <div className={styles.carddApps}>
-                    <Image src="/images/logo1.png" alt="Logo 1" width={50} height={50} />
+                    <Image src={campaign.logoImageUrl} alt="Logo" width={50} height={50} />
                     <div className={styles.carddAppsDescription}>
                       <p>{campaign.exchangeName}</p>
                       <p>Funding Goal: {ethers.formatUnits(campaign.fundingGoal, 18)} USDT</p>
@@ -119,7 +121,7 @@ export default function Dapps() {
               {listingPhase.map((campaign, index) => (
                 <button key={index} className={styles.buttondApps} onClick={() => dispatch(setExchangesNav('detail'))}>
                   <div className={styles.carddApps}>
-                    <Image src="/images/logo1.png" alt="Logo 1" width={50} height={50} />
+                    <Image src={campaign.logoImageUrl} alt="Logo" width={50} height={50} />
                     <div className={styles.carddAppsDescription}>
                       <p>{campaign.exchangeName}</p>
                       <p>Funding Goal: {ethers.formatUnits(campaign.fundingGoal, 18)} USDT</p>
@@ -137,7 +139,7 @@ export default function Dapps() {
               {paybackPhase.map((campaign, index) => (
                 <button key={index} className={styles.buttondApps} onClick={() => dispatch(setExchangesNav('detail'))}>
                   <div className={styles.carddApps}>
-                    <Image src="/images/logo1.png" alt="Logo 1" width={50} height={50} />
+                    <Image src={campaign.logoImageUrl} alt="Logo" width={50} height={50} />
                     <div className={styles.carddAppsDescription}>
                       <p>{campaign.exchangeName}</p>
                       <p>Funding Goal: {ethers.formatUnits(campaign.fundingGoal, 18)} USDT</p>
@@ -155,7 +157,7 @@ export default function Dapps() {
               {finalizedPhase.map((campaign, index) => (
                 <button key={index} className={styles.buttondApps} onClick={() => dispatch(setExchangesNav('detail'))}>
                   <div className={styles.carddApps}>
-                    <Image src="/images/logo1.png" alt="Logo 1" width={50} height={50} />
+                    <Image src={campaign.logoImageUrl} alt="Logo" width={50} height={50} />
                     <div className={styles.carddAppsDescription}>
                       <p>{campaign.exchangeName}</p>
                       <p>Funding Goal: {ethers.formatUnits(campaign.fundingGoal, 18)} USDT</p>
@@ -195,6 +197,16 @@ export default function Dapps() {
                 id="fundingGoal"
                 value={fundingGoal}
                 onChange={(e) => setFundingGoal(e.target.value)}
+                required
+              />
+            </div>
+            <div className={styles.inputGroup}>
+              <label htmlFor="logoImageUrl">Logo Image URL (200x200 Transparent):</label>
+              <input
+                type="text"
+                id="logoImageUrl"
+                value={logoImageUrl}
+                onChange={(e) => setLogoImageUrl(e.target.value)}
                 required
               />
             </div>

@@ -19,16 +19,18 @@ export default function Detail() {
     const loadCampaign = async () => {
       try {
         const contract = await getContract();
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const signer = await provider.getSigner();
-        const address = await signer.getAddress();
-        setAccount(address);
+        if (typeof window.ethereum !== 'undefined') {
+          const provider = new ethers.BrowserProvider(window.ethereum);
+          const signer = await provider.getSigner();
+          const address = await signer.getAddress();
+          setAccount(address);
         
-        const campaign = await contract.campaigns(1); // Example: Load the first campaign
-        setCampaign(campaign);
+          const campaign = await contract.campaigns(1); // Example: Load the first campaign
+          setCampaign(campaign);
         
-        const contribution = await contract.contributors(1, address); // Load contributions for the first campaign
-        setContributions([contribution]);
+          const contribution = await contract.contributors(1, address); // Load contributions for the first campaign
+          setContributions([contribution]);
+        }
       } catch (error) {
         console.error(error);
       }
@@ -46,11 +48,13 @@ export default function Detail() {
       const updatedCampaign = await contract.campaigns(1);
       setCampaign(updatedCampaign);
 
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-      const address = await signer.getAddress();
-      const contribution = await contract.contributors(1, address); // Load contributions for the first campaign
-      setContributions([contribution]);
+      if (typeof window.ethereum !== 'undefined') {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        const address = await signer.getAddress();
+        const contribution = await contract.contributors(1, address); // Load contributions for the first campaign
+        setContributions([contribution]);
+      }
     } catch (error) {
       console.error(error);
     }
@@ -72,13 +76,21 @@ export default function Detail() {
 
   return (
     <div className={styles.main}>
-      <h2>Kilopi Proof of Development dApp</h2>
-      <h2>Exchange Listing Details</h2>
+      <h3>Exchange Listings Detail Page</h3>
+      <button className={styles.buttonG} onClick={() => dispatch(setExchangesNav('Home'))}>
+          Back to Exchange Listings Main Page
+      </button>
       <div className={styles.dApps}>
         {campaign && (
           <div className={styles.buttondAppsDetail}>
             <div className={styles.carddApps}>
-              <Image src="/images/logo1.png" alt="Logo 1" width={300} height={300} />
+              <Image 
+                src={campaign.logoImageUrl} // Use the logo image URL from the campaign
+                alt="Logo"
+                layout="responsive"
+                width={300}
+                height={300}
+              />
               <div className={styles.carddAppsDescription}>
                 <p>Exchange Name: {campaign.exchangeName}</p>
                 <p>Funding Goal: {ethers.formatUnits(campaign.fundingGoal, 18)} USDT</p>
@@ -92,17 +104,20 @@ export default function Detail() {
                 {getProgress().toFixed(2)}%
               </span>
             </div>
-            <form onSubmit={handleContribute}>
-              <input
-                type="text"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="Amount in USDT"
-              />
-              <button type="submit" className={styles.buttonG}>Stake LOP tokens on this Project</button>
+            <form onSubmit={handleContribute} className={styles.form}>
+              <div className={styles.inputGroup}>
+                <input
+                  type="text"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="Amount in USDT"
+                  className={styles.shortInput}
+                />
+                <button type="submit" className={styles.buttonG}>Contribute</button>
+              </div>
             </form>
             <div className={styles.contributions}>
-              <h3>Your Contributions</h3>
+              <h4>Your Contribution</h4>
               <table>
                 <thead>
                   <tr>
@@ -124,9 +139,6 @@ export default function Detail() {
             </div>
           </div>
         )}
-        <button className={styles.buttonG} onClick={() => dispatch(setExchangesNav('Home'))}>
-          Back to Exchange Listings
-        </button>
       </div>
     </div>
   );
