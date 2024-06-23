@@ -25,6 +25,10 @@ export default function Dapps() {
   const [paybackPhase, setPaybackPhase] = useState<any[]>([]);
   const [finalizedPhase, setFinalizedPhase] = useState<any[]>([]);
 
+  const [exchangeName, setExchangeName] = useState('');
+  const [supportedChains, setSupportedChains] = useState('');
+  const [fundingGoal, setFundingGoal] = useState('');
+
   useEffect(() => {
     const loadCampaigns = async () => {
       try {
@@ -59,12 +63,38 @@ export default function Dapps() {
     loadCampaigns();
   }, []);
 
+  const handleCreateCampaign = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    try {
+      const contract = await getContract();
+      const tx = await contract.createCampaign(
+        exchangeName,
+        supportedChains,
+        ethers.parseUnits(fundingGoal, 18)
+      );
+      await tx.wait();
+      // Reload campaigns after creating a new one
+      const campaignCount = await contract.campaignCount();
+      const campaignsList = [];
+      for (let i = 1; i <= campaignCount; i++) {
+        const campaign = await contract.campaigns(i);
+        campaignsList.push(campaign);
+      }
+      setFundingPhase(campaignsList.filter(campaign => !campaign.listingConfirmed && !campaign.finalized));
+      setListingPhase(campaignsList.filter(campaign => campaign.listingConfirmed && !campaign.finalized));
+      setPaybackPhase(campaignsList.filter(campaign => campaign.listingConfirmed && campaign.finalized));
+      setFinalizedPhase(campaignsList.filter(campaign => campaign.finalized));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className={styles.main}>
       {ExchangesNav === "Home" && (
         <>
           <h2>Kilopi Proof of Development dApp</h2>
-          <h2>Decentralized Applications</h2>
+          <h2>Exchange Listings</h2>
 
           <div className={styles.row}>
             <h3>Funding Phase</h3>
@@ -74,11 +104,10 @@ export default function Dapps() {
                   <div className={styles.carddApps}>
                     <Image src="/images/logo1.png" alt="Logo 1" width={50} height={50} />
                     <div className={styles.carddAppsDescription}>
-                      <p>Kilopi DEX</p>
-                      <p>A Decentralized Exchange utilizing the Kilopi [LOP] token</p>
+                      <p>{campaign.exchangeName}</p>
+                      <p>Funding Goal: {ethers.formatUnits(campaign.fundingGoal, 18)} USDT</p>
                     </div>
                   </div>
-                  Staked LOP Tokens: {ethers.formatUnits(campaign.totalContributed, 18)}
                 </button>
               ))}
             </div>
@@ -92,8 +121,8 @@ export default function Dapps() {
                   <div className={styles.carddApps}>
                     <Image src="/images/logo1.png" alt="Logo 1" width={50} height={50} />
                     <div className={styles.carddAppsDescription}>
-                      <p>Kilopi DEX</p>
-                      <p>A Decentralized Exchange utilizing the Kilopi [LOP] token</p>
+                      <p>{campaign.exchangeName}</p>
+                      <p>Funding Goal: {ethers.formatUnits(campaign.fundingGoal, 18)} USDT</p>
                     </div>
                   </div>
                   Staked LOP Tokens: {ethers.formatUnits(campaign.totalContributed, 18)}
@@ -110,8 +139,8 @@ export default function Dapps() {
                   <div className={styles.carddApps}>
                     <Image src="/images/logo1.png" alt="Logo 1" width={50} height={50} />
                     <div className={styles.carddAppsDescription}>
-                      <p>Kilopi DEX</p>
-                      <p>A Decentralized Exchange utilizing the Kilopi [LOP] token</p>
+                      <p>{campaign.exchangeName}</p>
+                      <p>Funding Goal: {ethers.formatUnits(campaign.fundingGoal, 18)} USDT</p>
                     </div>
                   </div>
                   Staked LOP Tokens: {ethers.formatUnits(campaign.totalContributed, 18)}
@@ -128,8 +157,8 @@ export default function Dapps() {
                   <div className={styles.carddApps}>
                     <Image src="/images/logo1.png" alt="Logo 1" width={50} height={50} />
                     <div className={styles.carddAppsDescription}>
-                      <p>Kilopi DEX</p>
-                      <p>A Decentralized Exchange utilizing the Kilopi [LOP] token</p>
+                      <p>{campaign.exchangeName}</p>
+                      <p>Funding Goal: {ethers.formatUnits(campaign.fundingGoal, 18)} USDT</p>
                     </div>
                   </div>
                   Staked LOP Tokens: {ethers.formatUnits(campaign.totalContributed, 18)}
@@ -138,27 +167,39 @@ export default function Dapps() {
             </div>
           </div>
 
-          <button className={styles.buttonG} onClick={async (event) => {
-            event.preventDefault();
-            try {
-              const contract = await getContract();
-              const tx = await contract.createCampaign(ethers.parseUnits('1000', 18)); // Example funding goal
-              await tx.wait();
-              // Reload campaigns after creating a new one
-              const campaignCount = await contract.campaignCount();
-              const campaignsList = [];
-              for (let i = 1; i <= campaignCount; i++) {
-                const campaign = await contract.campaigns(i);
-                campaignsList.push(campaign);
-              }
-              setFundingPhase(campaignsList.filter(campaign => !campaign.listingConfirmed && !campaign.finalized));
-              setListingPhase(campaignsList.filter(campaign => campaign.listingConfirmed && !campaign.finalized));
-              setPaybackPhase(campaignsList.filter(campaign => campaign.listingConfirmed && campaign.finalized));
-              setFinalizedPhase(campaignsList.filter(campaign => campaign.finalized));
-            } catch (error) {
-              console.error(error);
-            }
-          }}>Add New Exchange</button>
+          <form onSubmit={handleCreateCampaign} className={styles.form}>
+            <div className={styles.inputGroup}>
+              <label htmlFor="exchangeName">Exchange Name:</label>
+              <input
+                type="text"
+                id="exchangeName"
+                value={exchangeName}
+                onChange={(e) => setExchangeName(e.target.value)}
+                required
+              />
+            </div>
+            <div className={styles.inputGroup}>
+              <label htmlFor="supportedChains">Supported Chains:</label>
+              <input
+                type="text"
+                id="supportedChains"
+                value={supportedChains}
+                onChange={(e) => setSupportedChains(e.target.value)}
+                required
+              />
+            </div>
+            <div className={styles.inputGroup}>
+              <label htmlFor="fundingGoal">Funding Goal (in USDT):</label>
+              <input
+                type="text"
+                id="fundingGoal"
+                value={fundingGoal}
+                onChange={(e) => setFundingGoal(e.target.value)}
+                required
+              />
+            </div>
+            <button type="submit" className={styles.buttonG}>Add New Exchange</button>
+          </form>
         </>
       )}
       {ExchangesNav === "detail" && (

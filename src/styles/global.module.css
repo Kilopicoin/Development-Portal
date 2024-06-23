@@ -326,6 +326,50 @@
     margin: 9px;
     
   }
+
+
+  .carddAppsDescription p {
+    margin: 5px 0;
+  }
+  
+  .buttondAppsDetail form {
+    margin-top: 20px;
+  }
+  
+  .buttondAppsDetail input {
+    margin-right: 10px;
+  }
+  
+  .progressBarContainer {
+    width: 100%;
+    background-color: #ddd;
+    border-radius: 13px;
+    overflow: hidden;
+    margin: 10px 0;
+    position: relative;
+  }
+  
+  .progressBar {
+    height: 20px;
+    background-color: #4caf50;
+    transition: width 0.5s;
+  }
+  
+  .progressText {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #000;
+    font-weight: bold;
+  }
+  
+  
+  
+
+  
+  
+  
   
   .carddApps {
     display: flex;
@@ -335,7 +379,7 @@
   }
   
   .carddAppsDescription {
-    margin: 3px 6px;
+    margin: 5px 0;
   }
   
   /* Button Hover Effect */
@@ -434,3 +478,68 @@
   font-size: 1.5rem;
   color: #e7ecf1; /* Adjust the color as needed */
 }
+
+
+.form {
+  margin: 20px 0;
+  padding: 20px;
+  background-color: rgba(var(--card-rgb), 0.1);
+  border: 1px solid rgba(var(--card-border-rgb), 0.1);
+  border-radius: var(--border-radius);
+}
+
+.inputGroup {
+  margin-bottom: 10px;
+}
+
+.inputGroup label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #e7ecf1;
+}
+
+.inputGroup input {
+  width: 100%;
+  padding: 8px;
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(var(--card-border-rgb), 0.3);
+  background-color: rgba(var(--card-rgb), 0.2);
+  color: #e7ecf1;
+}
+
+.inputGroup input:focus {
+  outline: none;
+  border-color: #ac5050;
+}
+
+
+.contributions {
+  margin-top: 20px;
+}
+
+.contributions table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.contributions th, .contributions td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.contributions th {
+  background-color: #4caf50;
+  color: white;
+}
+
+.contributions tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.contributions tr:hover {
+  background-color: #ddd;
+}
+
