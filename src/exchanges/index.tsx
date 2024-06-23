@@ -28,39 +28,47 @@ export default function Dapps() {
   const [exchangeName, setExchangeName] = useState('');
   const [supportedChains, setSupportedChains] = useState('');
   const [fundingGoal, setFundingGoal] = useState('');
-  const [logoImageUrl, setLogoImageUrl] = useState(''); // Add this state
+  const [logoImageUrl, setLogoImageUrl] = useState('');
+
+  const loadCampaigns = async () => {
+    try {
+      const contract = await getContract();
+      const campaignCount = await contract.campaignCount();
+      const funding = [];
+      const listing = [];
+      const payback = [];
+      const finalized = [];
+
+      for (let i = 1; i <= campaignCount; i++) {
+        const campaign = await contract.campaigns(i);
+        const campaignWithId = { ...campaign, id: i };
+        console.log(`Campaign ${i}:`, campaignWithId); // Log the fetched campaign data
+        const totalContributed = parseFloat(ethers.formatUnits(campaign.totalContributed, 18));
+        const fundingGoal = parseFloat(ethers.formatUnits(campaign.fundingGoal, 18));
+
+        if (totalContributed >= fundingGoal && !campaign.listingConfirmed && !campaign.finalized) {
+          listing.push(campaignWithId);
+        } else if (!campaign.listingConfirmed && !campaign.finalized) {
+          funding.push(campaignWithId);
+        } else if (campaign.listingConfirmed && !campaign.finalized) {
+          listing.push(campaignWithId);
+        } else if (campaign.listingConfirmed && campaign.finalized) {
+          payback.push(campaignWithId);
+        } else if (campaign.finalized) {
+          finalized.push(campaignWithId);
+        }
+      }
+
+      setFundingPhase(funding);
+      setListingPhase(listing);
+      setPaybackPhase(payback);
+      setFinalizedPhase(finalized);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
-    const loadCampaigns = async () => {
-      try {
-        const contract = await getContract();
-        const campaignCount = await contract.campaignCount();
-        const funding = [];
-        const listing = [];
-        const payback = [];
-        const finalized = [];
-
-        for (let i = 1; i <= campaignCount; i++) {
-          const campaign = await contract.campaigns(i);
-          if (!campaign.listingConfirmed && !campaign.finalized) {
-            funding.push(campaign);
-          } else if (campaign.listingConfirmed && !campaign.finalized) {
-            listing.push(campaign);
-          } else if (campaign.listingConfirmed && campaign.finalized) {
-            payback.push(campaign);
-          } else if (campaign.finalized) {
-            finalized.push(campaign);
-          }
-        }
-
-        setFundingPhase(funding);
-        setListingPhase(listing);
-        setPaybackPhase(payback);
-        setFinalizedPhase(finalized);
-      } catch (error) {
-        console.error(error);
-      }
-    };
     loadCampaigns();
   }, []);
 
@@ -72,20 +80,10 @@ export default function Dapps() {
         exchangeName,
         supportedChains,
         ethers.parseUnits(fundingGoal, 18),
-        logoImageUrl // Pass the logo image URL
+        logoImageUrl
       );
       await tx.wait();
-      // Reload campaigns after creating a new one
-      const campaignCount = await contract.campaignCount();
-      const campaignsList = [];
-      for (let i = 1; i <= campaignCount; i++) {
-        const campaign = await contract.campaigns(i);
-        campaignsList.push(campaign);
-      }
-      setFundingPhase(campaignsList.filter(campaign => !campaign.listingConfirmed && !campaign.finalized));
-      setListingPhase(campaignsList.filter(campaign => campaign.listingConfirmed && !campaign.finalized));
-      setPaybackPhase(campaignsList.filter(campaign => campaign.listingConfirmed && campaign.finalized));
-      setFinalizedPhase(campaignsList.filter(campaign => campaign.finalized));
+      loadCampaigns(); // Reload campaigns after creating a new one
     } catch (error) {
       console.error(error);
     }
@@ -95,77 +93,128 @@ export default function Dapps() {
     <div className={styles.main}>
       {ExchangesNav === "Home" && (
         <>
-          <h2>Kilopi Proof of Development dApp</h2>
-          <h2>Exchange Listings</h2>
+          <h3>Exchange Listings</h3>
 
           <div className={styles.row}>
-            <h3>Funding Phase</h3>
+            <h4>Funding Phase</h4>
             <div className={styles.dApps}>
-              {fundingPhase.map((campaign, index) => (
-                <button key={index} className={styles.buttondApps} onClick={() => dispatch(setExchangesNav('detail'))}>
-                  <div className={styles.carddApps}>
-                    <Image src={campaign.logoImageUrl} alt="Logo" width={50} height={50} />
-                    <div className={styles.carddAppsDescription}>
-                      <p>{campaign.exchangeName}</p>
-                      <p>Funding Goal: {ethers.formatUnits(campaign.fundingGoal, 18)} USDT</p>
+              {fundingPhase.map((campaign, index) => {
+                const exchangeName = campaign[1];
+                const supportedChains = campaign[2];
+                const fundingGoal = campaign[3];
+                const totalContributed = campaign[4];
+                const logoImageUrl = campaign[7];
+
+                return (
+                  <button key={index} className={styles.buttondApps} onClick={() => dispatch(setExchangesNav('detail'))}>
+                    <div className={styles.carddApps}>
+                      {logoImageUrl ? (
+                        <Image src={logoImageUrl} alt="Logo" width={50} height={50} />
+                      ) : (
+                        <div style={{ width: 50, height: 50, background: '#ccc' }} />
+                      )}
+                      <div className={styles.carddAppsDescription}>
+                        <p>ID: {campaign.id}</p>
+                        <p>{exchangeName || 'N/A'}</p>
+                        <p>Funding Goal: {fundingGoal ? ethers.formatUnits(fundingGoal, 18) : 'N/A'} USDT</p>
+                      </div>
                     </div>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           <div className={styles.row}>
-            <h3>Listing Phase</h3>
+            <h4>Listing Phase</h4>
             <div className={styles.dApps}>
-              {listingPhase.map((campaign, index) => (
-                <button key={index} className={styles.buttondApps} onClick={() => dispatch(setExchangesNav('detail'))}>
-                  <div className={styles.carddApps}>
-                    <Image src={campaign.logoImageUrl} alt="Logo" width={50} height={50} />
-                    <div className={styles.carddAppsDescription}>
-                      <p>{campaign.exchangeName}</p>
-                      <p>Funding Goal: {ethers.formatUnits(campaign.fundingGoal, 18)} USDT</p>
+              {listingPhase.map((campaign, index) => {
+                const exchangeName = campaign[1];
+                const supportedChains = campaign[2];
+                const fundingGoal = campaign[3];
+                const totalContributed = campaign[4];
+                const logoImageUrl = campaign[7];
+
+                return (
+                  <button key={index} className={styles.buttondApps} onClick={() => dispatch(setExchangesNav('detail'))}>
+                    <div className={styles.carddApps}>
+                      {logoImageUrl ? (
+                        <Image src={logoImageUrl} alt="Logo" width={50} height={50} />
+                      ) : (
+                        <div style={{ width: 50, height: 50, background: '#ccc' }} />
+                      )}
+                      <div className={styles.carddAppsDescription}>
+                        <p>ID: {campaign.id}</p>
+                        <p>{exchangeName || 'N/A'}</p>
+                        <p>Funding Goal: {fundingGoal ? ethers.formatUnits(fundingGoal, 18) : 'N/A'} USDT</p>
+                      </div>
                     </div>
-                  </div>
-                  Staked LOP Tokens: {ethers.formatUnits(campaign.totalContributed, 18)}
-                </button>
-              ))}
+                    Staked LOP Tokens: {totalContributed ? ethers.formatUnits(totalContributed, 18) : 'N/A'}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           <div className={styles.row}>
-            <h3>Payback Phase</h3>
+            <h4>Payback Phase</h4>
             <div className={styles.dApps}>
-              {paybackPhase.map((campaign, index) => (
-                <button key={index} className={styles.buttondApps} onClick={() => dispatch(setExchangesNav('detail'))}>
-                  <div className={styles.carddApps}>
-                    <Image src={campaign.logoImageUrl} alt="Logo" width={50} height={50} />
-                    <div className={styles.carddAppsDescription}>
-                      <p>{campaign.exchangeName}</p>
-                      <p>Funding Goal: {ethers.formatUnits(campaign.fundingGoal, 18)} USDT</p>
+              {paybackPhase.map((campaign, index) => {
+                const exchangeName = campaign[1];
+                const supportedChains = campaign[2];
+                const fundingGoal = campaign[3];
+                const totalContributed = campaign[4];
+                const logoImageUrl = campaign[7];
+
+                return (
+                  <button key={index} className={styles.buttondApps} onClick={() => dispatch(setExchangesNav('detail'))}>
+                    <div className={styles.carddApps}>
+                      {logoImageUrl ? (
+                        <Image src={logoImageUrl} alt="Logo" width={50} height={50} />
+                      ) : (
+                        <div style={{ width: 50, height: 50, background: '#ccc' }} />
+                      )}
+                      <div className={styles.carddAppsDescription}>
+                        <p>ID: {campaign.id}</p>
+                        <p>{exchangeName || 'N/A'}</p>
+                        <p>Funding Goal: {fundingGoal ? ethers.formatUnits(fundingGoal, 18) : 'N/A'} USDT</p>
+                      </div>
                     </div>
-                  </div>
-                  Staked LOP Tokens: {ethers.formatUnits(campaign.totalContributed, 18)}
-                </button>
-              ))}
+                    Staked LOP Tokens: {totalContributed ? ethers.formatUnits(totalContributed, 18) : 'N/A'}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           <div className={styles.row}>
-            <h3>Finalized Phase</h3>
+            <h4>Finalized Phase</h4>
             <div className={styles.dApps}>
-              {finalizedPhase.map((campaign, index) => (
-                <button key={index} className={styles.buttondApps} onClick={() => dispatch(setExchangesNav('detail'))}>
-                  <div className={styles.carddApps}>
-                    <Image src={campaign.logoImageUrl} alt="Logo" width={50} height={50} />
-                    <div className={styles.carddAppsDescription}>
-                      <p>{campaign.exchangeName}</p>
-                      <p>Funding Goal: {ethers.formatUnits(campaign.fundingGoal, 18)} USDT</p>
+              {finalizedPhase.map((campaign, index) => {
+                const exchangeName = campaign[1];
+                const supportedChains = campaign[2];
+                const fundingGoal = campaign[3];
+                const totalContributed = campaign[4];
+                const logoImageUrl = campaign[7];
+
+                return (
+                  <button key={index} className={styles.buttondApps} onClick={() => dispatch(setExchangesNav('detail'))}>
+                    <div className={styles.carddApps}>
+                      {logoImageUrl ? (
+                        <Image src={logoImageUrl} alt="Logo" width={50} height={50} />
+                      ) : (
+                        <div style={{ width: 50, height: 50, background: '#ccc' }} />
+                      )}
+                      <div className={styles.carddAppsDescription}>
+                        <p>ID: {campaign.id}</p>
+                        <p>{exchangeName || 'N/A'}</p>
+                        <p>Funding Goal: {fundingGoal ? ethers.formatUnits(fundingGoal, 18) : 'N/A'} USDT</p>
+                      </div>
                     </div>
-                  </div>
-                  Staked LOP Tokens: {ethers.formatUnits(campaign.totalContributed, 18)}
-                </button>
-              ))}
+                    Staked LOP Tokens: {totalContributed ? ethers.formatUnits(totalContributed, 18) : 'N/A'}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
