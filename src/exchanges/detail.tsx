@@ -4,7 +4,7 @@ import styles from "../styles/global.module.css";
 import Image from 'next/image';
 import { useDispatch } from 'react-redux';
 import { setExchangesNav } from '../store/globalSlice';
-import getContract from './contract';
+import getContract, { getSignerContract } from './contract';
 import { useEffect, useState } from 'react';
 import { ethers } from 'ethers'; // Correct import for ethers.js v6.x.x
 
@@ -19,23 +19,37 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
   const [paybackAmount, setPaybackAmount] = useState(''); // New state for payback amount input
   const [contributions, setContributions] = useState<any[]>([]);
   const [account, setAccount] = useState<string | null>(null);
+  const [isMetamaskConnected, setIsMetamaskConnected] = useState(false);
+  const [isCorrectNetwork, setIsCorrectNetwork] = useState(false);
+
+  const harmonyTestnetChainId = '0x6357d2e0'; // Harmony Testnet chain ID in hexadecimal
+
+  const checkMetamaskConnection = async () => {
+    if (typeof window.ethereum !== 'undefined') {
+      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+      const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+      setIsMetamaskConnected(accounts.length > 0);
+      setIsCorrectNetwork(chainId === harmonyTestnetChainId);
+      if (accounts.length > 0 && chainId === harmonyTestnetChainId) {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        const address = await signer.getAddress();
+        setAccount(address);
+        
+        const contract = await getContract();
+        const contribution = await contract.contributors(campaignId, address); // Load contributions for the campaign
+        setContributions([contribution]);
+      }
+    }
+  };
 
   useEffect(() => {
     const loadCampaign = async () => {
       try {
         const contract = await getContract();
-        if (typeof window.ethereum !== 'undefined') {
-          const provider = new ethers.BrowserProvider(window.ethereum);
-          const signer = await provider.getSigner();
-          const address = await signer.getAddress();
-          setAccount(address);
-          
-          const campaign = await contract.campaigns(campaignId); // Load the campaign with the given ID
-          setCampaign(campaign);
-          
-          const contribution = await contract.contributors(campaignId, address); // Load contributions for the campaign
-          setContributions([contribution]);
-        }
+        const campaign = await contract.campaigns(campaignId); // Load the campaign with the given ID
+        setCampaign(campaign);
+        checkMetamaskConnection();
       } catch (error) {
         console.error(error);
       }
@@ -46,14 +60,14 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
   const handleContribute = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      const contract = await getContract();
+      const contract = await getSignerContract();
       const tx = await contract.contribute(campaignId, ethers.parseUnits(amount, 18)); // Contribute to the campaign with the given ID
       await tx.wait();
       // Reload campaign data after contributing
       const updatedCampaign = await contract.campaigns(campaignId);
       setCampaign(updatedCampaign);
 
-      if (typeof window.ethereum !== 'undefined') {
+      if (isMetamaskConnected) {
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
         const address = await signer.getAddress();
@@ -68,7 +82,7 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
   const handleAddPaybackFunds = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      const contract = await getContract();
+      const contract = await getSignerContract();
       const tx = await contract.addPaybackFunds(campaignId, ethers.parseUnits(paybackAmount, 18)); // Add payback funds to the campaign
       await tx.wait();
       // Reload campaign data after adding payback funds
@@ -182,7 +196,9 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
                       placeholder="Amount in USDT"
                       className={styles.shortInput}
                     />
-                    <button type="submit" className={styles.buttonG}>Add Payback Funds</button>
+                    <button type="submit" className={styles.buttonG} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                      {isMetamaskConnected && isCorrectNetwork ? 'Add Payback Funds' : 'Metamask (Harmony Testnet) Needed'}
+                    </button>
                   </div>
                 </form>
               </div>
@@ -197,7 +213,9 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
                     placeholder="Amount in USDT"
                     className={styles.shortInput}
                   />
-                  <button type="submit" className={styles.buttonG}>Contribute</button>
+                  <button type="submit" className={styles.buttonG} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                    {isMetamaskConnected && isCorrectNetwork ? 'Contribute' : 'Metamask (Harmony Testnet) Needed'}
+                  </button>
                 </div>
               </form>
             )}

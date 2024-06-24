@@ -5,7 +5,7 @@ import { setExchangesNav } from '../store/globalSlice';
 import styles from "../styles/global.module.css";
 import Image from 'next/image';
 import Detail from './detail';
-import getContract from './contract';
+import getContract, { getSignerContract } from './contract';
 import { useEffect, useState } from 'react';
 import { ethers } from 'ethers'; // Correct import for ethers.js v6.x.x
 
@@ -33,6 +33,25 @@ export default function Dapps() {
 
   const [confirmId, setConfirmId] = useState<string>(''); // New state for confirm listing ID
   const [paybackId, setPaybackId] = useState<string>(''); // New state for payback ID
+
+  const [isMetamaskConnected, setIsMetamaskConnected] = useState(false);
+  const [isCorrectNetwork, setIsCorrectNetwork] = useState(false);
+
+  const harmonyTestnetChainId = '0x6357d2e0'; // Harmony Testnet chain ID in hexadecimal
+
+  const checkMetamaskConnection = async () => {
+    if (typeof window.ethereum !== 'undefined') {
+      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+      const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+      setIsMetamaskConnected(accounts.length > 0);
+      setIsCorrectNetwork(chainId === harmonyTestnetChainId);
+    }
+  };
+
+  useEffect(() => {
+    loadCampaigns();
+    checkMetamaskConnection();
+  }, []);
 
   const loadCampaigns = async () => {
     try {
@@ -82,14 +101,10 @@ export default function Dapps() {
     }
   };
 
-  useEffect(() => {
-    loadCampaigns();
-  }, []);
-
   const handleCreateCampaign = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      const contract = await getContract();
+      const contract = await getSignerContract();
       const tx = await contract.createCampaign(
         exchangeName,
         supportedChains,
@@ -105,7 +120,7 @@ export default function Dapps() {
 
   const handleConfirmListing = async () => {
     try {
-      const contract = await getContract();
+      const contract = await getSignerContract();
       const tx = await contract.confirmListing(parseInt(confirmId));
       await tx.wait();
       loadCampaigns(); // Reload campaigns after confirming listing
@@ -116,7 +131,7 @@ export default function Dapps() {
 
   const handlePayback = async () => {
     try {
-      const contract = await getContract();
+      const contract = await getSignerContract();
       const tx = await contract.payBack(parseInt(paybackId));
       await tx.wait();
       loadCampaigns(); // Reload campaigns after payback
@@ -301,7 +316,9 @@ export default function Dapps() {
                       required
                     />
                   </div>
-                  <button type="submit" className={styles.buttonG}>Add New Exchange</button>
+                  <button type="submit" className={styles.buttonG} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                    {isMetamaskConnected && isCorrectNetwork ? 'Add New Exchange' : 'Metamask (Harmony Testnet) Needed'}
+                  </button>
                 </form>
               </div>
 
@@ -319,7 +336,9 @@ export default function Dapps() {
                       required
                     />
                   </div>
-                  <button className={styles.buttonG} onClick={handleConfirmListing}>Confirm Listing</button>
+                  <button className={styles.buttonG} onClick={handleConfirmListing} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                    {isMetamaskConnected && isCorrectNetwork ? 'Confirm Listing' : 'Metamask (Harmony Testnet) Needed'}
+                  </button>
                 </div>
               </div>
 
@@ -337,7 +356,9 @@ export default function Dapps() {
                       required
                     />
                   </div>
-                  <button className={styles.buttonG} onClick={handlePayback}>Execute Payback</button>
+                  <button className={styles.buttonG} onClick={handlePayback} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                    {isMetamaskConnected && isCorrectNetwork ? 'Execute Payback' : 'Metamask (Harmony Testnet) Needed'}
+                  </button>
                 </div>
               </div>
             </div>

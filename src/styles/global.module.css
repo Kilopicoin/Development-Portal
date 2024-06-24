@@ -466,6 +466,13 @@
   margin: 10px 0;
 }
 
+.hrContent {
+  border: none;
+  height: 1px;
+  background: rgb(19, 57, 83);
+  margin: 10px 0;
+}
+
 .row {
   margin-bottom: 20px;
 }
