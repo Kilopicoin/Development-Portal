@@ -16,6 +16,7 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
   const dispatch = useDispatch();
   const [campaign, setCampaign] = useState<any>(null);
   const [amount, setAmount] = useState('');
+  const [paybackAmount, setPaybackAmount] = useState(''); // New state for payback amount input
   const [contributions, setContributions] = useState<any[]>([]);
   const [account, setAccount] = useState<string | null>(null);
 
@@ -64,11 +65,34 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
     }
   };
 
+  const handleAddPaybackFunds = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    try {
+      const contract = await getContract();
+      const tx = await contract.addPaybackFunds(campaignId, ethers.parseUnits(paybackAmount, 18)); // Add payback funds to the campaign
+      await tx.wait();
+      // Reload campaign data after adding payback funds
+      const updatedCampaign = await contract.campaigns(campaignId);
+      setCampaign(updatedCampaign);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const getProgress = () => {
     if (campaign) {
       const totalContributed = ethers.formatUnits(campaign.totalContributed, 18);
       const fundingGoal = ethers.formatUnits(campaign.fundingGoal, 18);
       return (parseFloat(totalContributed) / parseFloat(fundingGoal)) * 100;
+    }
+    return 0;
+  };
+
+  const getPaybackProgress = () => {
+    if (campaign) {
+      const totalPaybackAdded = parseFloat(ethers.formatUnits(campaign.totalPaybackAdded, 18));
+      const paybackGoal = parseFloat(ethers.formatUnits(campaign.paybackGoal, 18));
+      return (totalPaybackAdded / paybackGoal) * 100;
     }
     return 0;
   };
@@ -113,30 +137,70 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
               />
               <div className={styles.carddAppsDescription}>
                 <p>Exchange Name: {campaign.exchangeName}</p>
-                <p>Funding Goal: {ethers.formatUnits(campaign.fundingGoal, 18)} USDT</p>
                 <p>Supported Chains: {campaign.supportedChains}</p>
-                <p>Total Contributed: {ethers.formatUnits(campaign.totalContributed, 18)} USDT</p>
+                {getPhase() !== 'Payback Phase' && (
+                  <>
+                    <p>Funding Goal: {ethers.formatUnits(campaign.fundingGoal, 18)} USDT</p>
+                    <p>Total Contributed: {ethers.formatUnits(campaign.totalContributed, 18)} USDT</p>
+                  </>
+                )}
+                {getPhase() === 'Payback Phase' && (
+                  <>
+                    <p>Payback Goal: {ethers.formatUnits(campaign.paybackGoal, 18)} USDT</p>
+                    <p>Total Payback Added: {ethers.formatUnits(campaign.totalPaybackAdded, 18)} USDT</p>
+                  </>
+                )}
                 <p>Current Phase: {getPhase()}</p>
               </div>
             </div>
-            <div className={styles.progressBarContainer}>
-              <div className={styles.progressBar} style={{ width: `${getProgress()}%` }}></div>
-              <span className={styles.progressText}>
-                {getProgress().toFixed(2)}%
-              </span>
-            </div>
-            <form onSubmit={handleContribute} className={styles.form}>
-              <div className={styles.inputGroup}>
-                <input
-                  type="text"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="Amount in USDT"
-                  className={styles.shortInput}
-                />
-                <button type="submit" className={styles.buttonG}>Contribute</button>
+            {getPhase() === 'Funding Phase' && (
+              <div className={styles.progressBarWrapper}>
+                <h5 className={styles.progressBarLabel}>Funding Progress Bar</h5>
+                <div className={styles.progressBarContainer}>
+                  <div className={styles.progressBar} style={{ width: `${getProgress()}%` }}></div>
+                  <span className={styles.progressText}>
+                    {getProgress().toFixed(2)}%
+                  </span>
+                </div>
               </div>
-            </form>
+            )}
+            {getPhase() === 'Payback Phase' && (
+              <div className={styles.progressBarWrapper}>
+                <h5 className={styles.progressBarLabel}>Payback Progress Bar</h5>
+                <div className={styles.progressBarContainer}>
+                  <div className={styles.progressBar} style={{ width: `${getPaybackProgress()}%` }}></div>
+                  <span className={styles.progressText}>
+                    {getPaybackProgress().toFixed(2)}%
+                  </span>
+                </div>
+                <form onSubmit={handleAddPaybackFunds} className={styles.form}>
+                  <div className={styles.inputGroup}>
+                    <input
+                      type="text"
+                      value={paybackAmount}
+                      onChange={(e) => setPaybackAmount(e.target.value)}
+                      placeholder="Amount in USDT"
+                      className={styles.shortInput}
+                    />
+                    <button type="submit" className={styles.buttonG}>Add Payback Funds</button>
+                  </div>
+                </form>
+              </div>
+            )}
+            {getPhase() === 'Funding Phase' && (
+              <form onSubmit={handleContribute} className={styles.form}>
+                <div className={styles.inputGroup}>
+                  <input
+                    type="text"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="Amount in USDT"
+                    className={styles.shortInput}
+                  />
+                  <button type="submit" className={styles.buttonG}>Contribute</button>
+                </div>
+              </form>
+            )}
             <div className={styles.contributions}>
               <h4>Your Contribution</h4>
               <table>

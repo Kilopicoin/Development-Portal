@@ -325,6 +325,17 @@
   margin-right: 10px;
 }
 
+/* Add these styles to your global.module.css */
+
+.progressBarWrapper {
+  margin-bottom: 20px;
+}
+
+.progressBarLabel {
+  margin-bottom: 5px;
+  text-align: center; /* Align the label to the left */
+}
+
 .progressBarContainer {
   width: 100%;
   background-color: #ddd;
@@ -348,6 +359,7 @@
   color: #000;
   font-weight: bold;
 }
+
 
 .carddApps {
   display: flex;

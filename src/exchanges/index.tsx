@@ -32,6 +32,7 @@ export default function Dapps() {
   const [logoImageUrl, setLogoImageUrl] = useState('');
 
   const [confirmId, setConfirmId] = useState<string>(''); // New state for confirm listing ID
+  const [paybackId, setPaybackId] = useState<string>(''); // New state for payback ID
 
   const loadCampaigns = async () => {
     try {
@@ -108,6 +109,17 @@ export default function Dapps() {
       const tx = await contract.confirmListing(parseInt(confirmId));
       await tx.wait();
       loadCampaigns(); // Reload campaigns after confirming listing
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handlePayback = async () => {
+    try {
+      const contract = await getContract();
+      const tx = await contract.payBack(parseInt(paybackId));
+      await tx.wait();
+      loadCampaigns(); // Reload campaigns after payback
     } catch (error) {
       console.error(error);
     }
@@ -308,6 +320,24 @@ export default function Dapps() {
                     />
                   </div>
                   <button className={styles.buttonG} onClick={handleConfirmListing}>Confirm Listing</button>
+                </div>
+              </div>
+
+              <div className={styles.formContainer}>
+                <div className={styles.form}>
+                  <h4>Execute Payback</h4>
+                  <h5>Distribute funds to contributors</h5>
+                  <div className={styles.inputGroup}>
+                    <label htmlFor="paybackId">Campaign ID:</label>
+                    <input
+                      type="text"
+                      id="paybackId"
+                      value={paybackId}
+                      onChange={(e) => setPaybackId(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <button className={styles.buttonG} onClick={handlePayback}>Execute Payback</button>
                 </div>
               </div>
             </div>
