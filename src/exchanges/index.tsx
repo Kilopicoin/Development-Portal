@@ -31,6 +31,8 @@ export default function Dapps() {
   const [fundingGoal, setFundingGoal] = useState('');
   const [logoImageUrl, setLogoImageUrl] = useState('');
 
+  const [confirmId, setConfirmId] = useState<string>(''); // New state for confirm listing ID
+
   const loadCampaigns = async () => {
     try {
       const contract = await getContract();
@@ -47,14 +49,12 @@ export default function Dapps() {
         const totalContributed = parseFloat(ethers.formatUnits(campaign.totalContributed, 18));
         const fundingGoal = parseFloat(ethers.formatUnits(campaign.fundingGoal, 18));
 
-        if (totalContributed >= fundingGoal && !campaign.listingConfirmed && !campaign.finalized) {
+        if (campaign.listingConfirmed && !campaign.finalized) {
+          payback.push(campaignWithId);
+        } else if (totalContributed >= fundingGoal && !campaign.listingConfirmed && !campaign.finalized) {
           listing.push(campaignWithId);
         } else if (!campaign.listingConfirmed && !campaign.finalized) {
           funding.push(campaignWithId);
-        } else if (campaign.listingConfirmed && !campaign.finalized) {
-          listing.push(campaignWithId);
-        } else if (campaign.listingConfirmed && campaign.finalized) {
-          payback.push(campaignWithId);
         } else if (campaign.finalized) {
           finalized.push(campaignWithId);
         }
@@ -85,6 +85,17 @@ export default function Dapps() {
       );
       await tx.wait();
       loadCampaigns(); // Reload campaigns after creating a new one
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleConfirmListing = async () => {
+    try {
+      const contract = await getContract();
+      const tx = await contract.confirmListing(parseInt(confirmId));
+      await tx.wait();
+      loadCampaigns(); // Reload campaigns after confirming listing
     } catch (error) {
       console.error(error);
     }
@@ -224,49 +235,74 @@ export default function Dapps() {
             </div>
           </div>
 
-          <form onSubmit={handleCreateCampaign} className={styles.form}>
-            <div className={styles.inputGroup}>
-              <label htmlFor="exchangeName">Exchange Name:</label>
-              <input
-                type="text"
-                id="exchangeName"
-                value={exchangeName}
-                onChange={(e) => setExchangeName(e.target.value)}
-                required
-              />
+          <div className={styles.row}>
+            <div className={styles.formContainerWrapper}>
+              <div className={styles.formContainer}>
+                <form onSubmit={handleCreateCampaign} className={styles.form}>
+                  <h4>Add New Exchange</h4>
+                  <div className={styles.inputGroup}>
+                    <label htmlFor="exchangeName">Exchange Name:</label>
+                    <input
+                      type="text"
+                      id="exchangeName"
+                      value={exchangeName}
+                      onChange={(e) => setExchangeName(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className={styles.inputGroup}>
+                    <label htmlFor="supportedChains">Supported Chains:</label>
+                    <input
+                      type="text"
+                      id="supportedChains"
+                      value={supportedChains}
+                      onChange={(e) => setSupportedChains(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className={styles.inputGroup}>
+                    <label htmlFor="fundingGoal">Funding Goal (in USDT):</label>
+                    <input
+                      type="text"
+                      id="fundingGoal"
+                      value={fundingGoal}
+                      onChange={(e) => setFundingGoal(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className={styles.inputGroup}>
+                    <label htmlFor="logoImageUrl">Logo Image URL (200x200 Transparent):</label>
+                    <input
+                      type="text"
+                      id="logoImageUrl"
+                      value={logoImageUrl}
+                      onChange={(e) => setLogoImageUrl(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <button type="submit" className={styles.buttonG}>Add New Exchange</button>
+                </form>
+              </div>
+
+              <div className={styles.formContainer}>
+              <div className={styles.form}>
+                <h4>Confirm Listing</h4>
+                <h5>Once the token gets listed</h5>
+                <div className={styles.inputGroup}>
+                  <label htmlFor="confirmId">Campaign ID:</label>
+                  <input
+                    type="text"
+                    id="confirmId"
+                    value={confirmId}
+                    onChange={(e) => setConfirmId(e.target.value)}
+                    required
+                  />
+                </div>
+                <button className={styles.buttonG} onClick={handleConfirmListing}>Confirm Listing</button>
+                </div>
+              </div>
             </div>
-            <div className={styles.inputGroup}>
-              <label htmlFor="supportedChains">Supported Chains:</label>
-              <input
-                type="text"
-                id="supportedChains"
-                value={supportedChains}
-                onChange={(e) => setSupportedChains(e.target.value)}
-                required
-              />
-            </div>
-            <div className={styles.inputGroup}>
-              <label htmlFor="fundingGoal">Funding Goal (in USDT):</label>
-              <input
-                type="text"
-                id="fundingGoal"
-                value={fundingGoal}
-                onChange={(e) => setFundingGoal(e.target.value)}
-                required
-              />
-            </div>
-            <div className={styles.inputGroup}>
-              <label htmlFor="logoImageUrl">Logo Image URL (200x200 Transparent):</label>
-              <input
-                type="text"
-                id="logoImageUrl"
-                value={logoImageUrl}
-                onChange={(e) => setLogoImageUrl(e.target.value)}
-                required
-              />
-            </div>
-            <button type="submit" className={styles.buttonG}>Add New Exchange</button>
-          </form>
+          </div>
         </>
       )}
       {ExchangesNav === "detail" && selectedCampaignId !== null && (

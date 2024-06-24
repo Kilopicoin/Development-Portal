@@ -561,3 +561,13 @@
 .contributions tr:hover {
   background-color: #ddd;
 }
+
+.formContainerWrapper {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px; /* Add gap between forms if needed */
+}
+
+.formContainer {
+  flex: 1;
+}
