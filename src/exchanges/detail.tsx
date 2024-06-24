@@ -78,6 +78,23 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
     return parseFloat(contributionAmount) * (1 + interestRate / 100);
   };
 
+  const getPhase = () => {
+    if (!campaign) return 'Unknown';
+
+    const totalContributed = parseFloat(ethers.formatUnits(campaign.totalContributed, 18));
+    const fundingGoal = parseFloat(ethers.formatUnits(campaign.fundingGoal, 18));
+
+    if (campaign.finalized) {
+      return 'Finalized';
+    } else if (campaign.listingConfirmed) {
+      return 'Payback Phase';
+    } else if (totalContributed >= fundingGoal) {
+      return 'Listing Phase';
+    } else {
+      return 'Funding Phase';
+    }
+  };
+
   return (
     <div className={styles.main}>
       <h3>Exchange Listings Detail Page</h3>
@@ -99,6 +116,7 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
                 <p>Funding Goal: {ethers.formatUnits(campaign.fundingGoal, 18)} USDT</p>
                 <p>Supported Chains: {campaign.supportedChains}</p>
                 <p>Total Contributed: {ethers.formatUnits(campaign.totalContributed, 18)} USDT</p>
+                <p>Current Phase: {getPhase()}</p>
               </div>
             </div>
             <div className={styles.progressBarContainer}>

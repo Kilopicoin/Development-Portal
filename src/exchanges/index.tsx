@@ -44,18 +44,30 @@ export default function Dapps() {
 
       for (let i = 1; i <= campaignCount; i++) {
         const campaign = await contract.campaigns(i);
-        const campaignWithId = { ...campaign, id: i };
+        const campaignWithId = {
+          id: i,
+          exchangeName: campaign[1],
+          supportedChains: campaign[2],
+          fundingGoal: campaign[3],
+          totalContributed: campaign[4],
+          paybackGoal: campaign[5],
+          paybackAmount: campaign[6],
+          listingConfirmed: campaign[7],
+          finalized: campaign[8],
+          logoImageUrl: campaign[9]
+        };
+
         console.log(`Campaign ${i}:`, campaignWithId); // Log the fetched campaign data
         const totalContributed = parseFloat(ethers.formatUnits(campaign.totalContributed, 18));
         const fundingGoal = parseFloat(ethers.formatUnits(campaign.fundingGoal, 18));
 
-        if (campaign.listingConfirmed && !campaign.finalized) {
+        if (campaignWithId.listingConfirmed && !campaignWithId.finalized) {
           payback.push(campaignWithId);
-        } else if (totalContributed >= fundingGoal && !campaign.listingConfirmed && !campaign.finalized) {
+        } else if (totalContributed >= fundingGoal && !campaignWithId.listingConfirmed && !campaignWithId.finalized) {
           listing.push(campaignWithId);
-        } else if (!campaign.listingConfirmed && !campaign.finalized) {
+        } else if (!campaignWithId.listingConfirmed && !campaignWithId.finalized) {
           funding.push(campaignWithId);
-        } else if (campaign.finalized) {
+        } else if (campaignWithId.finalized) {
           finalized.push(campaignWithId);
         }
       }
@@ -116,11 +128,11 @@ export default function Dapps() {
             <h4>Funding Phase</h4>
             <div className={styles.dApps}>
               {fundingPhase.map((campaign, index) => {
-                const exchangeName = campaign[1];
-                const supportedChains = campaign[2];
-                const fundingGoal = campaign[3];
-                const totalContributed = campaign[4];
-                const logoImageUrl = campaign[7];
+                const exchangeName = campaign.exchangeName;
+                const supportedChains = campaign.supportedChains;
+                const fundingGoal = campaign.fundingGoal;
+                const totalContributed = campaign.totalContributed;
+                const logoImageUrl = campaign.logoImageUrl;
 
                 return (
                   <button key={index} className={styles.buttondApps} onClick={() => handleCampaignClick(campaign.id)}>
@@ -132,7 +144,7 @@ export default function Dapps() {
                       )}
                       <div className={styles.carddAppsDescription}>
                         <p>ID: {campaign.id}</p>
-                        <p>Exchange Name: {exchangeName || 'N/A'}</p>
+                        <p>Exchange Name: {exchangeName ? exchangeName : 'N/A'}</p>
                         <p>Funding Goal: {fundingGoal ? ethers.formatUnits(fundingGoal, 18) : 'N/A'} USDT</p>
                       </div>
                     </div>
@@ -146,11 +158,11 @@ export default function Dapps() {
             <h4>Listing Phase</h4>
             <div className={styles.dApps}>
               {listingPhase.map((campaign, index) => {
-                const exchangeName = campaign[1];
-                const supportedChains = campaign[2];
-                const fundingGoal = campaign[3];
-                const totalContributed = campaign[4];
-                const logoImageUrl = campaign[7];
+                const exchangeName = campaign.exchangeName;
+                const supportedChains = campaign.supportedChains;
+                const fundingGoal = campaign.fundingGoal;
+                const totalContributed = campaign.totalContributed;
+                const logoImageUrl = campaign.logoImageUrl;
 
                 return (
                   <button key={index} className={styles.buttondApps} onClick={() => handleCampaignClick(campaign.id)}>
@@ -162,11 +174,10 @@ export default function Dapps() {
                       )}
                       <div className={styles.carddAppsDescription}>
                         <p>ID: {campaign.id}</p>
-                        <p>Exchange Name: {exchangeName || 'N/A'}</p>
+                        <p>Exchange Name: {exchangeName ? exchangeName : 'N/A'}</p>
                         <p>Funding Goal: {fundingGoal ? ethers.formatUnits(fundingGoal, 18) : 'N/A'} USDT</p>
                       </div>
                     </div>
-                    
                   </button>
                 );
               })}
@@ -177,11 +188,11 @@ export default function Dapps() {
             <h4>Payback Phase</h4>
             <div className={styles.dApps}>
               {paybackPhase.map((campaign, index) => {
-                const exchangeName = campaign[1];
-                const supportedChains = campaign[2];
-                const fundingGoal = campaign[3];
-                const totalContributed = campaign[4];
-                const logoImageUrl = campaign[7];
+                const exchangeName = campaign.exchangeName;
+                const supportedChains = campaign.supportedChains;
+                const fundingGoal = campaign.fundingGoal;
+                const totalContributed = campaign.totalContributed;
+                const logoImageUrl = campaign.logoImageUrl;
 
                 return (
                   <button key={index} className={styles.buttondApps} onClick={() => handleCampaignClick(campaign.id)}>
@@ -193,11 +204,10 @@ export default function Dapps() {
                       )}
                       <div className={styles.carddAppsDescription}>
                         <p>ID: {campaign.id}</p>
-                        <p>Exchange Name: {exchangeName || 'N/A'}</p>
+                        <p>Exchange Name: {exchangeName ? exchangeName : 'N/A'}</p>
                         <p>Funding Goal: {fundingGoal ? ethers.formatUnits(fundingGoal, 18) : 'N/A'} USDT</p>
                       </div>
                     </div>
-                    
                   </button>
                 );
               })}
@@ -208,11 +218,11 @@ export default function Dapps() {
             <h4>Finalized Phase</h4>
             <div className={styles.dApps}>
               {finalizedPhase.map((campaign, index) => {
-                const exchangeName = campaign[1];
-                const supportedChains = campaign[2];
-                const fundingGoal = campaign[3];
-                const totalContributed = campaign[4];
-                const logoImageUrl = campaign[7];
+                const exchangeName = campaign.exchangeName;
+                const supportedChains = campaign.supportedChains;
+                const fundingGoal = campaign.fundingGoal;
+                const totalContributed = campaign.totalContributed;
+                const logoImageUrl = campaign.logoImageUrl;
 
                 return (
                   <button key={index} className={styles.buttondApps} onClick={() => handleCampaignClick(campaign.id)}>
@@ -224,11 +234,10 @@ export default function Dapps() {
                       )}
                       <div className={styles.carddAppsDescription}>
                         <p>ID: {campaign.id}</p>
-                        <p>Exchange Name: {exchangeName || 'N/A'}</p>
+                        <p>Exchange Name: {exchangeName ? exchangeName : 'N/A'}</p>
                         <p>Funding Goal: {fundingGoal ? ethers.formatUnits(fundingGoal, 18) : 'N/A'} USDT</p>
                       </div>
                     </div>
-                    
                   </button>
                 );
               })}
@@ -285,20 +294,20 @@ export default function Dapps() {
               </div>
 
               <div className={styles.formContainer}>
-              <div className={styles.form}>
-                <h4>Confirm Listing</h4>
-                <h5>Once the token gets listed</h5>
-                <div className={styles.inputGroup}>
-                  <label htmlFor="confirmId">Campaign ID:</label>
-                  <input
-                    type="text"
-                    id="confirmId"
-                    value={confirmId}
-                    onChange={(e) => setConfirmId(e.target.value)}
-                    required
-                  />
-                </div>
-                <button className={styles.buttonG} onClick={handleConfirmListing}>Confirm Listing</button>
+                <div className={styles.form}>
+                  <h4>Confirm Listing</h4>
+                  <h5>Once the token gets listed</h5>
+                  <div className={styles.inputGroup}>
+                    <label htmlFor="confirmId">Campaign ID:</label>
+                    <input
+                      type="text"
+                      id="confirmId"
+                      value={confirmId}
+                      onChange={(e) => setConfirmId(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <button className={styles.buttonG} onClick={handleConfirmListing}>Confirm Listing</button>
                 </div>
               </div>
             </div>
