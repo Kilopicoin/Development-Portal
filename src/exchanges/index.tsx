@@ -24,6 +24,7 @@ export default function Dapps() {
   const [listingPhase, setListingPhase] = useState<any[]>([]);
   const [paybackPhase, setPaybackPhase] = useState<any[]>([]);
   const [finalizedPhase, setFinalizedPhase] = useState<any[]>([]);
+  const [selectedCampaignId, setSelectedCampaignId] = useState<number | null>(null);
 
   const [exchangeName, setExchangeName] = useState('');
   const [supportedChains, setSupportedChains] = useState('');
@@ -89,6 +90,11 @@ export default function Dapps() {
     }
   };
 
+  const handleCampaignClick = (campaignId: number) => {
+    setSelectedCampaignId(campaignId);
+    dispatch(setExchangesNav('detail'));
+  };
+
   return (
     <div className={styles.main}>
       {ExchangesNav === "Home" && (
@@ -106,7 +112,7 @@ export default function Dapps() {
                 const logoImageUrl = campaign[7];
 
                 return (
-                  <button key={index} className={styles.buttondApps} onClick={() => dispatch(setExchangesNav('detail'))}>
+                  <button key={index} className={styles.buttondApps} onClick={() => handleCampaignClick(campaign.id)}>
                     <div className={styles.carddApps}>
                       {logoImageUrl ? (
                         <Image src={logoImageUrl} alt="Logo" width={50} height={50} />
@@ -115,7 +121,7 @@ export default function Dapps() {
                       )}
                       <div className={styles.carddAppsDescription}>
                         <p>ID: {campaign.id}</p>
-                        <p>{exchangeName || 'N/A'}</p>
+                        <p>Exchange Name: {exchangeName || 'N/A'}</p>
                         <p>Funding Goal: {fundingGoal ? ethers.formatUnits(fundingGoal, 18) : 'N/A'} USDT</p>
                       </div>
                     </div>
@@ -136,7 +142,7 @@ export default function Dapps() {
                 const logoImageUrl = campaign[7];
 
                 return (
-                  <button key={index} className={styles.buttondApps} onClick={() => dispatch(setExchangesNav('detail'))}>
+                  <button key={index} className={styles.buttondApps} onClick={() => handleCampaignClick(campaign.id)}>
                     <div className={styles.carddApps}>
                       {logoImageUrl ? (
                         <Image src={logoImageUrl} alt="Logo" width={50} height={50} />
@@ -145,11 +151,11 @@ export default function Dapps() {
                       )}
                       <div className={styles.carddAppsDescription}>
                         <p>ID: {campaign.id}</p>
-                        <p>{exchangeName || 'N/A'}</p>
+                        <p>Exchange Name: {exchangeName || 'N/A'}</p>
                         <p>Funding Goal: {fundingGoal ? ethers.formatUnits(fundingGoal, 18) : 'N/A'} USDT</p>
                       </div>
                     </div>
-                    Staked LOP Tokens: {totalContributed ? ethers.formatUnits(totalContributed, 18) : 'N/A'}
+                    
                   </button>
                 );
               })}
@@ -167,7 +173,7 @@ export default function Dapps() {
                 const logoImageUrl = campaign[7];
 
                 return (
-                  <button key={index} className={styles.buttondApps} onClick={() => dispatch(setExchangesNav('detail'))}>
+                  <button key={index} className={styles.buttondApps} onClick={() => handleCampaignClick(campaign.id)}>
                     <div className={styles.carddApps}>
                       {logoImageUrl ? (
                         <Image src={logoImageUrl} alt="Logo" width={50} height={50} />
@@ -176,11 +182,11 @@ export default function Dapps() {
                       )}
                       <div className={styles.carddAppsDescription}>
                         <p>ID: {campaign.id}</p>
-                        <p>{exchangeName || 'N/A'}</p>
+                        <p>Exchange Name: {exchangeName || 'N/A'}</p>
                         <p>Funding Goal: {fundingGoal ? ethers.formatUnits(fundingGoal, 18) : 'N/A'} USDT</p>
                       </div>
                     </div>
-                    Staked LOP Tokens: {totalContributed ? ethers.formatUnits(totalContributed, 18) : 'N/A'}
+                    
                   </button>
                 );
               })}
@@ -198,7 +204,7 @@ export default function Dapps() {
                 const logoImageUrl = campaign[7];
 
                 return (
-                  <button key={index} className={styles.buttondApps} onClick={() => dispatch(setExchangesNav('detail'))}>
+                  <button key={index} className={styles.buttondApps} onClick={() => handleCampaignClick(campaign.id)}>
                     <div className={styles.carddApps}>
                       {logoImageUrl ? (
                         <Image src={logoImageUrl} alt="Logo" width={50} height={50} />
@@ -207,11 +213,11 @@ export default function Dapps() {
                       )}
                       <div className={styles.carddAppsDescription}>
                         <p>ID: {campaign.id}</p>
-                        <p>{exchangeName || 'N/A'}</p>
+                        <p>Exchange Name: {exchangeName || 'N/A'}</p>
                         <p>Funding Goal: {fundingGoal ? ethers.formatUnits(fundingGoal, 18) : 'N/A'} USDT</p>
                       </div>
                     </div>
-                    Staked LOP Tokens: {totalContributed ? ethers.formatUnits(totalContributed, 18) : 'N/A'}
+                    
                   </button>
                 );
               })}
@@ -263,9 +269,9 @@ export default function Dapps() {
           </form>
         </>
       )}
-      {ExchangesNav === "detail" && (
+      {ExchangesNav === "detail" && selectedCampaignId !== null && (
         <>
-          <Detail />
+          <Detail campaignId={selectedCampaignId} />
         </>
       )}
     </div>

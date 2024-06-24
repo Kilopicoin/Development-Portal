@@ -8,7 +8,11 @@ import getContract from './contract';
 import { useEffect, useState } from 'react';
 import { ethers } from 'ethers'; // Correct import for ethers.js v6.x.x
 
-export default function Detail() {
+interface DetailProps {
+  campaignId: number;
+}
+
+const Detail: React.FC<DetailProps> = ({ campaignId }) => {
   const dispatch = useDispatch();
   const [campaign, setCampaign] = useState<any>(null);
   const [amount, setAmount] = useState('');
@@ -24,11 +28,11 @@ export default function Detail() {
           const signer = await provider.getSigner();
           const address = await signer.getAddress();
           setAccount(address);
-        
-          const campaign = await contract.campaigns(1); // Example: Load the first campaign
+          
+          const campaign = await contract.campaigns(campaignId); // Load the campaign with the given ID
           setCampaign(campaign);
-        
-          const contribution = await contract.contributors(1, address); // Load contributions for the first campaign
+          
+          const contribution = await contract.contributors(campaignId, address); // Load contributions for the campaign
           setContributions([contribution]);
         }
       } catch (error) {
@@ -36,23 +40,23 @@ export default function Detail() {
       }
     };
     loadCampaign();
-  }, []);
+  }, [campaignId]);
 
   const handleContribute = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
       const contract = await getContract();
-      const tx = await contract.contribute(1, ethers.parseUnits(amount, 18)); // Example: Contribute to the first campaign
+      const tx = await contract.contribute(campaignId, ethers.parseUnits(amount, 18)); // Contribute to the campaign with the given ID
       await tx.wait();
       // Reload campaign data after contributing
-      const updatedCampaign = await contract.campaigns(1);
+      const updatedCampaign = await contract.campaigns(campaignId);
       setCampaign(updatedCampaign);
 
       if (typeof window.ethereum !== 'undefined') {
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
         const address = await signer.getAddress();
-        const contribution = await contract.contributors(1, address); // Load contributions for the first campaign
+        const contribution = await contract.contributors(campaignId, address); // Load contributions for the campaign
         setContributions([contribution]);
       }
     } catch (error) {
@@ -78,7 +82,7 @@ export default function Detail() {
     <div className={styles.main}>
       <h3>Exchange Listings Detail Page</h3>
       <button className={styles.buttonG} onClick={() => dispatch(setExchangesNav('Home'))}>
-          Back to Exchange Listings Main Page
+        Back to Exchange Listings Main Page
       </button>
       <div className={styles.dApps}>
         {campaign && (
@@ -87,7 +91,6 @@ export default function Detail() {
               <Image 
                 src={campaign.logoImageUrl} // Use the logo image URL from the campaign
                 alt="Logo"
-                layout="responsive"
                 width={300}
                 height={300}
               />
@@ -142,4 +145,6 @@ export default function Detail() {
       </div>
     </div>
   );
-}
+};
+
+export default Detail;
