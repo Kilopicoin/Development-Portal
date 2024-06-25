@@ -5,9 +5,14 @@ import Image from 'next/image';
 import { useDispatch } from 'react-redux';
 import { setExchangesNav } from '../store/globalSlice';
 import getContract, { getSignerContract } from './contract';
+import usdtABI from './usdtABI.json'; // Import the ABI JSON file
 import { useEffect, useState } from 'react';
 import { ethers } from 'ethers'; // Correct import for ethers.js v6.x.x
 import { TailSpin } from 'react-loader-spinner'; // Correct import for Loader
+import Modal from '../modal/Modal'; // Import the Modal component
+
+const usdtContractAddress = '0xf74AE40623B29c995D0173aC53dC2a8ef5660763'; // Replace with the actual USDT contract address
+const multiExchangeListingAddress = '0xbA510173783C90cDe31035a894C27d7E1A346D5A'; // MultiExchangeListing contract address
 
 interface DetailProps {
   campaignId: number;
@@ -23,6 +28,8 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
   const [isMetamaskConnected, setIsMetamaskConnected] = useState(false);
   const [isCorrectNetwork, setIsCorrectNetwork] = useState(false);
   const [loading, setLoading] = useState(false); // Loading state
+  const [isOwner, setIsOwner] = useState(false); // State for checking owner
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // Error message state
 
   const harmonyTestnetChainId = '0x6357d2e0'; // Harmony Testnet chain ID in hexadecimal
 
@@ -41,7 +48,19 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
         const contract = await getContract();
         const contribution = await contract.contributors(campaignId, address); // Load contributions for the campaign
         setContributions([contribution]);
+
+        await checkOwner(address);
       }
+    }
+  };
+
+  const checkOwner = async (account: string) => {
+    try {
+      const contract = await getContract();
+      const owner = await contract.owner(); // Assuming your contract has an owner() function
+      setIsOwner(owner.toLowerCase() === account.toLowerCase());
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -69,42 +88,85 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
     }
   }, [campaignId]);
 
-  const handleContribute = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleApproveAndContribute = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true); // Start loading
+    setErrorMessage(null); // Reset error message
     try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const usdtContract = new ethers.Contract(usdtContractAddress, usdtABI.abi, signer);
+      const amountInWei = ethers.parseUnits(amount, 18);
+
+      // Check user's USDT balance
+      const usdtBalance: bigint = await usdtContract.balanceOf(account);
+      if (usdtBalance < amountInWei) {
+        throw new Error("You do not have enough USDT in your wallet");
+      }
+
+      // Always approve the contribution amount
+      const approveTx = await usdtContract.approve(multiExchangeListingAddress, amountInWei);
+      await approveTx.wait();
+
+      // Now proceed with the contribution
       const contract = await getSignerContract();
-      const tx = await contract.contribute(campaignId, ethers.parseUnits(amount, 18)); // Contribute to the campaign with the given ID
-      await tx.wait();
+      const contributeTx = await contract.contribute(campaignId, amountInWei); // Contribute to the campaign with the given ID
+      await contributeTx.wait();
+
       // Reload campaign data after contributing
       const updatedCampaign = await contract.campaigns(campaignId);
       setCampaign(updatedCampaign);
 
       if (isMetamaskConnected) {
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const signer = await provider.getSigner();
-        const address = await signer.getAddress();
-        const contribution = await contract.contributors(campaignId, address); // Load contributions for the campaign
+        const contribution = await contract.contributors(campaignId, account); // Load contributions for the campaign
         setContributions([contribution]);
       }
     } catch (error) {
+      if (error instanceof Error) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage('An unknown error occurred');
+      }
       console.error(error);
     } finally {
       setLoading(false); // Stop loading
     }
   };
 
-  const handleAddPaybackFunds = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleApproveAndAddPaybackFunds = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true); // Start loading
+    setErrorMessage(null); // Reset error message
     try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const usdtContract = new ethers.Contract(usdtContractAddress, usdtABI.abi, signer);
+      const paybackAmountInWei = ethers.parseUnits(paybackAmount, 18);
+
+      // Check user's USDT balance
+      const usdtBalance: bigint = await usdtContract.balanceOf(account);
+      if (usdtBalance < paybackAmountInWei) {
+        throw new Error("You do not have enough USDT in your wallet");
+      }
+
+      // Always approve the payback amount
+      const approveTx = await usdtContract.approve(multiExchangeListingAddress, paybackAmountInWei);
+      await approveTx.wait();
+
+      // Now proceed with adding payback funds
       const contract = await getSignerContract();
-      const tx = await contract.addPaybackFunds(campaignId, ethers.parseUnits(paybackAmount, 18)); // Add payback funds to the campaign
-      await tx.wait();
+      const addPaybackTx = await contract.addPaybackFunds(campaignId, paybackAmountInWei); // Add payback funds to the campaign
+      await addPaybackTx.wait();
+
       // Reload campaign data after adding payback funds
       const updatedCampaign = await contract.campaigns(campaignId);
       setCampaign(updatedCampaign);
     } catch (error) {
+      if (error instanceof Error) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage('An unknown error occurred');
+      }
       console.error(error);
     } finally {
       setLoading(false); // Stop loading
@@ -158,6 +220,9 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
           <TailSpin color="#00BFFF" height={80} width={80} />
         </div>
       )}
+      {errorMessage && (
+        <Modal message={errorMessage} onClose={() => setErrorMessage(null)} />
+      )}
       <h3>Exchange Listings Detail Page</h3>
       <button className={styles.buttonG} onClick={() => dispatch(setExchangesNav('Home'))}>
         Back to Exchange Listings Main Page
@@ -207,7 +272,7 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
                 </div>
               </div>
             )}
-            {getPhase() === 'Payback Phase' && (
+            {getPhase() === 'Payback Phase' && isOwner && (
               <div className={styles.progressBarWrapper}>
                 <h5 className={styles.progressBarLabel}>Payback Progress Bar</h5>
                 <div className={styles.progressBarContainer}>
@@ -216,7 +281,7 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
                     {getPaybackProgress().toFixed(2)}%
                   </span>
                 </div>
-                <form onSubmit={handleAddPaybackFunds} className={styles.form}>
+                <form onSubmit={handleApproveAndAddPaybackFunds} className={styles.form}>
                   <div className={styles.inputGroup}>
                     <input
                       type="text"
@@ -233,7 +298,7 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
               </div>
             )}
             {getPhase() === 'Funding Phase' && (
-              <form onSubmit={handleContribute} className={styles.form}>
+              <form onSubmit={handleApproveAndContribute} className={styles.form}>
                 <div className={styles.inputGroup}>
                   <input
                     type="text"

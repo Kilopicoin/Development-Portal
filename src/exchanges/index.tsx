@@ -38,6 +38,7 @@ export default function Dapps() {
   const [isMetamaskConnected, setIsMetamaskConnected] = useState(false);
   const [isCorrectNetwork, setIsCorrectNetwork] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isOwner, setIsOwner] = useState(false); // State for checking owner
 
   const harmonyTestnetChainId = '0x6357d2e0'; // Harmony Testnet chain ID in hexadecimal
 
@@ -47,6 +48,19 @@ export default function Dapps() {
       const chainId = await window.ethereum.request({ method: 'eth_chainId' });
       setIsMetamaskConnected(accounts.length > 0);
       setIsCorrectNetwork(chainId === harmonyTestnetChainId);
+      if (accounts.length > 0) {
+        await checkOwner(accounts[0]);
+      }
+    }
+  };
+
+  const checkOwner = async (account: string) => {
+    try {
+      const contract = await getContract();
+      const owner = await contract.owner(); // Assuming your contract has an owner() function
+      setIsOwner(owner.toLowerCase() === account.toLowerCase());
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -297,98 +311,100 @@ export default function Dapps() {
             </div>
           </div>
 
-          <div className={styles.row}>
-            <div className={styles.formContainerWrapper}>
-              <div className={styles.formContainer}>
-                <form onSubmit={handleCreateCampaign} className={styles.form}>
-                  <h4>Add New Exchange</h4>
-                  <div className={styles.inputGroup}>
-                    <label htmlFor="exchangeName">Exchange Name:</label>
-                    <input
-                      type="text"
-                      id="exchangeName"
-                      value={exchangeName}
-                      onChange={(e) => setExchangeName(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className={styles.inputGroup}>
-                    <label htmlFor="supportedChains">Supported Chains:</label>
-                    <input
-                      type="text"
-                      id="supportedChains"
-                      value={supportedChains}
-                      onChange={(e) => setSupportedChains(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className={styles.inputGroup}>
-                    <label htmlFor="fundingGoal">Funding Goal (in USDT):</label>
-                    <input
-                      type="text"
-                      id="fundingGoal"
-                      value={fundingGoal}
-                      onChange={(e) => setFundingGoal(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className={styles.inputGroup}>
-                    <label htmlFor="logoImageUrl">Logo Image URL (200x200 Transparent):</label>
-                    <input
-                      type="text"
-                      id="logoImageUrl"
-                      value={logoImageUrl}
-                      onChange={(e) => setLogoImageUrl(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <button type="submit" className={styles.buttonG} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                    {isMetamaskConnected && isCorrectNetwork ? 'Add New Exchange' : 'Metamask (Harmony Testnet) Needed'}
-                  </button>
-                </form>
-              </div>
-
-              <div className={styles.formContainer}>
-                <div className={styles.form}>
-                  <h4>Confirm Listing</h4>
-                  <h5>Once the token gets listed</h5>
-                  <div className={styles.inputGroup}>
-                    <label htmlFor="confirmId">Campaign ID:</label>
-                    <input
-                      type="text"
-                      id="confirmId"
-                      value={confirmId}
-                      onChange={(e) => setConfirmId(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <button className={styles.buttonG} onClick={handleConfirmListing} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                    {isMetamaskConnected && isCorrectNetwork ? 'Confirm Listing' : 'Metamask (Harmony Testnet) Needed'}
-                  </button>
+          {isOwner && (
+            <div className={styles.row}>
+              <div className={styles.formContainerWrapper}>
+                <div className={styles.formContainer}>
+                  <form onSubmit={handleCreateCampaign} className={styles.form}>
+                    <h4>Add New Exchange</h4>
+                    <div className={styles.inputGroup}>
+                      <label htmlFor="exchangeName">Exchange Name:</label>
+                      <input
+                        type="text"
+                        id="exchangeName"
+                        value={exchangeName}
+                        onChange={(e) => setExchangeName(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label htmlFor="supportedChains">Supported Chains:</label>
+                      <input
+                        type="text"
+                        id="supportedChains"
+                        value={supportedChains}
+                        onChange={(e) => setSupportedChains(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label htmlFor="fundingGoal">Funding Goal (in USDT):</label>
+                      <input
+                        type="text"
+                        id="fundingGoal"
+                        value={fundingGoal}
+                        onChange={(e) => setFundingGoal(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label htmlFor="logoImageUrl">Logo Image URL (200x200 Transparent):</label>
+                      <input
+                        type="text"
+                        id="logoImageUrl"
+                        value={logoImageUrl}
+                        onChange={(e) => setLogoImageUrl(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <button type="submit" className={styles.buttonG} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                      {isMetamaskConnected && isCorrectNetwork ? 'Add New Exchange' : 'Metamask (Harmony Testnet) Needed'}
+                    </button>
+                  </form>
                 </div>
-              </div>
 
-              <div className={styles.formContainer}>
-                <div className={styles.form}>
-                  <h4>Execute Payback</h4>
-                  <h5>Distribute funds to contributors</h5>
-                  <div className={styles.inputGroup}>
-                    <label htmlFor="paybackId">Campaign ID:</label>
-                    <input
-                      type="text"
-                      id="paybackId"
-                      value={paybackId}
-                      onChange={(e) => setPaybackId(e.target.value)}
-                      required
-                    />
+                <div className={styles.formContainer}>
+                  <div className={styles.form}>
+                    <h4>Confirm Listing</h4>
+                    <h5>Once the token gets listed</h5>
+                    <div className={styles.inputGroup}>
+                      <label htmlFor="confirmId">Campaign ID:</label>
+                      <input
+                        type="text"
+                        id="confirmId"
+                        value={confirmId}
+                        onChange={(e) => setConfirmId(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <button className={styles.buttonG} onClick={handleConfirmListing} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                      {isMetamaskConnected && isCorrectNetwork ? 'Confirm Listing' : 'Metamask (Harmony Testnet) Needed'}
+                    </button>
                   </div>
-                  <button className={styles.buttonG} onClick={handlePayback} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                    {isMetamaskConnected && isCorrectNetwork ? 'Execute Payback' : 'Metamask (Harmony Testnet) Needed'}
-                  </button>
+                </div>
+
+                <div className={styles.formContainer}>
+                  <div className={styles.form}>
+                    <h4>Execute Payback</h4>
+                    <h5>Distribute funds to contributors</h5>
+                    <div className={styles.inputGroup}>
+                      <label htmlFor="paybackId">Campaign ID:</label>
+                      <input
+                        type="text"
+                        id="paybackId"
+                        value={paybackId}
+                        onChange={(e) => setPaybackId(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <button className={styles.buttonG} onClick={handlePayback} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                      {isMetamaskConnected && isCorrectNetwork ? 'Execute Payback' : 'Metamask (Harmony Testnet) Needed'}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </>
       )}
       {ExchangesNav === "detail" && selectedCampaignId !== null && (
