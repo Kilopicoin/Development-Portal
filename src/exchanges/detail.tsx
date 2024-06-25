@@ -7,6 +7,7 @@ import { setExchangesNav } from '../store/globalSlice';
 import getContract, { getSignerContract } from './contract';
 import { useEffect, useState } from 'react';
 import { ethers } from 'ethers'; // Correct import for ethers.js v6.x.x
+import { TailSpin } from 'react-loader-spinner'; // Correct import for Loader
 
 interface DetailProps {
   campaignId: number;
@@ -21,6 +22,7 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
   const [account, setAccount] = useState<string | null>(null);
   const [isMetamaskConnected, setIsMetamaskConnected] = useState(false);
   const [isCorrectNetwork, setIsCorrectNetwork] = useState(false);
+  const [loading, setLoading] = useState(false); // Loading state
 
   const harmonyTestnetChainId = '0x6357d2e0'; // Harmony Testnet chain ID in hexadecimal
 
@@ -69,6 +71,7 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
 
   const handleContribute = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setLoading(true); // Start loading
     try {
       const contract = await getSignerContract();
       const tx = await contract.contribute(campaignId, ethers.parseUnits(amount, 18)); // Contribute to the campaign with the given ID
@@ -86,11 +89,14 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
   const handleAddPaybackFunds = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setLoading(true); // Start loading
     try {
       const contract = await getSignerContract();
       const tx = await contract.addPaybackFunds(campaignId, ethers.parseUnits(paybackAmount, 18)); // Add payback funds to the campaign
@@ -100,6 +106,8 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
       setCampaign(updatedCampaign);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
@@ -145,6 +153,11 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
 
   return (
     <div className={styles.main}>
+      {loading && (
+        <div className={styles.loaderWrapper}>
+          <TailSpin color="#00BFFF" height={80} width={80} />
+        </div>
+      )}
       <h3>Exchange Listings Detail Page</h3>
       <button className={styles.buttonG} onClick={() => dispatch(setExchangesNav('Home'))}>
         Back to Exchange Listings Main Page
@@ -162,7 +175,13 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
               <div className={styles.carddAppsDescription}>
                 <p>Exchange Name: {campaign.exchangeName}</p>
                 <p>Supported Chains: {campaign.supportedChains}</p>
-                {getPhase() !== 'Payback Phase' && (
+                {getPhase() === 'Finalized' && (
+                  <>
+                    <p>Payback Goal: {ethers.formatUnits(campaign.paybackGoal, 18)} USDT</p>
+                    <p>Total Payback Added: {ethers.formatUnits(campaign.totalPaybackAdded, 18)} USDT</p>
+                  </>
+                )}
+                {getPhase() !== 'Payback Phase' && getPhase() !== 'Finalized' && (
                   <>
                     <p>Funding Goal: {ethers.formatUnits(campaign.fundingGoal, 18)} USDT</p>
                     <p>Total Contributed: {ethers.formatUnits(campaign.totalContributed, 18)} USDT</p>

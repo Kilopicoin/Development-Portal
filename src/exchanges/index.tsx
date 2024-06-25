@@ -8,6 +8,7 @@ import Detail from './detail';
 import getContract, { getSignerContract } from './contract';
 import { useEffect, useState } from 'react';
 import { ethers } from 'ethers'; // Correct import for ethers.js v6.x.x
+import { TailSpin } from 'react-loader-spinner'; // Correct import for Loader
 
 interface RootState {
   global: {
@@ -36,6 +37,7 @@ export default function Dapps() {
 
   const [isMetamaskConnected, setIsMetamaskConnected] = useState(false);
   const [isCorrectNetwork, setIsCorrectNetwork] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const harmonyTestnetChainId = '0x6357d2e0'; // Harmony Testnet chain ID in hexadecimal
 
@@ -113,6 +115,7 @@ export default function Dapps() {
 
   const handleCreateCampaign = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setLoading(true);
     try {
       const contract = await getSignerContract();
       const tx = await contract.createCampaign(
@@ -125,10 +128,13 @@ export default function Dapps() {
       loadCampaigns(); // Reload campaigns after creating a new one
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleConfirmListing = async () => {
+    setLoading(true);
     try {
       const contract = await getSignerContract();
       const tx = await contract.confirmListing(parseInt(confirmId));
@@ -136,10 +142,13 @@ export default function Dapps() {
       loadCampaigns(); // Reload campaigns after confirming listing
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handlePayback = async () => {
+    setLoading(true);
     try {
       const contract = await getSignerContract();
       const tx = await contract.payBack(parseInt(paybackId));
@@ -147,6 +156,8 @@ export default function Dapps() {
       loadCampaigns(); // Reload campaigns after payback
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -157,6 +168,11 @@ export default function Dapps() {
 
   return (
     <div className={styles.main}>
+      {loading && (
+        <div className={styles.loaderWrapper}>
+          <TailSpin color="#00BFFF" height={80} width={80} />
+        </div>
+      )}
       {ExchangesNav === "Home" && (
         <>
           <h3>Exchange Listings</h3>
@@ -383,4 +399,3 @@ export default function Dapps() {
     </div>
   );
 }
-
