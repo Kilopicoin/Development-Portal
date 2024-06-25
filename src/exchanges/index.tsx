@@ -51,6 +51,16 @@ export default function Dapps() {
   useEffect(() => {
     loadCampaigns();
     checkMetamaskConnection();
+
+    if (typeof window.ethereum !== 'undefined') {
+      window.ethereum.on('accountsChanged', checkMetamaskConnection);
+      window.ethereum.on('chainChanged', checkMetamaskConnection);
+
+      return () => {
+        window.ethereum.removeListener('accountsChanged', checkMetamaskConnection);
+        window.ethereum.removeListener('chainChanged', checkMetamaskConnection);
+      };
+    }
   }, []);
 
   const loadCampaigns = async () => {
@@ -373,3 +383,4 @@ export default function Dapps() {
     </div>
   );
 }
+
