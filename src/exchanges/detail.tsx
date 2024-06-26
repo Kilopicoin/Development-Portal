@@ -98,6 +98,18 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
       const usdtContract = new ethers.Contract(usdtContractAddress, usdtABI.abi, signer);
       const amountInWei = ethers.parseUnits(amount, 18);
 
+      // Define limits
+      const minAmount = ethers.parseUnits('1', 18);
+      const maxAmount = ethers.parseUnits((parseFloat(ethers.formatUnits(campaign.fundingGoal, 18)) - parseFloat(ethers.formatUnits(campaign.totalContributed, 18))).toString(), 18);
+
+      // Check limits
+      if (amountInWei < minAmount) {
+        throw new Error("The contribution amount must be at least 1 USDT");
+      }
+      if (amountInWei > maxAmount) {
+        throw new Error("The contribution amount exceeds the maximum limit");
+      }
+
       // Check user's USDT balance
       const usdtBalance: bigint = await usdtContract.balanceOf(account);
       if (usdtBalance < amountInWei) {
@@ -142,6 +154,18 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
       const signer = await provider.getSigner();
       const usdtContract = new ethers.Contract(usdtContractAddress, usdtABI.abi, signer);
       const paybackAmountInWei = ethers.parseUnits(paybackAmount, 18);
+
+      // Define limits
+      const minAmount = ethers.parseUnits('1', 18);
+      const maxAmount = ethers.parseUnits((parseFloat(ethers.formatUnits(campaign.paybackGoal, 18)) - parseFloat(ethers.formatUnits(campaign.totalPaybackAdded, 18))).toString(), 18);
+
+      // Check limits
+      if (paybackAmountInWei < minAmount) {
+        throw new Error("The payback amount must be at least 1 USDT");
+      }
+      if (paybackAmountInWei > maxAmount) {
+        throw new Error("The payback amount exceeds the maximum limit");
+      }
 
       // Check user's USDT balance
       const usdtBalance: bigint = await usdtContract.balanceOf(account);
@@ -210,6 +234,15 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
       return 'Listing Phase';
     } else {
       return 'Funding Phase';
+    }
+  };
+
+  // Function to handle input validation
+  const handleNumericInput = (event: React.ChangeEvent<HTMLInputElement>, setState: (value: string) => void) => {
+    const value = event.target.value;
+    // Allow only numbers and a single decimal point
+    if (/^\d*\.?\d*$/.test(value)) {
+      setState(value);
     }
   };
 
@@ -286,7 +319,7 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
                     <input
                       type="text"
                       value={paybackAmount}
-                      onChange={(e) => setPaybackAmount(e.target.value)}
+                      onChange={(e) => handleNumericInput(e, setPaybackAmount)}
                       placeholder="Amount in USDT"
                       className={styles.shortInput}
                     />
@@ -303,7 +336,7 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
                   <input
                     type="text"
                     value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
+                    onChange={(e) => handleNumericInput(e, setAmount)}
                     placeholder="Amount in USDT"
                     className={styles.shortInput}
                   />
