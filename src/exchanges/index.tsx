@@ -1,5 +1,3 @@
-// use client
-'use client';
 import { useSelector, useDispatch } from 'react-redux';
 import { setExchangesNav } from '../store/globalSlice';
 import styles from "../styles/global.module.css";
@@ -9,6 +7,7 @@ import getContract, { getSignerContract } from './contract';
 import { useEffect, useState } from 'react';
 import { ethers } from 'ethers'; // Correct import for ethers.js v6.x.x
 import { TailSpin } from 'react-loader-spinner'; // Correct import for Loader
+import Modal from '../modal/Modal'; // Import the Modal component
 
 interface RootState {
   global: {
@@ -34,11 +33,14 @@ export default function Dapps() {
 
   const [confirmId, setConfirmId] = useState<string>(''); // New state for confirm listing ID
   const [paybackId, setPaybackId] = useState<string>(''); // New state for payback ID
+  const [withdrawId, setWithdrawId] = useState<string>(''); // New state for withdraw funds ID
 
   const [isMetamaskConnected, setIsMetamaskConnected] = useState(false);
   const [isCorrectNetwork, setIsCorrectNetwork] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isOwner, setIsOwner] = useState(false); // State for checking owner
+  const [isSecondOwner, setIsSecondOwner] = useState(false); // State for checking second owner
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // Error message state
 
   const harmonyTestnetChainId = '0x6357d2e0'; // Harmony Testnet chain ID in hexadecimal
 
@@ -57,8 +59,10 @@ export default function Dapps() {
   const checkOwner = async (account: string) => {
     try {
       const contract = await getContract();
-      const owner = await contract.owner(); // Assuming your contract has an owner() function
+      const owner = await contract.owner();
+      const secondOwner = await contract.secondOwner();
       setIsOwner(owner.toLowerCase() === account.toLowerCase());
+      setIsSecondOwner(secondOwner.toLowerCase() === account.toLowerCase());
     } catch (error) {
       console.error(error);
     }
@@ -67,6 +71,7 @@ export default function Dapps() {
   useEffect(() => {
     loadCampaigns();
     checkMetamaskConnection();
+    loadEnabledStates(); // Load the enabled/disabled states
 
     if (typeof window.ethereum !== 'undefined') {
       window.ethereum.on('accountsChanged', checkMetamaskConnection);
@@ -103,7 +108,6 @@ export default function Dapps() {
           logoImageUrl: campaign[9]
         };
 
-        console.log(`Campaign ${i}:`, campaignWithId); // Log the fetched campaign data
         const totalContributed = parseFloat(ethers.formatUnits(campaign.totalContributed, 18));
         const fundingGoal = parseFloat(ethers.formatUnits(campaign.fundingGoal, 18));
 
@@ -127,9 +131,37 @@ export default function Dapps() {
     }
   };
 
+  const [createCampaignEnabled, setCreateCampaignEnabled] = useState(false);
+  const [confirmListingEnabled, setConfirmListingEnabled] = useState(false);
+  const [payBackEnabled, setPayBackEnabled] = useState(false);
+  const [withdrawFundsEnabled, setWithdrawFundsEnabled] = useState(false);
+
+  const loadEnabledStates = async () => {
+    try {
+      const contract = await getContract();
+      const createCampaignState = await contract.createCampaignEnabled();
+      const confirmListingState = await contract.confirmListingEnabled();
+      const payBackState = await contract.payBackEnabled();
+      const withdrawFundsState = await contract.withdrawFundsEnabled();
+
+      setCreateCampaignEnabled(createCampaignState);
+      setConfirmListingEnabled(confirmListingState);
+      setPayBackEnabled(payBackState);
+      setWithdrawFundsEnabled(withdrawFundsState);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const handleCreateCampaign = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
+    setErrorMessage(null);
+    if (!createCampaignEnabled) {
+      setErrorMessage("Create campaign functionality is currently disabled");
+      setLoading(false);
+      return;
+    }
     try {
       const contract = await getSignerContract();
       const tx = await contract.createCampaign(
@@ -149,6 +181,12 @@ export default function Dapps() {
 
   const handleConfirmListing = async () => {
     setLoading(true);
+    setErrorMessage(null);
+    if (!confirmListingEnabled) {
+      setErrorMessage("Confirm listing functionality is currently disabled");
+      setLoading(false);
+      return;
+    }
     try {
       const contract = await getSignerContract();
       const tx = await contract.confirmListing(parseInt(confirmId));
@@ -163,11 +201,97 @@ export default function Dapps() {
 
   const handlePayback = async () => {
     setLoading(true);
+    setErrorMessage(null);
+    if (!payBackEnabled) {
+      setErrorMessage("Payback functionality is currently disabled");
+      setLoading(false);
+      return;
+    }
     try {
       const contract = await getSignerContract();
       const tx = await contract.payBack(parseInt(paybackId));
       await tx.wait();
       loadCampaigns(); // Reload campaigns after payback
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleWithdrawFunds = async () => {
+    setLoading(true);
+    setErrorMessage(null);
+    if (!withdrawFundsEnabled) {
+      setErrorMessage("Withdraw funds functionality is currently disabled");
+      setLoading(false);
+      return;
+    }
+    try {
+      const contract = await getSignerContract();
+      const tx = await contract.withdrawFunds(parseInt(withdrawId));
+      await tx.wait();
+      loadCampaigns(); // Reload campaigns after withdrawing funds
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggleCreateCampaign = async () => {
+    setLoading(true);
+    try {
+      const contract = await getSignerContract();
+      const currentStatus = await contract.createCampaignEnabled();
+      const tx = await contract.setCreateCampaignEnabled(!currentStatus);
+      await tx.wait();
+      loadEnabledStates();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggleConfirmListing = async () => {
+    setLoading(true);
+    try {
+      const contract = await getSignerContract();
+      const currentStatus = await contract.confirmListingEnabled();
+      const tx = await contract.setConfirmListingEnabled(!currentStatus);
+      await tx.wait();
+      loadEnabledStates();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTogglePayBack = async () => {
+    setLoading(true);
+    try {
+      const contract = await getSignerContract();
+      const currentStatus = await contract.payBackEnabled();
+      const tx = await contract.setPayBackEnabled(!currentStatus);
+      await tx.wait();
+      loadEnabledStates();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggleWithdrawFunds = async () => {
+    setLoading(true);
+    try {
+      const contract = await getSignerContract();
+      const currentStatus = await contract.withdrawFundsEnabled();
+      const tx = await contract.setWithdrawFundsEnabled(!currentStatus);
+      await tx.wait();
+      loadEnabledStates();
     } catch (error) {
       console.error(error);
     } finally {
@@ -186,6 +310,9 @@ export default function Dapps() {
         <div className={styles.loaderWrapper}>
           <TailSpin color="#00BFFF" height={80} width={80} />
         </div>
+      )}
+      {errorMessage && (
+        <Modal message={errorMessage} onClose={() => setErrorMessage(null)} />
       )}
       {ExchangesNav === "Home" && (
         <>
@@ -402,6 +529,74 @@ export default function Dapps() {
                     </button>
                   </div>
                 </div>
+
+                <div className={styles.formContainer}>
+                  <div className={styles.form}>
+                    <h4>Withdraw Funds</h4>
+                    <h5>Withdraw contributed funds for listing confirmation</h5>
+                    <div className={styles.inputGroup}>
+                      <label htmlFor="withdrawId">Campaign ID:</label>
+                      <input
+                        type="text"
+                        id="withdrawId"
+                        value={withdrawId}
+                        onChange={(e) => setWithdrawId(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <button className={styles.buttonG} onClick={handleWithdrawFunds} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                      {isMetamaskConnected && isCorrectNetwork ? 'Withdraw Funds' : 'Metamask (Harmony Testnet) Needed'}
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          )}
+
+          {isSecondOwner && (
+            <div className={styles.row}>
+              <div className={styles.formContainerWrapper}>
+                <div className={styles.formContainer}>
+                  <div className={styles.form}>
+                    <h4>Toggle Create Campaign</h4>
+                    <p>Current State: {createCampaignEnabled ? "Enabled" : "Disabled"}</p>
+                    <button className={styles.buttonG} onClick={handleToggleCreateCampaign} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                      {isMetamaskConnected && isCorrectNetwork ? (createCampaignEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className={styles.formContainer}>
+                  <div className={styles.form}>
+                    <h4>Toggle Confirm Listing</h4>
+                    <p>Current State: {confirmListingEnabled ? "Enabled" : "Disabled"}</p>
+                    <button className={styles.buttonG} onClick={handleToggleConfirmListing} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                      {isMetamaskConnected && isCorrectNetwork ? (confirmListingEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className={styles.formContainer}>
+                  <div className={styles.form}>
+                    <h4>Toggle Pay Back</h4>
+                    <p>Current State: {payBackEnabled ? "Enabled" : "Disabled"}</p>
+                    <button className={styles.buttonG} onClick={handleTogglePayBack} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                      {isMetamaskConnected && isCorrectNetwork ? (payBackEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className={styles.formContainer}>
+                  <div className={styles.form}>
+                    <h4>Toggle Withdraw Funds</h4>
+                    <p>Current State: {withdrawFundsEnabled ? "Enabled" : "Disabled"}</p>
+                    <button className={styles.buttonG} onClick={handleToggleWithdrawFunds} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                      {isMetamaskConnected && isCorrectNetwork ? (withdrawFundsEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
+                    </button>
+                  </div>
+                </div>
+
               </div>
             </div>
           )}
