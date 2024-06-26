@@ -11,8 +11,8 @@ import { ethers } from 'ethers'; // Correct import for ethers.js v6.x.x
 import { TailSpin } from 'react-loader-spinner'; // Correct import for Loader
 import Modal from '../modal/Modal'; // Import the Modal component
 
-const usdtContractAddress = '0xD981387F0Ef099a88eC1f586F1c75a16e6A7d4a1'; // Replace with the actual USDT contract address
-const multiExchangeListingAddress = '0x6849144dc305e0208AEbD1b407D81DC7BC93c5b5'; // MultiExchangeListing contract address
+const usdtContractAddress = '0x6E61E02e070FB0fEd2cE14C54421598Dc635FA7d'; // Replace with the actual USDT contract address
+const multiExchangeListingAddress = '0x8D6ACa9D18136F556d0D1e82E0d7780A693AE6e6'; // MultiExchangeListing contract address
 
 interface DetailProps {
   campaignId: number;
@@ -111,7 +111,7 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
       }
 
       // Check user's USDT balance
-      const usdtBalance: bigint = await usdtContract.balanceOf(account);
+      const usdtBalance = await usdtContract.balanceOf(account);
       if (usdtBalance < amountInWei) {
         throw new Error("You do not have enough USDT in your wallet");
       }
@@ -168,7 +168,7 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
       }
 
       // Check user's USDT balance
-      const usdtBalance: bigint = await usdtContract.balanceOf(account);
+      const usdtBalance = await usdtContract.balanceOf(account);
       if (usdtBalance < paybackAmountInWei) {
         throw new Error("You do not have enough USDT in your wallet");
       }
@@ -199,9 +199,9 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
 
   const getProgress = () => {
     if (campaign) {
-      const totalContributed = ethers.formatUnits(campaign.totalContributed, 18);
-      const fundingGoal = ethers.formatUnits(campaign.fundingGoal, 18);
-      return (parseFloat(totalContributed) / parseFloat(fundingGoal)) * 100;
+      const totalContributed = parseFloat(ethers.formatUnits(campaign.totalContributed, 18));
+      const fundingGoal = parseFloat(ethers.formatUnits(campaign.fundingGoal, 18));
+      return (totalContributed / fundingGoal) * 100;
     }
     return 0;
   };
@@ -225,9 +225,10 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
 
     const totalContributed = parseFloat(ethers.formatUnits(campaign.totalContributed, 18));
     const fundingGoal = parseFloat(ethers.formatUnits(campaign.fundingGoal, 18));
+    const totalPaybackAdded = parseFloat(ethers.formatUnits(campaign.totalPaybackAdded, 18));
 
     if (campaign.finalized) {
-      return 'Finalized';
+      return totalPaybackAdded === 0 ? 'Cancelled' : 'Finalized';
     } else if (campaign.listingConfirmed) {
       return 'Payback Phase';
     } else if (totalContributed >= fundingGoal) {
@@ -244,6 +245,11 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
     if (/^\d*\.?\d*$/.test(value)) {
       setState(value);
     }
+  };
+
+  const formatDeadline = (timestamp: number) => {
+    const date = new Date(Number(timestamp) * 1000); // Convert seconds to milliseconds
+    return date.toLocaleDateString();
   };
 
   return (
@@ -273,13 +279,18 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
               <div className={styles.carddAppsDescription}>
                 <p>Exchange Name: {campaign.exchangeName}</p>
                 <p>Supported Chains: {campaign.supportedChains}</p>
+                {getPhase() === 'Cancelled' && (
+                  <>
+                    <p>Funding Goal: {ethers.formatUnits(campaign.fundingGoal, 18)} USDT</p>
+                  </>
+                )}
                 {getPhase() === 'Finalized' && (
                   <>
                     <p>Payback Goal: {ethers.formatUnits(campaign.paybackGoal, 18)} USDT</p>
                     <p>Total Payback Added: {ethers.formatUnits(campaign.totalPaybackAdded, 18)} USDT</p>
                   </>
                 )}
-                {getPhase() !== 'Payback Phase' && getPhase() !== 'Finalized' && (
+                {getPhase() !== 'Payback Phase' && getPhase() !== 'Finalized' && getPhase() !== 'Cancelled' && (
                   <>
                     <p>Funding Goal: {ethers.formatUnits(campaign.fundingGoal, 18)} USDT</p>
                     <p>Total Contributed: {ethers.formatUnits(campaign.totalContributed, 18)} USDT</p>
@@ -305,7 +316,7 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
                 </div>
               </div>
             )}
-            {getPhase() === 'Payback Phase' && isOwner && (
+            {getPhase() === 'Payback Phase' && (
               <div className={styles.progressBarWrapper}>
                 <h5 className={styles.progressBarLabel}>Payback Progress Bar</h5>
                 <div className={styles.progressBarContainer}>
@@ -314,20 +325,23 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
                     {getPaybackProgress().toFixed(2)}%
                   </span>
                 </div>
-                <form onSubmit={handleApproveAndAddPaybackFunds} className={styles.form}>
-                  <div className={styles.inputGroup}>
-                    <input
-                      type="text"
-                      value={paybackAmount}
-                      onChange={(e) => handleNumericInput(e, setPaybackAmount)}
-                      placeholder="Amount in USDT"
-                      className={styles.shortInput}
-                    />
-                    <button type="submit" className={styles.buttonG} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                      {isMetamaskConnected && isCorrectNetwork ? 'Add Payback Funds' : 'Metamask (Harmony Testnet) Needed'}
-                    </button>
-                  </div>
-                </form>
+                <p>Payback Deadline: {formatDeadline(Number(campaign.paybackDeadline))}</p>
+                {isOwner && (
+                  <form onSubmit={handleApproveAndAddPaybackFunds} className={styles.form}>
+                    <div className={styles.inputGroup}>
+                      <input
+                        type="text"
+                        value={paybackAmount}
+                        onChange={(e) => handleNumericInput(e, setPaybackAmount)}
+                        placeholder="Amount in USDT"
+                        className={styles.shortInput}
+                      />
+                      <button type="submit" className={styles.buttonG} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                        {isMetamaskConnected && isCorrectNetwork ? 'Add Payback Funds' : 'Metamask (Harmony Testnet) Needed'}
+                      </button>
+                    </div>
+                  </form>
+                )}
               </div>
             )}
             {getPhase() === 'Funding Phase' && (
@@ -359,7 +373,7 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
                 <tbody>
                   {contributions.map((contribution, index) => (
                     <tr key={index}>
-                      <td>{ethers.formatUnits(contribution.amount, 18)} USDT</td>
+                      <td>{parseFloat(ethers.formatUnits(contribution.amount, 18)).toFixed(2)} USDT</td>
                       <td>{getPaybackAmount(ethers.formatUnits(contribution.amount, 18)).toFixed(2)} USDT</td>
                       <td>{contribution.paidBack ? "Paid Back" : "Not Paid Back"}</td>
                     </tr>

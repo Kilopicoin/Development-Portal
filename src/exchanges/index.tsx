@@ -34,6 +34,7 @@ export default function Dapps() {
   const [confirmId, setConfirmId] = useState<string>(''); // New state for confirm listing ID
   const [paybackId, setPaybackId] = useState<string>(''); // New state for payback ID
   const [withdrawId, setWithdrawId] = useState<string>(''); // New state for withdraw funds ID
+  const [cancelId, setCancelId] = useState<string>(''); // New state for cancel campaign ID
 
   const [isMetamaskConnected, setIsMetamaskConnected] = useState(false);
   const [isCorrectNetwork, setIsCorrectNetwork] = useState(false);
@@ -135,6 +136,7 @@ export default function Dapps() {
   const [confirmListingEnabled, setConfirmListingEnabled] = useState(false);
   const [payBackEnabled, setPayBackEnabled] = useState(false);
   const [withdrawFundsEnabled, setWithdrawFundsEnabled] = useState(false);
+  const [cancelCampaignEnabled, setCancelCampaignEnabled] = useState(false);
 
   const loadEnabledStates = async () => {
     try {
@@ -143,11 +145,13 @@ export default function Dapps() {
       const confirmListingState = await contract.confirmListingEnabled();
       const payBackState = await contract.payBackEnabled();
       const withdrawFundsState = await contract.withdrawFundsEnabled();
+      const cancelCampaignState = await contract.cancelCampaignEnabled();
 
       setCreateCampaignEnabled(createCampaignState);
       setConfirmListingEnabled(confirmListingState);
       setPayBackEnabled(payBackState);
       setWithdrawFundsEnabled(withdrawFundsState);
+      setCancelCampaignEnabled(cancelCampaignState);
     } catch (error) {
       console.error(error);
     }
@@ -239,6 +243,26 @@ export default function Dapps() {
     }
   };
 
+  const handleCancelCampaign = async () => {
+    setLoading(true);
+    setErrorMessage(null);
+    if (!cancelCampaignEnabled) {
+      setErrorMessage("Cancel campaign functionality is currently disabled");
+      setLoading(false);
+      return;
+    }
+    try {
+      const contract = await getSignerContract();
+      const tx = await contract.cancelCampaign(parseInt(cancelId));
+      await tx.wait();
+      loadCampaigns(); // Reload campaigns after cancelling the campaign
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleToggleCreateCampaign = async () => {
     setLoading(true);
     try {
@@ -290,6 +314,21 @@ export default function Dapps() {
       const contract = await getSignerContract();
       const currentStatus = await contract.withdrawFundsEnabled();
       const tx = await contract.setWithdrawFundsEnabled(!currentStatus);
+      await tx.wait();
+      loadEnabledStates();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggleCancelCampaign = async () => {
+    setLoading(true);
+    try {
+      const contract = await getSignerContract();
+      const currentStatus = await contract.cancelCampaignEnabled();
+      const tx = await contract.setCancelCampaignEnabled(!currentStatus);
       await tx.wait();
       loadEnabledStates();
     } catch (error) {
@@ -550,6 +589,26 @@ export default function Dapps() {
                   </div>
                 </div>
 
+                <div className={styles.formContainer}>
+                  <div className={styles.form}>
+                    <h4>Cancel Campaign</h4>
+                    <h5>Cancel an active campaign</h5>
+                    <div className={styles.inputGroup}>
+                      <label htmlFor="cancelId">Campaign ID:</label>
+                      <input
+                        type="text"
+                        id="cancelId"
+                        value={cancelId}
+                        onChange={(e) => setCancelId(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <button className={styles.buttonG} onClick={handleCancelCampaign} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                      {isMetamaskConnected && isCorrectNetwork ? 'Cancel Campaign' : 'Metamask (Harmony Testnet) Needed'}
+                    </button>
+                  </div>
+                </div>
+
               </div>
             </div>
           )}
@@ -593,6 +652,16 @@ export default function Dapps() {
                     <p>Current State: {withdrawFundsEnabled ? "Enabled" : "Disabled"}</p>
                     <button className={styles.buttonG} onClick={handleToggleWithdrawFunds} disabled={!isMetamaskConnected || !isCorrectNetwork}>
                       {isMetamaskConnected && isCorrectNetwork ? (withdrawFundsEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className={styles.formContainer}>
+                  <div className={styles.form}>
+                    <h4>Toggle Cancel Campaign</h4>
+                    <p>Current State: {cancelCampaignEnabled ? "Enabled" : "Disabled"}</p>
+                    <button className={styles.buttonG} onClick={handleToggleCancelCampaign} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                      {isMetamaskConnected && isCorrectNetwork ? (cancelCampaignEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
                     </button>
                   </div>
                 </div>
