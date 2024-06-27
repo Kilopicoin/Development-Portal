@@ -111,20 +111,27 @@ export default function Dapps() {
           paybackAmount: campaign[6],
           listingConfirmed: campaign[7],
           finalized: campaign[8],
-          logoImageUrl: campaign[9]
+          logoImageUrl: campaign[9],
         };
 
-        const totalContributed = parseFloat(ethers.formatUnits(campaign.totalContributed, 18));
-        const fundingGoal = parseFloat(ethers.formatUnits(campaign.fundingGoal, 18));
+        const totalContributed = parseFloat(ethers.formatUnits(campaign[4], 18));
+        const fundingGoal = parseFloat(ethers.formatUnits(campaign[3], 18));
 
-        if (campaignWithId.listingConfirmed && !campaignWithId.finalized) {
-          payback.push(campaignWithId);
-        } else if (totalContributed >= fundingGoal && !campaignWithId.listingConfirmed && !campaignWithId.finalized) {
-          listing.push(campaignWithId);
-        } else if (!campaignWithId.listingConfirmed && !campaignWithId.finalized) {
-          funding.push(campaignWithId);
-        } else if (campaignWithId.finalized) {
+        console.log(`Campaign ${i}`, {
+          totalContributed,
+          fundingGoal,
+          listingConfirmed: campaignWithId.listingConfirmed,
+          finalized: campaignWithId.finalized,
+        });
+
+        if (campaignWithId.finalized) {
           finalized.push(campaignWithId);
+        } else if (campaignWithId.listingConfirmed) {
+          payback.push(campaignWithId);
+        } else if (totalContributed >= fundingGoal) {
+          listing.push(campaignWithId);
+        } else {
+          funding.push(campaignWithId);
         }
       }
 
