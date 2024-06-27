@@ -11,8 +11,8 @@ import { ethers } from 'ethers'; // Correct import for ethers.js v6.x.x
 import { TailSpin } from 'react-loader-spinner'; // Correct import for Loader
 import Modal from '../modal/Modal'; // Import the Modal component
 
-const usdtContractAddress = '0x6E61E02e070FB0fEd2cE14C54421598Dc635FA7d'; // Replace with the actual USDT contract address
-const multiExchangeListingAddress = '0x8D6ACa9D18136F556d0D1e82E0d7780A693AE6e6'; // MultiExchangeListing contract address
+const usdtContractAddress = '0x1B8e51F6f5496BDAC8AF9189430C7cF4C50aC7A2'; // Replace with the actual USDT contract address
+const multiExchangeListingAddress = '0xCEA63C5a4B5568aA61FF5DfDa0591374eefb8ad7'; // MultiExchangeListing contract address
 
 interface DetailProps {
   campaignId: number;
