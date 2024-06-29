@@ -461,6 +461,18 @@ export default function Dapps() {
     dispatch(setExchangesNav('detail'));
   };
 
+  const [showGettingStarted, setShowGettingStarted] = useState(false);
+  const [showUsingPlatform, setShowUsingPlatform] = useState(false);
+  const [showUserRisks, setShowUserRisks] = useState(false);
+  const [showExampleUserFlow, setShowExampleUserFlow] = useState(false);
+
+  const toggleSection = (section: string) => {
+    if (section === "GettingStarted") setShowGettingStarted(!showGettingStarted);
+    if (section === "UsingPlatform") setShowUsingPlatform(!showUsingPlatform);
+    if (section === "UserRisks") setShowUserRisks(!showUserRisks);
+    if (section === "ExampleUserFlow") setShowExampleUserFlow(!showExampleUserFlow);
+  };
+
   return (
     <div className={styles.main}>
       {loading && (
@@ -593,6 +605,43 @@ export default function Dapps() {
                 );
               })}
             </div>
+
+            {!isOwner && !isSecondOwner && !isThirdOwner && (
+              <div className={styles.infoButtons}>
+                <button onClick={() => toggleSection("GettingStarted")} className={styles.buttonG}>
+                  Getting Started
+                </button>
+                {showGettingStarted && (
+                  <div className={styles.infoContent}>
+                    <p>Welcome to the Multi-Exchange Listing Platform! To get started, ensure you have a MetaMask wallet connected to the Harmony Testnet with sufficient USDT.</p>
+                  </div>
+                )}
+                <button onClick={() => toggleSection("UsingPlatform")} className={styles.buttonG}>
+                  Using the Platform
+                </button>
+                {showUsingPlatform && (
+                  <div className={styles.infoContent}>
+                    <p>Use the platform to contribute to campaigns, confirm listings, and receive paybacks. Navigate through different phases and follow instructions for each action.</p>
+                  </div>
+                )}
+                <button onClick={() => toggleSection("UserRisks")} className={styles.buttonG}>
+                  User Risks and Considerations
+                </button>
+                {showUserRisks && (
+                  <div className={styles.infoContent}>
+                    <p>Be aware of potential risks, including the possibility of campaigns not reaching their funding goals or listings not being confirmed. Only contribute what you can afford to lose.</p>
+                  </div>
+                )}
+                <button onClick={() => toggleSection("ExampleUserFlow")} className={styles.buttonG}>
+                  Example User Flow
+                </button>
+                {showExampleUserFlow && (
+                  <div className={styles.infoContent}>
+                    <p>1. Connect your MetaMask wallet. 2. Select a campaign in the Funding Phase. 3. Contribute USDT. 4. Wait for listing confirmation. 5. Receive paybacks if the campaign is successful.</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {isOwner && (

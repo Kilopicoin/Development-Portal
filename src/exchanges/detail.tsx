@@ -12,7 +12,7 @@ import { TailSpin } from 'react-loader-spinner'; // Correct import for Loader
 import Modal from '../modal/Modal'; // Import the Modal component
 
 const usdtContractAddress = '0xE61946fc54519fc57A2F6e442f9Eb3A60AB8bffA'; // Replace with the actual USDT contract address
-const multiExchangeListingAddress = '0xc282A542c275bfBD348B18Aed4CA59719c01Be85'; // MultiExchangeListing contract address
+const multiExchangeListingAddress = '0x776341c8e01165fFC50EF1112b041703f394d8b5'; // MultiExchangeListing contract address
 
 interface DetailProps {
   campaignId: number;
