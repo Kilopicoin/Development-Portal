@@ -618,19 +618,34 @@
 
 
 .infoButtons {
+  margin-top: 20px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  margin-top: 20px;
+  gap: 10px;
 }
 
 .infoContent {
-  background-color: rgba(var(--card-rgb), 0.1);
+  padding: 10px;
+  background: rgba(var(--card-rgb), 0.1);
   border: 1px solid rgba(var(--card-border-rgb), 0.1);
   border-radius: var(--border-radius);
-  padding: 10px;
   margin-top: 10px;
-  width: 80%;
-  text-align: left;
+}
+
+.infoContent p {
+  margin: 5px 0;
+}
+
+.infoContent h4 {
+  margin-bottom: 10px;
+  font-size: 1.2rem;
   color: #e7ecf1;
+}
+
+.phaseContainer {
+  background-color: rgba(255, 255, 255, 0.1); /* Slightly transparent background */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Light border */
+  border-radius: 10px; /* Rounded corners */
+  padding: 20px; /* Padding inside the container */
+  margin-bottom: 20px; /* Space between phase sections */
 }

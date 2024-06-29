@@ -487,7 +487,7 @@ export default function Dapps() {
         <>
           <h3>Exchange Listings</h3>
 
-          <div className={styles.row}>
+          <div className={styles.phaseContainer}>
             <h4>Funding Phase</h4>
             <div className={styles.dApps}>
               {fundingPhase.map((campaign, index) => {
@@ -517,7 +517,7 @@ export default function Dapps() {
             </div>
           </div>
 
-          <div className={styles.row}>
+          <div className={styles.phaseContainer}>
             <h4>Listing Phase</h4>
             <div className={styles.dApps}>
               {listingPhase.map((campaign, index) => {
@@ -547,7 +547,7 @@ export default function Dapps() {
             </div>
           </div>
 
-          <div className={styles.row}>
+          <div className={styles.phaseContainer}>
             <h4>Payback Phase</h4>
             <div className={styles.dApps}>
               {paybackPhase.map((campaign, index) => {
@@ -577,7 +577,7 @@ export default function Dapps() {
             </div>
           </div>
 
-          <div className={styles.row}>
+          <div className={styles.phaseContainer}>
             <h4>Finalized Phase</h4>
             <div className={styles.dApps}>
               {finalizedPhase.map((campaign, index) => {
@@ -606,14 +606,38 @@ export default function Dapps() {
               })}
             </div>
 
-            {!isOwner && !isSecondOwner && !isThirdOwner && (
+            
+          </div>
+
+
+
+          {!isOwner && !isSecondOwner && !isThirdOwner && (
               <div className={styles.infoButtons}>
                 <button onClick={() => toggleSection("GettingStarted")} className={styles.buttonG}>
                   Getting Started
                 </button>
                 {showGettingStarted && (
                   <div className={styles.infoContent}>
-                    <p>Welcome to the Multi-Exchange Listing Platform! To get started, ensure you have a MetaMask wallet connected to the Harmony Testnet with sufficient USDT.</p>
+                    <h4>Getting Started</h4>
+                    <p><strong>Step 1: Connect Your Wallet</strong></p>
+                    <p><strong>Install Metamask:</strong></p>
+                    <p>If you haven't already, download and install the Metamask wallet extension for your browser.</p>
+                    <p><strong>Connect to Harmony Testnet:</strong></p>
+                    <p>Open Metamask.</p>
+                    <p>Click on the network dropdown at the top and select "Harmony Testnet".</p>
+                    <p>If Harmony Testnet is not listed, you can add it manually by clicking on "Add Network" and entering the following details:</p>
+                    <p>Network Name: Harmony Testnet</p>
+                    <p>New RPC URL: https://api.s0.b.hmny.io</p>
+                    <p>Chain ID: 1666700000</p>
+                    <p>Symbol: ONE</p>
+                    <p>Block Explorer URL: https://explorer.pops.one</p>
+                    <p><strong>Connect Your Wallet:</strong></p>
+                    <p>Visit the MultiExchangeListing platform.</p>
+                    <p>Click on the "Connect Wallet" button.</p>
+                    <p>Select Metamask and follow the prompts to connect your wallet.</p>
+                    <p><strong>Step 2: Verify Network Connection</strong></p>
+                    <p>Check Network:</p>
+                    <p>Ensure that Metamask is connected to the Harmony Testnet. If not, switch to the Harmony Testnet in Metamask.</p>
                   </div>
                 )}
                 <button onClick={() => toggleSection("UsingPlatform")} className={styles.buttonG}>
@@ -621,7 +645,31 @@ export default function Dapps() {
                 </button>
                 {showUsingPlatform && (
                   <div className={styles.infoContent}>
-                    <p>Use the platform to contribute to campaigns, confirm listings, and receive paybacks. Navigate through different phases and follow instructions for each action.</p>
+                    <h4>Using the Platform</h4>
+                    <p><strong>Browsing Campaigns</strong></p>
+                    <p><strong>Navigate to Campaigns:</strong></p>
+                    <p>Go to the "Exchange Listings" section on the platform's main page.</p>
+                    <p>Campaigns are categorized into four phases: Funding, Listing, Payback, and Finalized.</p>
+                    <p><strong>View Campaign Details:</strong></p>
+                    <p>Click on any campaign card to view detailed information about the campaign, including its progress, funding goal, and total contributions.</p>
+                    <p><strong>Contributing to a Campaign</strong></p>
+                    <p><strong>Select a Campaign in the Funding Phase:</strong></p>
+                    <p>Choose a campaign that is currently in the Funding Phase.</p>
+                    <p><strong>Enter Contribution Amount:</strong></p>
+                    <p>Decide the amount of USDT you want to contribute.</p>
+                    <p>Minimum contribution: 1 USDT.</p>
+                    <p>Ensure you have sufficient USDT balance in your Metamask wallet.</p>
+                    <p><strong>Approve USDT Spending:</strong></p>
+                    <p>Your wallet will prompt you to approve the spending of USDT.</p>
+                    <p>Approve the transaction in Metamask.</p>
+                    <p><strong>Confirm Contribution:</strong></p>
+                    <p>After approval, confirm the contribution transaction.</p>
+                    <p>Wait for the transaction to be confirmed on the blockchain.</p>
+                    <p><strong>Checking Your Contributions</strong></p>
+                    <p><strong>Navigate to Campaign Details:</strong></p>
+                    <p>Select the campaign you contributed to, and go to its details page.</p>
+                    <p><strong>View Contributions:</strong></p>
+                    <p>Your contributions will be listed along with the payback amount and status (Paid Back or Not Paid Back).</p>
                   </div>
                 )}
                 <button onClick={() => toggleSection("UserRisks")} className={styles.buttonG}>
@@ -629,7 +677,26 @@ export default function Dapps() {
                 </button>
                 {showUserRisks && (
                   <div className={styles.infoContent}>
-                    <p>Be aware of potential risks, including the possibility of campaigns not reaching their funding goals or listings not being confirmed. Only contribute what you can afford to lose.</p>
+                    <h4>User Risks and Considerations</h4>
+                    <p><strong>Contribution Risks</strong></p>
+                    <p><strong>Locked Funds:</strong></p>
+                    <p>Contributions are locked in the contract until the campaign is finalized or canceled. Be aware that your funds will be inaccessible during this period.</p>
+                    <p><strong>Campaign Failure:</strong></p>
+                    <p>If the campaign does not reach its funding goal or is canceled, your contributions will be refunded.</p>
+                    <p><strong>Listing Risks</strong></p>
+                    <p><strong>No Guarantee of Listing:</strong></p>
+                    <p>There is no guarantee that the token will be listed on the exchange. The success of the listing depends on the actions of the contract owner and the acceptance by the exchange.</p>
+                    <p><strong>Payback Risks</strong></p>
+                    <p><strong>Dependent on Listing:</strong></p>
+                    <p>Paybacks are contingent on the successful listing of the token on the exchange.</p>
+                    <p><strong>Sufficient Payback Funds:</strong></p>
+                    <p>The owner must add sufficient payback funds to the contract for contributors to receive their payback.</p>
+                    <p><strong>Contract Functionality</strong></p>
+                    <p><strong>Function Toggles:</strong></p>
+                    <p>Certain functions of the contract can be enabled or disabled by the owners. Always check the current state of the contract functions before interacting.</p>
+                    <p><strong>Smart Contract Limitations</strong></p>
+                    <p><strong>No Upgradeability:</strong></p>
+                    <p>The contract is not upgradeable. Any changes require redeployment, which can affect ongoing campaigns.</p>
                   </div>
                 )}
                 <button onClick={() => toggleSection("ExampleUserFlow")} className={styles.buttonG}>
@@ -637,12 +704,32 @@ export default function Dapps() {
                 </button>
                 {showExampleUserFlow && (
                   <div className={styles.infoContent}>
-                    <p>1. Connect your MetaMask wallet. 2. Select a campaign in the Funding Phase. 3. Contribute USDT. 4. Wait for listing confirmation. 5. Receive paybacks if the campaign is successful.</p>
+                    <h4>Example User Flow</h4>
+                    <p><strong>Step 1: Connect Wallet</strong></p>
+                    <p>Connect your Metamask wallet to the Harmony Testnet on the MultiExchangeListing platform.</p>
+                    <p><strong>Step 2: Select a Campaign</strong></p>
+                    <p>Browse the campaigns and select one in the Funding Phase.</p>
+                    <p><strong>Step 3: Contribute</strong></p>
+                    <p><strong>Enter Contribution Amount:</strong></p>
+                    <p>Enter the amount of USDT you wish to contribute.</p>
+                    <p>Ensure the amount is at least 1 USDT.</p>
+                    <p><strong>Approve and Contribute:</strong></p>
+                    <p>Approve the USDT spending in Metamask.</p>
+                    <p>Confirm the contribution transaction.</p>
+                    <p><strong>Step 4: Monitor Campaign Progress</strong></p>
+                    <p>Regularly check the campaign details to monitor its progress and the status of your contributions.</p>
+                    <p><strong>Step 5: Receive Payback</strong></p>
+                    <p>If the campaign successfully lists the token and payback funds are added, you will receive your contribution plus interest in USDT.</p>
                   </div>
                 )}
+                <button 
+                className={styles.buttonG} 
+                onClick={() => window.open('https://www.youtube.com/watch?v=YOUR_VIDEO_ID', '_blank')}
+                >
+                  Tutorial Video
+                </button>
               </div>
             )}
-          </div>
 
           {isOwner && (
             <div className={styles.row}>
