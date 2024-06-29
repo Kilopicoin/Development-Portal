@@ -58,7 +58,7 @@ export default function Home() {
                                                                         dispatch(setdAppsNav('Home'));
                                                                       }
 
-                                                                     }  }>Decentralized Applications
+                                                                     }  }>Application Development Protocol
           </button>
         </h2>
 
@@ -74,7 +74,7 @@ export default function Home() {
                                                                         dispatch(setMarketingNav('Home'));
                                                                       }
 
-                                                                     }  }>Marketing
+                                                                     }  }>Marketing Protocol
           </button>
         </h2>
 
@@ -90,7 +90,7 @@ export default function Home() {
                                                                 dispatch(setExchangesNav('Home'));
                                                               }
 
-                                                             }  }>Exchange Listings
+                                                             }  }>Exchange Listing Protocol
   </button>
 </h2>
 
@@ -102,7 +102,7 @@ export default function Home() {
 
         {nav === "Home" && (
           <>
-          <h2>Kilopi Proof of Development dApp</h2>
+          <h2>Kilopi, Decentralized "Proof of Development" System</h2>
           <h2>Home</h2>
           <h4>Guide and Rules Page</h4>
 

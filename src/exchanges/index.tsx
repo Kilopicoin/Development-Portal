@@ -46,7 +46,7 @@ export default function Dapps() {
   const [isThirdOwner, setIsThirdOwner] = useState(false); // State for checking third owner
   const [errorMessage, setErrorMessage] = useState<string | null>(null); // Error message state
 
-  const harmonyTestnetChainId = '0x6357d2e0'; // Harmony Testnet chain ID in hexadecimal
+  const harmonyTestnetChainId = '0x61'; // Harmony Testnet chain ID in hexadecimal
 
   const checkMetamaskConnection = async () => {
     if (typeof window.ethereum !== 'undefined') {
@@ -91,6 +91,7 @@ export default function Dapps() {
   }, []);
 
   const loadCampaigns = async () => {
+    setLoading(true);
     try {
       const contract = await getContract();
       const campaignCount = await contract.campaignCount();
@@ -117,12 +118,7 @@ export default function Dapps() {
         const totalContributed = parseFloat(ethers.formatUnits(campaign[4], 18));
         const fundingGoal = parseFloat(ethers.formatUnits(campaign[3], 18));
 
-        console.log(`Campaign ${i}`, {
-          totalContributed,
-          fundingGoal,
-          listingConfirmed: campaignWithId.listingConfirmed,
-          finalized: campaignWithId.finalized,
-        });
+      
 
         if (campaignWithId.finalized) {
           finalized.push(campaignWithId);
@@ -142,6 +138,7 @@ export default function Dapps() {
     } catch (error) {
       console.error(error);
     }
+    setLoading(false);
   };
 
   const [createCampaignEnabled, setCreateCampaignEnabled] = useState(false);
@@ -485,10 +482,10 @@ export default function Dapps() {
       )}
       {ExchangesNav === "Home" && (
         <>
-          <h3>Exchange Listings</h3>
+          <h2>Exchange Listing Protocol</h2>
 
           <div className={styles.phaseContainer}>
-            <h4>Funding Phase</h4>
+            <h3>1 - Funding Phase</h3>
             <div className={styles.dApps}>
               {fundingPhase.map((campaign, index) => {
                 const exchangeName = campaign.exchangeName;
@@ -518,7 +515,7 @@ export default function Dapps() {
           </div>
 
           <div className={styles.phaseContainer}>
-            <h4>Listing Phase</h4>
+            <h3>2 - Listing Phase</h3>
             <div className={styles.dApps}>
               {listingPhase.map((campaign, index) => {
                 const exchangeName = campaign.exchangeName;
@@ -548,7 +545,7 @@ export default function Dapps() {
           </div>
 
           <div className={styles.phaseContainer}>
-            <h4>Payback Phase</h4>
+            <h3>3 - Payback Phase</h3>
             <div className={styles.dApps}>
               {paybackPhase.map((campaign, index) => {
                 const exchangeName = campaign.exchangeName;
@@ -578,7 +575,7 @@ export default function Dapps() {
           </div>
 
           <div className={styles.phaseContainer}>
-            <h4>Finalized Phase</h4>
+            <h3>4 - Finalized</h3>
             <div className={styles.dApps}>
               {finalizedPhase.map((campaign, index) => {
                 const exchangeName = campaign.exchangeName;
@@ -622,22 +619,15 @@ export default function Dapps() {
                     <p><strong>Step 1: Connect Your Wallet</strong></p>
                     <p><strong>Install Metamask:</strong></p>
                     <p>If you haven't already, download and install the Metamask wallet extension for your browser.</p>
-                    <p><strong>Connect to Harmony Testnet:</strong></p>
+                    <p><strong>Connect to Binance Smart Chain:</strong></p>
                     <p>Open Metamask.</p>
-                    <p>Click on the network dropdown at the top and select "Harmony Testnet".</p>
-                    <p>If Harmony Testnet is not listed, you can add it manually by clicking on "Add Network" and entering the following details:</p>
-                    <p>Network Name: Harmony Testnet</p>
-                    <p>New RPC URL: https://api.s0.b.hmny.io</p>
-                    <p>Chain ID: 1666700000</p>
-                    <p>Symbol: ONE</p>
-                    <p>Block Explorer URL: https://explorer.pops.one</p>
-                    <p><strong>Connect Your Wallet:</strong></p>
-                    <p>Visit the MultiExchangeListing platform.</p>
-                    <p>Click on the "Connect Wallet" button.</p>
-                    <p>Select Metamask and follow the prompts to connect your wallet.</p>
-                    <p><strong>Step 2: Verify Network Connection</strong></p>
-                    <p>Check Network:</p>
-                    <p>Ensure that Metamask is connected to the Harmony Testnet. If not, switch to the Harmony Testnet in Metamask.</p>
+                    <p>Click on the network dropdown at the top and select "BNB Smart Chain".</p>
+                    <p>If BNB Smart Chain is not listed, you can add it manually by clicking on "Add Network" and entering the following details:</p>
+                    <p>Network Name: BNB Smart Chain</p>
+                    <p>New RPC URL: https://bsc-dataseed.binance.org/</p>
+                    <p>Chain ID: 56</p>
+                    <p>Symbol: BNB</p>
+                    <p>Block Explorer URL: https://bscscan.com/</p>
                   </div>
                 )}
                 <button onClick={() => toggleSection("UsingPlatform")} className={styles.buttonG}>
@@ -648,7 +638,7 @@ export default function Dapps() {
                     <h4>Using the Platform</h4>
                     <p><strong>Browsing Campaigns</strong></p>
                     <p><strong>Navigate to Campaigns:</strong></p>
-                    <p>Go to the "Exchange Listings" section on the platform's main page.</p>
+                    <p>Go to the "Exchange Listing Protocol" section on the platform's main page.</p>
                     <p>Campaigns are categorized into four phases: Funding, Listing, Payback, and Finalized.</p>
                     <p><strong>View Campaign Details:</strong></p>
                     <p>Click on any campaign card to view detailed information about the campaign, including its progress, funding goal, and total contributions.</p>
@@ -689,14 +679,8 @@ export default function Dapps() {
                     <p><strong>Payback Risks</strong></p>
                     <p><strong>Dependent on Listing:</strong></p>
                     <p>Paybacks are contingent on the successful listing of the token on the exchange.</p>
-                    <p><strong>Sufficient Payback Funds:</strong></p>
-                    <p>The owner must add sufficient payback funds to the contract for contributors to receive their payback.</p>
-                    <p><strong>Contract Functionality</strong></p>
-                    <p><strong>Function Toggles:</strong></p>
-                    <p>Certain functions of the contract can be enabled or disabled by the owners. Always check the current state of the contract functions before interacting.</p>
-                    <p><strong>Smart Contract Limitations</strong></p>
-                    <p><strong>No Upgradeability:</strong></p>
-                    <p>The contract is not upgradeable. Any changes require redeployment, which can affect ongoing campaigns.</p>
+                    <p>Paybacks are to be done to the contributer addresses, you should not lose your wallets in the process</p>
+                    <p><strong>By contributing this protocol, you accept all the risk and confirm that you have the responsibility of your actions</strong></p>
                   </div>
                 )}
                 <button onClick={() => toggleSection("ExampleUserFlow")} className={styles.buttonG}>
@@ -706,7 +690,7 @@ export default function Dapps() {
                   <div className={styles.infoContent}>
                     <h4>Example User Flow</h4>
                     <p><strong>Step 1: Connect Wallet</strong></p>
-                    <p>Connect your Metamask wallet to the Harmony Testnet on the MultiExchangeListing platform.</p>
+                    <p>Connect your Metamask wallet to the Binance Smart Chain on the platform.</p>
                     <p><strong>Step 2: Select a Campaign</strong></p>
                     <p>Browse the campaigns and select one in the Funding Phase.</p>
                     <p><strong>Step 3: Contribute</strong></p>

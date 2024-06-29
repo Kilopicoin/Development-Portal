@@ -11,8 +11,8 @@ import { ethers } from 'ethers'; // Correct import for ethers.js v6.x.x
 import { TailSpin } from 'react-loader-spinner'; // Correct import for Loader
 import Modal from '../modal/Modal'; // Import the Modal component
 
-const usdtContractAddress = '0xE61946fc54519fc57A2F6e442f9Eb3A60AB8bffA'; // Replace with the actual USDT contract address
-const multiExchangeListingAddress = '0x776341c8e01165fFC50EF1112b041703f394d8b5'; // MultiExchangeListing contract address
+const usdtContractAddress = '0x94895123784c24b92C851711149d2D4Ae294d796'; // Replace with the actual USDT contract address
+const multiExchangeListingAddress = '0xc207dBD1cED9c6a570EbCFf08772D73C3ac7cA30'; // MultiExchangeListing contract address
 
 interface DetailProps {
   campaignId: number;
@@ -31,7 +31,7 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
   const [isOwner, setIsOwner] = useState(false); // State for checking owner
   const [errorMessage, setErrorMessage] = useState<string | null>(null); // Error message state
 
-  const harmonyTestnetChainId = '0x6357d2e0'; // Harmony Testnet chain ID in hexadecimal
+  const harmonyTestnetChainId = '0x61'; // Harmony Testnet chain ID in hexadecimal
 
   const checkMetamaskConnection = async () => {
     if (typeof window.ethereum !== 'undefined') {
