@@ -117,10 +117,10 @@ There 3 major categories in this manner. Application Development, Marketing and 
 
         {nav === "Home" && (
           <>
-          <h2>Kilopi, Decentralized "Proof of Development" System</h2>
+          <h2>Kilopi, Decentralized &quot;Proof of Development&quot; System</h2>
           <h2>Home</h2>
           <br></br>
-          <h4>Decentralized "Proof of Development" system ensures the project keeps its development in all ways.</h4>
+          <h4>Decentralized &quot;Proof of Development&quot; system ensures the project keeps its development in all ways.</h4>
           <h4>There 3 major categories in this manner. Application Development, Marketing and Exchange Listing Protocols.</h4>
           <h4>Please use the navigation menu to review these categories.</h4>
           <br></br>
@@ -133,7 +133,7 @@ There 3 major categories in this manner. Application Development, Marketing and 
           <h4>This protocol ensures Kilopi project keeps its marketing activities in a sustainable and long term way</h4>
           <br></br>
           <h4>Exchange Listing Protocol</h4>
-          <h4>This protocol ensures Kilopi project's LOP token to gets listed on new exchanges continuously</h4>
+          <h4>This protocol ensures Kilopi project&apos;s LOP token to gets listed on new exchanges continuously</h4>
 
 
           </>

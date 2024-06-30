@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  assetPrefix: 'https://kilopi.net/pod/',
     images: {
       remotePatterns: [
         {

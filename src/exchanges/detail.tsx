@@ -6,14 +6,14 @@ import { useDispatch } from 'react-redux';
 import { setExchangesNav } from '../store/globalSlice';
 import getContract, { getSignerContract } from './contract';
 import usdtABI from './usdtABI.json'; // Import the ABI JSON file
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ethers } from 'ethers'; // Correct import for ethers.js v6.x.x
 import { TailSpin } from 'react-loader-spinner'; // Correct import for Loader
 import Modal from '../modal/Modal'; // Import the Modal component
 import Head from 'next/head';
 
-const usdtContractAddress = '0x94895123784c24b92C851711149d2D4Ae294d796'; // Replace with the actual USDT contract address
-const multiExchangeListingAddress = '0xc207dBD1cED9c6a570EbCFf08772D73C3ac7cA30'; // MultiExchangeListing contract address
+const usdtContractAddress = '0x55d398326f99059fF775485246999027B3197955'; // Replace with the actual USDT contract address
+const multiExchangeListingAddress = '0xb430Aa3ff9472D1091873d1c66073C24CE7e39C6'; // MultiExchangeListing contract address
 
 interface DetailProps {
   campaignId: number;
@@ -32,9 +32,9 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
   const [isOwner, setIsOwner] = useState(false); // State for checking owner
   const [errorMessage, setErrorMessage] = useState<string | null>(null); // Error message state
 
-  const harmonyTestnetChainId = '0x61'; // Binance Chain chain ID in hexadecimal
+  const harmonyTestnetChainId = '0x38'; // Binance Chain chain ID in hexadecimal
 
-  const checkMetamaskConnection = async () => {
+  const checkMetamaskConnection = useCallback(async () => {
     if (typeof window.ethereum !== 'undefined') {
       const accounts = await window.ethereum.request({ method: 'eth_accounts' });
       const chainId = await window.ethereum.request({ method: 'eth_chainId' });
@@ -53,7 +53,7 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
         await checkOwner(address);
       }
     }
-  };
+  }, [harmonyTestnetChainId, campaignId]);
 
   const checkOwner = async (account: string) => {
     try {
@@ -87,7 +87,7 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
         window.ethereum.removeListener('chainChanged', checkMetamaskConnection);
       };
     }
-  }, [campaignId]);
+  }, [campaignId, checkMetamaskConnection]);
 
   const handleApproveAndContribute = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

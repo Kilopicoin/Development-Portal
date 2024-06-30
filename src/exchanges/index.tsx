@@ -4,7 +4,7 @@ import styles from "../styles/global.module.css";
 import Image from 'next/image';
 import Detail from './detail';
 import getContract, { getSignerContract } from './contract';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ethers } from 'ethers'; // Correct import for ethers.js v6.x.x
 import { TailSpin } from 'react-loader-spinner'; // Correct import for Loader
 import Modal from '../modal/Modal'; // Import the Modal component
@@ -47,9 +47,9 @@ export default function Dapps() {
   const [isThirdOwner, setIsThirdOwner] = useState(false); // State for checking third owner
   const [errorMessage, setErrorMessage] = useState<string | null>(null); // Error message state
 
-  const harmonyTestnetChainId = '0x61'; // Binance Chain chain ID in hexadecimal
+  const harmonyTestnetChainId = '0x38'; // Binance Chain chain ID in hexadecimal
 
-  const checkMetamaskConnection = async () => {
+  const checkMetamaskConnection = useCallback(async () => {
     if (typeof window.ethereum !== 'undefined') {
       const accounts = await window.ethereum.request({ method: 'eth_accounts' });
       const chainId = await window.ethereum.request({ method: 'eth_chainId' });
@@ -59,7 +59,7 @@ export default function Dapps() {
         await checkOwner(accounts[0]);
       }
     }
-  };
+  }, [harmonyTestnetChainId]);
 
   const checkOwner = async (account: string) => {
     try {
@@ -89,7 +89,7 @@ export default function Dapps() {
         window.ethereum.removeListener('chainChanged', checkMetamaskConnection);
       };
     }
-  }, []);
+  }, [checkMetamaskConnection]);
 
   const loadCampaigns = async () => {
     setLoading(true);
@@ -471,6 +471,15 @@ export default function Dapps() {
     if (section === "ExampleUserFlow") setShowExampleUserFlow(!showExampleUserFlow);
   };
 
+  const connectMetamask = async () => {
+    try {
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      checkMetamaskConnection();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
 <>
     <Head>
@@ -496,6 +505,11 @@ export default function Dapps() {
       {ExchangesNav === "Home" && (
         <>
           <h2>Exchange Listing Protocol</h2>
+          {!isMetamaskConnected && (
+            <button onClick={connectMetamask} className={styles.buttonG}>
+              Connect to MetaMask
+            </button>
+          )}
 
           <div className={styles.phaseContainer}>
             <h3>1 - Funding Phase</h3>
@@ -631,11 +645,11 @@ export default function Dapps() {
                     <h4>Getting Started</h4>
                     <p><strong>Step 1: Connect Your Wallet</strong></p>
                     <p><strong>Install Metamask:</strong></p>
-                    <p>If you haven't already, download and install the Metamask wallet extension for your browser.</p>
+                    <p>If you haven&apos;t already, download and install the Metamask wallet extension for your browser.</p>
                     <p><strong>Connect to Binance Smart Chain:</strong></p>
                     <p>Open Metamask.</p>
-                    <p>Click on the network dropdown at the top and select "BNB Smart Chain".</p>
-                    <p>If BNB Smart Chain is not listed, you can add it manually by clicking on "Add Network" and entering the following details:</p>
+                    <p>Click on the network dropdown at the top and select &quot;BNB Smart Chain&quot;.</p>
+                    <p>If BNB Smart Chain is not listed, you can add it manually by clicking on &quot;Add Network&quot; and entering the following details:</p>
                     <p>Network Name: BNB Smart Chain</p>
                     <p>New RPC URL: https://bsc-dataseed.binance.org/</p>
                     <p>Chain ID: 56</p>
@@ -651,7 +665,7 @@ export default function Dapps() {
                     <h4>Using the Platform</h4>
                     <p><strong>Browsing Campaigns</strong></p>
                     <p><strong>Navigate to Campaigns:</strong></p>
-                    <p>Go to the "Exchange Listing Protocol" section on the platform's main page.</p>
+                    <p>Go to the &quot;Exchange Listing Protocol&quot; section on the platform&apos;s main page.</p>
                     <p>Campaigns are categorized into four phases: Funding, Listing, Payback, and Finalized.</p>
                     <p><strong>View Campaign Details:</strong></p>
                     <p>Click on any campaign card to view detailed information about the campaign, including its progress, funding goal, and total contributions.</p>
