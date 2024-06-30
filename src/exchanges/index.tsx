@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { ethers } from 'ethers'; // Correct import for ethers.js v6.x.x
 import { TailSpin } from 'react-loader-spinner'; // Correct import for Loader
 import Modal from '../modal/Modal'; // Import the Modal component
+import Head from 'next/head';
 
 interface RootState {
   global: {
@@ -46,7 +47,7 @@ export default function Dapps() {
   const [isThirdOwner, setIsThirdOwner] = useState(false); // State for checking third owner
   const [errorMessage, setErrorMessage] = useState<string | null>(null); // Error message state
 
-  const harmonyTestnetChainId = '0x61'; // Harmony Testnet chain ID in hexadecimal
+  const harmonyTestnetChainId = '0x61'; // Binance Chain chain ID in hexadecimal
 
   const checkMetamaskConnection = async () => {
     if (typeof window.ethereum !== 'undefined') {
@@ -471,6 +472,18 @@ export default function Dapps() {
   };
 
   return (
+<>
+    <Head>
+        <title>Kilopi - Exchange Listing Protocol</title>
+        <meta name="description" content="Exchange Listing Protocol ensures Kilopi project's LOP token to gets listed on new exchanges continuously" />
+        <meta property="og:title" content="Kilopi - Exchange Listing Protocol" />
+        <meta property="og:description" content="Exchange Listing Protocol ensures Kilopi project's LOP token to gets listed on new exchanges continuously" />
+        <meta property="og:image" content="/images/Kilopi_Full.png" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {/* Add more meta tags as needed */}
+      </Head>
+
+
     <div className={styles.main}>
       {loading && (
         <div className={styles.loaderWrapper}>
@@ -649,6 +662,7 @@ export default function Dapps() {
                     <p>Decide the amount of USDT you want to contribute.</p>
                     <p>Minimum contribution: 1 USDT.</p>
                     <p>Ensure you have sufficient USDT balance in your Metamask wallet.</p>
+                    <p>Ensure you have sufficient BNB balance in your Metamask wallet for Transaction Fee.</p>
                     <p><strong>Approve USDT Spending:</strong></p>
                     <p>Your wallet will prompt you to approve the spending of USDT.</p>
                     <p>Approve the transaction in Metamask.</p>
@@ -762,7 +776,7 @@ export default function Dapps() {
                       />
                     </div>
                     <button type="submit" className={styles.buttonG} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                      {isMetamaskConnected && isCorrectNetwork ? 'Add New Exchange' : 'Metamask (Harmony Testnet) Needed'}
+                      {isMetamaskConnected && isCorrectNetwork ? 'Add New Exchange' : 'Metamask (Binance Chain) Needed'}
                     </button>
                   </form>
                 </div>
@@ -782,7 +796,7 @@ export default function Dapps() {
                       />
                     </div>
                     <button className={styles.buttonG} onClick={handleConfirmListing} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                      {isMetamaskConnected && isCorrectNetwork ? 'Confirm Listing' : 'Metamask (Harmony Testnet) Needed'}
+                      {isMetamaskConnected && isCorrectNetwork ? 'Confirm Listing' : 'Metamask (Binance Chain) Needed'}
                     </button>
                   </div>
                 </div>
@@ -802,7 +816,7 @@ export default function Dapps() {
                       />
                     </div>
                     <button className={styles.buttonG} onClick={handlePayback} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                      {isMetamaskConnected && isCorrectNetwork ? 'Execute Payback' : 'Metamask (Harmony Testnet) Needed'}
+                      {isMetamaskConnected && isCorrectNetwork ? 'Execute Payback' : 'Metamask (Binance Chain) Needed'}
                     </button>
                   </div>
                 </div>
@@ -822,7 +836,7 @@ export default function Dapps() {
                       />
                     </div>
                     <button className={styles.buttonG} onClick={handleWithdrawFunds} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                      {isMetamaskConnected && isCorrectNetwork ? 'Withdraw Funds' : 'Metamask (Harmony Testnet) Needed'}
+                      {isMetamaskConnected && isCorrectNetwork ? 'Withdraw Funds' : 'Metamask (Binance Chain) Needed'}
                     </button>
                   </div>
                 </div>
@@ -842,7 +856,7 @@ export default function Dapps() {
                       />
                     </div>
                     <button className={styles.buttonG} onClick={handleCancelCampaign} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                      {isMetamaskConnected && isCorrectNetwork ? 'Cancel Campaign' : 'Metamask (Harmony Testnet) Needed'}
+                      {isMetamaskConnected && isCorrectNetwork ? 'Cancel Campaign' : 'Metamask (Binance Chain) Needed'}
                     </button>
                   </div>
                 </div>
@@ -852,7 +866,7 @@ export default function Dapps() {
                     <h4>Toggle Second Owner Address Change</h4>
                     <p>Current State: {secondOwnerAddressChangeEnabled ? "Enabled" : "Disabled"}</p>
                     <button className={styles.buttonG} onClick={handleToggleSecondOwnerAddressChange} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                      {isMetamaskConnected && isCorrectNetwork ? (secondOwnerAddressChangeEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
+                      {isMetamaskConnected && isCorrectNetwork ? (secondOwnerAddressChangeEnabled ? 'Disable' : 'Enable') : 'Metamask (Binance Chain) Needed'}
                     </button>
                   </div>
                 </div>
@@ -869,7 +883,7 @@ export default function Dapps() {
                     <h4>Toggle Create Campaign</h4>
                     <p>Current State: {createCampaignEnabled ? "Enabled" : "Disabled"}</p>
                     <button className={styles.buttonG} onClick={handleToggleCreateCampaign} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                      {isMetamaskConnected && isCorrectNetwork ? (createCampaignEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
+                      {isMetamaskConnected && isCorrectNetwork ? (createCampaignEnabled ? 'Disable' : 'Enable') : 'Metamask (Binance Chain) Needed'}
                     </button>
                   </div>
                 </div>
@@ -879,7 +893,7 @@ export default function Dapps() {
                     <h4>Toggle Confirm Listing</h4>
                     <p>Current State: {confirmListingEnabled ? "Enabled" : "Disabled"}</p>
                     <button className={styles.buttonG} onClick={handleToggleConfirmListing} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                      {isMetamaskConnected && isCorrectNetwork ? (confirmListingEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
+                      {isMetamaskConnected && isCorrectNetwork ? (confirmListingEnabled ? 'Disable' : 'Enable') : 'Metamask (Binance Chain) Needed'}
                     </button>
                   </div>
                 </div>
@@ -889,7 +903,7 @@ export default function Dapps() {
                     <h4>Toggle Pay Back</h4>
                     <p>Current State: {payBackEnabled ? "Enabled" : "Disabled"}</p>
                     <button className={styles.buttonG} onClick={handleTogglePayBack} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                      {isMetamaskConnected && isCorrectNetwork ? (payBackEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
+                      {isMetamaskConnected && isCorrectNetwork ? (payBackEnabled ? 'Disable' : 'Enable') : 'Metamask (Binance Chain) Needed'}
                     </button>
                   </div>
                 </div>
@@ -899,7 +913,7 @@ export default function Dapps() {
                     <h4>Toggle Withdraw Funds</h4>
                     <p>Current State: {withdrawFundsEnabled ? "Enabled" : "Disabled"}</p>
                     <button className={styles.buttonG} onClick={handleToggleWithdrawFunds} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                      {isMetamaskConnected && isCorrectNetwork ? (withdrawFundsEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
+                      {isMetamaskConnected && isCorrectNetwork ? (withdrawFundsEnabled ? 'Disable' : 'Enable') : 'Metamask (Binance Chain) Needed'}
                     </button>
                   </div>
                 </div>
@@ -909,7 +923,7 @@ export default function Dapps() {
                     <h4>Toggle Cancel Campaign</h4>
                     <p>Current State: {cancelCampaignEnabled ? "Enabled" : "Disabled"}</p>
                     <button className={styles.buttonG} onClick={handleToggleCancelCampaign} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                      {isMetamaskConnected && isCorrectNetwork ? (cancelCampaignEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
+                      {isMetamaskConnected && isCorrectNetwork ? (cancelCampaignEnabled ? 'Disable' : 'Enable') : 'Metamask (Binance Chain) Needed'}
                     </button>
                   </div>
                 </div>
@@ -919,7 +933,7 @@ export default function Dapps() {
                     <h4>Toggle Owner Address Change</h4>
                     <p>Current State: {ownerAddressChangeEnabled ? "Enabled" : "Disabled"}</p>
                     <button className={styles.buttonG} onClick={handleToggleOwnerAddressChange} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                      {isMetamaskConnected && isCorrectNetwork ? (ownerAddressChangeEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
+                      {isMetamaskConnected && isCorrectNetwork ? (ownerAddressChangeEnabled ? 'Disable' : 'Enable') : 'Metamask (Binance Chain) Needed'}
                     </button>
                   </div>
                 </div>
@@ -945,7 +959,7 @@ export default function Dapps() {
                       />
                     </div>
                     <button className={styles.buttonG} onClick={handleChangeOwnerAddress} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                      {isMetamaskConnected && isCorrectNetwork ? 'Change Owner Address' : 'Metamask (Harmony Testnet) Needed'}
+                      {isMetamaskConnected && isCorrectNetwork ? 'Change Owner Address' : 'Metamask (Binance Chain) Needed'}
                     </button>
                   </div>
                 </div>
@@ -964,7 +978,7 @@ export default function Dapps() {
                       />
                     </div>
                     <button className={styles.buttonG} onClick={handleChangeSecondOwnerAddress} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                      {isMetamaskConnected && isCorrectNetwork ? 'Change Second Owner Address' : 'Metamask (Harmony Testnet) Needed'}
+                      {isMetamaskConnected && isCorrectNetwork ? 'Change Second Owner Address' : 'Metamask (Binance Chain) Needed'}
                     </button>
                   </div>
                 </div>
@@ -980,5 +994,7 @@ export default function Dapps() {
         </>
       )}
     </div>
+
+    </>
   );
 }

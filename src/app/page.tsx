@@ -7,6 +7,7 @@ import Marketing from '../marketing/index';
 import Exchanges from '../exchanges/index';
 import { useSelector, useDispatch } from 'react-redux';
 import { setdAppsNav, setMarketingNav, setExchangesNav } from '../store/globalSlice';
+import Head from 'next/head';
 
 interface RootState {
   global: {
@@ -29,6 +30,20 @@ export default function Home() {
 
 
   return (
+<>
+    <Head>
+        <title>Kilopi - Proof of Development</title>
+        <meta name="description" content="Decentralized Proof of Development system ensures the project keeps its development in all ways.
+There 3 major categories in this manner. Application Development, Marketing and Exchange Listing Protocols." />
+        <meta property="og:title" content="Kilopi - Proof of Development" />
+        <meta property="og:description" content="Decentralized Proof of Development system ensures the project keeps its development in all ways.
+There 3 major categories in this manner. Application Development, Marketing and Exchange Listing Protocols." />
+        <meta property="og:image" content="/images/Kilopi_Full.png" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {/* Add more meta tags as needed */}
+      </Head>
+
+
     <main className={styles.main}>
       
       <div className={styles.container}>
@@ -104,7 +119,21 @@ export default function Home() {
           <>
           <h2>Kilopi, Decentralized "Proof of Development" System</h2>
           <h2>Home</h2>
-          <h4>Guide and Rules Page</h4>
+          <br></br>
+          <h4>Decentralized "Proof of Development" system ensures the project keeps its development in all ways.</h4>
+          <h4>There 3 major categories in this manner. Application Development, Marketing and Exchange Listing Protocols.</h4>
+          <h4>Please use the navigation menu to review these categories.</h4>
+          <br></br>
+          <h4>The purpose of these categories;</h4>
+          <br></br>
+          <h4>Application Development Protocol</h4>
+          <h4>This protocol ensures Kilopi project keeps developing new applications and creates new utility areas for the LOP token</h4>
+          <br></br>
+          <h4>Marketing Protocol</h4>
+          <h4>This protocol ensures Kilopi project keeps its marketing activities in a sustainable and long term way</h4>
+          <br></br>
+          <h4>Exchange Listing Protocol</h4>
+          <h4>This protocol ensures Kilopi project's LOP token to gets listed on new exchanges continuously</h4>
 
 
           </>
@@ -159,5 +188,6 @@ export default function Home() {
 
 
     </main>
+    </>
   );
 }

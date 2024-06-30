@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react';
 import { ethers } from 'ethers'; // Correct import for ethers.js v6.x.x
 import { TailSpin } from 'react-loader-spinner'; // Correct import for Loader
 import Modal from '../modal/Modal'; // Import the Modal component
+import Head from 'next/head';
 
 const usdtContractAddress = '0x94895123784c24b92C851711149d2D4Ae294d796'; // Replace with the actual USDT contract address
 const multiExchangeListingAddress = '0xc207dBD1cED9c6a570EbCFf08772D73C3ac7cA30'; // MultiExchangeListing contract address
@@ -31,7 +32,7 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
   const [isOwner, setIsOwner] = useState(false); // State for checking owner
   const [errorMessage, setErrorMessage] = useState<string | null>(null); // Error message state
 
-  const harmonyTestnetChainId = '0x61'; // Harmony Testnet chain ID in hexadecimal
+  const harmonyTestnetChainId = '0x61'; // Binance Chain chain ID in hexadecimal
 
   const checkMetamaskConnection = async () => {
     if (typeof window.ethereum !== 'undefined') {
@@ -253,6 +254,18 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
   };
 
   return (
+<>
+    <Head>
+        <title>Kilopi - Exchange Listing Protocol</title>
+        <meta name="description" content="Exchange Listing Protocol ensures Kilopi project's LOP token to gets listed on new exchanges continuously" />
+        <meta property="og:title" content="Kilopi - Exchange Listing Protocol" />
+        <meta property="og:description" content="Exchange Listing Protocol ensures Kilopi project's LOP token to gets listed on new exchanges continuously" />
+        <meta property="og:image" content="/images/Kilopi_Full.png" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {/* Add more meta tags as needed */}
+      </Head>
+
+
     <div className={styles.main}>
       {loading && (
         <div className={styles.loaderWrapper}>
@@ -337,7 +350,7 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
                         className={styles.shortInput}
                       />
                       <button type="submit" className={styles.buttonG} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                        {isMetamaskConnected && isCorrectNetwork ? 'Add Payback Funds' : 'Metamask (Harmony Testnet) Needed'}
+                        {isMetamaskConnected && isCorrectNetwork ? 'Add Payback Funds' : 'Metamask (Binance Chain) Needed'}
                       </button>
                     </div>
                   </form>
@@ -355,7 +368,7 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
                     className={styles.shortInput}
                   />
                   <button type="submit" className={styles.buttonG} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                    {isMetamaskConnected && isCorrectNetwork ? 'Contribute' : 'Metamask (Harmony Testnet) Needed'}
+                    {isMetamaskConnected && isCorrectNetwork ? 'Contribute' : 'Metamask (Binance Chain) Needed'}
                   </button>
                 </div>
               </form>
@@ -385,6 +398,7 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
         )}
       </div>
     </div>
+    </>
   );
 };
 

@@ -5,6 +5,7 @@ import { setdAppsNav } from '../store/globalSlice';
 import styles from "../styles/global.module.css";
 import Image from 'next/image';
 import Detail from './detail'
+import Head from 'next/head';
 
 interface RootState {
   global: {
@@ -24,6 +25,18 @@ export default function Dapps() {
 
 
   return (
+<>
+    <Head>
+        <title>Kilopi - Application Development Protocol</title>
+        <meta name="description" content="Application Development Protocol ensures Kilopi project keeps developing new applications and creates new utility areas for the LOP token." />
+        <meta property="og:title" content="Kilopi - Application Development Protocol" />
+        <meta property="og:description" content="Application Development Protocol ensures Kilopi project keeps developing new applications and creates new utility areas for the LOP token." />
+        <meta property="og:image" content="/images/Kilopi_Full.png" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {/* Add more meta tags as needed */}
+      </Head>
+
+
     <div className={styles.main}>
       
 
@@ -72,5 +85,6 @@ export default function Dapps() {
 )}
 
     </div>
+    </>
   );
 }
