@@ -283,11 +283,12 @@ const Detail: React.FC<DetailProps> = ({ campaignId }) => {
         {campaign && (
           <div className={styles.buttondAppsDetail}>
             <div className={styles.carddApps}>
-              <Image 
+              <img 
                 src={campaign.logoImageUrl} // Use the logo image URL from the campaign
                 alt="Logo"
                 width={300}
                 height={300}
+                style={{ width: '200px', height: '200px', objectFit: 'contain' }} 
               />
               <div className={styles.carddAppsDescription}>
                 <p>Exchange Name: {campaign.exchangeName}</p>

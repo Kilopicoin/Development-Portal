@@ -525,7 +525,7 @@ export default function Dapps() {
                   <button key={index} className={styles.buttondApps} onClick={() => handleCampaignClick(campaign.id)}>
                     <div className={styles.carddApps}>
                       {logoImageUrl ? (
-                        <Image src={logoImageUrl} alt="Logo" width={50} height={50} />
+                        <img src={logoImageUrl} alt="Logo" width={50} height={50} style={{ width: '60px', height: '60px', objectFit: 'contain' }}  />
                       ) : (
                         <div style={{ width: 50, height: 50, background: '#ccc' }} />
                       )}
@@ -555,7 +555,7 @@ export default function Dapps() {
                   <button key={index} className={styles.buttondApps} onClick={() => handleCampaignClick(campaign.id)}>
                     <div className={styles.carddApps}>
                       {logoImageUrl ? (
-                        <Image src={logoImageUrl} alt="Logo" width={50} height={50} />
+                        <img src={logoImageUrl} alt="Logo" width={50} height={50} style={{ width: '60px', height: '60px', objectFit: 'contain' }}  />
                       ) : (
                         <div style={{ width: 50, height: 50, background: '#ccc' }} />
                       )}
@@ -585,7 +585,7 @@ export default function Dapps() {
                   <button key={index} className={styles.buttondApps} onClick={() => handleCampaignClick(campaign.id)}>
                     <div className={styles.carddApps}>
                       {logoImageUrl ? (
-                        <Image src={logoImageUrl} alt="Logo" width={50} height={50} />
+                        <img src={logoImageUrl} alt="Logo" width={50} height={50} style={{ width: '60px', height: '60px', objectFit: 'contain' }}  />
                       ) : (
                         <div style={{ width: 50, height: 50, background: '#ccc' }} />
                       )}
@@ -615,7 +615,7 @@ export default function Dapps() {
                   <button key={index} className={styles.buttondApps} onClick={() => handleCampaignClick(campaign.id)}>
                     <div className={styles.carddApps}>
                       {logoImageUrl ? (
-                        <Image src={logoImageUrl} alt="Logo" width={50} height={50} />
+                        <img src={logoImageUrl} alt="Logo" width={50} height={50} style={{ width: '60px', height: '60px', objectFit: 'contain' }}  />
                       ) : (
                         <div style={{ width: 50, height: 50, background: '#ccc' }} />
                       )}
@@ -736,7 +736,7 @@ export default function Dapps() {
                 )}
                 <button 
                 className={styles.buttonG} 
-                onClick={() => window.open('https://www.youtube.com/watch?v=YOUR_VIDEO_ID', '_blank')}
+                onClick={() => window.open('https://youtu.be/-iHwMgerX6s?si=M9pHkyVeBldkE3MI', '_blank')}
                 >
                   Tutorial Video
                 </button>
