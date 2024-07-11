@@ -11,17 +11,17 @@ import Head from 'next/head';
 
 interface RootState {
   global: {
-    dAppsNav: string;
-    marketingNav: string;
-    exchangesNav: string;
+    DAppsNav: string;
+    MarketingNav: string;
+    ExchangesNav: string;
   };
 }
 
 export default function Home() {
 
-  const dAppsNav = useSelector((state: RootState) => state.global.dAppsNav);
-  const marketingNav = useSelector((state: RootState) => state.global.marketingNav);
-  const exchangesNav = useSelector((state: RootState) => state.global.exchangesNav);
+  const dAppsNav = useSelector((state: RootState) => state.global.DAppsNav);
+  const marketingNav = useSelector((state: RootState) => state.global.MarketingNav);
+  const exchangesNav = useSelector((state: RootState) => state.global.ExchangesNav);
   const dispatch = useDispatch();
 
   const [nav, setnav] = useState("Home");
