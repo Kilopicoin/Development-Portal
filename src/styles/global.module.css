@@ -377,6 +377,12 @@
   max-height: 200px; /* You can adjust this value */
 }
 
+@media (max-width: 700px) {
+  .carddApps img {
+    max-width: 100px; /* Adjust the size for mobile */
+    max-height: 100px; /* Adjust the size for mobile */
+  }
+}
 
 .carddAppsDescription {
   margin-left: 20px; /* Adjust as needed */
