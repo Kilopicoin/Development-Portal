@@ -341,9 +341,9 @@ export default function ApplicationDevelopment() {
           {isOwner && (
             <div className={styles.phaseContainer}>
               <h3>Pending Approval</h3>
-              <div className={styles.dApps}>
+              <div className={styles.carddApps}>
                 {pendingApproval.map((element, index) => (
-                  <div key={index} className={styles.carddApps}>
+                  <div key={index} >
                     <div className={styles.carddAppsDescription}>
                       <p>ID: {element.id}</p>
                       <p>Name: {element.name}</p>
