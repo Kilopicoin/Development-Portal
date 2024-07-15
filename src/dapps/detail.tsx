@@ -3,7 +3,7 @@
 import styles from "../styles/global.module.css";
 import { useDispatch } from 'react-redux';
 import { setdAppsNav } from '../store/globalSlice';
-import getContract from './contract';
+import getContract, { getSignerContract } from './contract';
 import { useCallback, useEffect, useState } from 'react';
 import { ethers } from 'ethers'; // Correct import for ethers.js v6.x.x
 import { TailSpin } from 'react-loader-spinner'; // Correct import for Loader
@@ -22,8 +22,11 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
   const [isCorrectNetwork, setIsCorrectNetwork] = useState(false);
   const [loading, setLoading] = useState(false); // Loading state
   const [errorMessage, setErrorMessage] = useState<string | null>(null); // Error message state
+  const [newWebsiteLink, setNewWebsiteLink] = useState<string>(''); // State for new website link
+  const [newTutorialLink, setNewTutorialLink] = useState<string>(''); // State for new tutorial link
+  const [newPerformanceMetricsLink, setNewPerformanceMetricsLink] = useState<string>(''); // State for new performance metrics link
 
-  const harmonyTestnetChainId = '0x6357d2e0'; // Binance Chain chain ID in hexadecimal
+  const harmonyTestnetChainId = '0x6357d2e0'; // Harmony Testnet chain ID in hexadecimal
 
   const checkMetamaskConnection = useCallback(async () => {
     if (typeof window.ethereum !== 'undefined') {
@@ -71,16 +74,48 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
   const getPhase = () => {
     if (!element) return 'Unknown';
 
-    const phase = element.phase;
+    const phase = Number(element.phase);
 
-    if (phase === 3) {
-      return 'Prestige';
-    } else if (phase === 2) {
-      return 'Live';
-    } else if (phase === 1) {
-      return 'Development';
-    } else {
-      return 'Theory';
+    switch (phase) {
+      case 0:
+        return 'Approval Pending';
+      case 1:
+        return 'Theory';
+      case 2:
+        return 'Development';
+      case 3:
+        return 'Live';
+      case 4:
+        return 'Prestige';
+      default:
+        return 'Unknown';
+    }
+  };
+
+  const handleUpdateElement = async () => {
+    setLoading(true);
+    setErrorMessage(null);
+    try {
+      const contract = await getSignerContract();
+      let tx;
+      if (getPhase() === 'Development') {
+        tx = await contract.updateElementTutorial(elementId, newTutorialLink);
+      } else if (getPhase() === 'Live') {
+        tx = await contract.updateElementMetrics(elementId, newPerformanceMetricsLink);
+      } else {
+        tx = await contract.updateElementWebsite(elementId, newWebsiteLink);
+      }
+      await tx.wait();
+      loadElement(); // Reload element data after update
+    } catch (error) {
+      if (error instanceof Error) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage('An unknown error occurred');
+      }
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -144,6 +179,48 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
                   <p>Current Phase: {getPhase()}</p>
                 </div>
               </div>
+              {element.creator.toLowerCase() === account?.toLowerCase() && getPhase() !== 'Prestige' && (
+                <div className={styles.updateCard}>
+                  <h4>Update Element</h4>
+                  {getPhase() === 'Development' ? (
+                    <div className={styles.inputGroup}>
+                      <label htmlFor="tutorialLink">Tutorial Link:</label>
+                      <input
+                        type="text"
+                        id="tutorialLink"
+                        value={newTutorialLink}
+                        onChange={(e) => setNewTutorialLink(e.target.value)}
+                        required
+                      />
+                    </div>
+                  ) : getPhase() === 'Live' ? (
+                    <div className={styles.inputGroup}>
+                      <label htmlFor="performanceMetricsLink">Performance Metrics Link:</label>
+                      <input
+                        type="text"
+                        id="performanceMetricsLink"
+                        value={newPerformanceMetricsLink}
+                        onChange={(e) => setNewPerformanceMetricsLink(e.target.value)}
+                        required
+                      />
+                    </div>
+                  ) : (
+                    <div className={styles.inputGroup}>
+                      <label htmlFor="websiteLink">Website Link:</label>
+                      <input
+                        type="text"
+                        id="websiteLink"
+                        value={newWebsiteLink}
+                        onChange={(e) => setNewWebsiteLink(e.target.value)}
+                        required
+                      />
+                    </div>
+                  )}
+                  <button onClick={handleUpdateElement} className={styles.buttonG}>
+                    Update Element
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

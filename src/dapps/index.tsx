@@ -25,7 +25,8 @@ export default function ApplicationDevelopment() {
   const [developmentPhase, setDevelopmentPhase] = useState<any[]>([]);
   const [livePhase, setLivePhase] = useState<any[]>([]);
   const [prestigePhase, setPrestigePhase] = useState<any[]>([]);
-  const [pendingApproval, setPendingApproval] = useState<any[]>([]); // New state for pending approval elements
+  const [pendingApproval, setPendingApproval] = useState<any[]>([]);
+  const [pendingUpdate, setPendingUpdate] = useState<any[]>([]); // New state for pending update elements
   const [selectedElementId, setSelectedElementId] = useState<number | null>(null);
 
   const [name, setName] = useState('');
@@ -89,7 +90,8 @@ export default function ApplicationDevelopment() {
       const development = [];
       const live = [];
       const prestige = [];
-      const pending = []; // New array for pending approval elements
+      const pending = []; // Array for pending approval elements
+      const pendingUpdates = []; // Array for pending update elements
 
       for (let i = 0; i < elementCount; i++) {
         const element = await contract.elements(i);
@@ -123,6 +125,14 @@ export default function ApplicationDevelopment() {
         if (elementWithId.phase === 0) { // Assuming phase 0 means pending approval
           pending.push(elementWithId);
         }
+
+        if (
+          (elementWithId.phase === 1 && elementWithId.websiteLink) || 
+          (elementWithId.phase === 2 && elementWithId.tutorialLink) || 
+          (elementWithId.phase === 3 && elementWithId.performanceMetricsLink)
+        ) {
+          pendingUpdates.push(elementWithId);
+        }
       }
 
       setTheoryPhase(theory);
@@ -130,12 +140,14 @@ export default function ApplicationDevelopment() {
       setLivePhase(live);
       setPrestigePhase(prestige);
       setPendingApproval(pending); // Set the state for pending approval elements
+      setPendingUpdate(pendingUpdates); // Set the state for pending update elements
 
       console.log('Theory Phase:', theory); // Debugging line
       console.log('Development Phase:', development); // Debugging line
       console.log('Live Phase:', live); // Debugging line
       console.log('Prestige Phase:', prestige); // Debugging line
       console.log('Pending Approval:', pending); // Debugging line
+      console.log('Pending Update:', pendingUpdates); // Debugging line
     } catch (error) {
       console.error(error);
     }
@@ -170,6 +182,20 @@ export default function ApplicationDevelopment() {
       const tx = await contract.approveElement(elementId); // Call the approveElement function
       await tx.wait();
       loadElements(); // Reload elements after approving one
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateElement = async (elementId: number) => {
+    setLoading(true);
+    try {
+      const contract = await getSignerContract();
+      const tx = await contract.confirmUpdate(elementId); // Call the confirmUpdate function
+      await tx.wait();
+      loadElements(); // Reload elements after confirming update
     } catch (error) {
       console.error(error);
     } finally {
@@ -249,11 +275,10 @@ export default function ApplicationDevelopment() {
                         <div style={{ width: 50, height: 50, background: '#ccc' }} />
                       )}
                       <div className={styles.carddAppsDescription}>
-                        <p>ID: {element.id}</p>
+                  
                         <p>Name: {element.name}</p>
-                        <p>Description: {element.description}</p>
-                        <p>Whitepaper: <a href={element.whitepaperLink} target="_blank">Link</a></p>
-                        <p>Website: <a href={element.websiteLink} target="_blank">Link</a></p>
+                        <p>Votes: {element.voteCount}</p>
+                   
                       </div>
                     </div>
                   </button>
@@ -273,12 +298,10 @@ export default function ApplicationDevelopment() {
                         <div style={{ width: 50, height: 50, background: '#ccc' }} />
                       )}
                       <div className={styles.carddAppsDescription}>
-                        <p>ID: {element.id}</p>
+                      
                         <p>Name: {element.name}</p>
-                        <p>Description: {element.description}</p>
-                        <p>Whitepaper: <a href={element.whitepaperLink} target="_blank">Link</a></p>
-                        <p>Website: <a href={element.websiteLink} target="_blank">Link</a></p>
-                        <p>Tutorial: <a href={element.tutorialLink} target="_blank">Link</a></p>
+                        <p>Votes: {element.voteCount}</p>
+                    
                       </div>
                     </div>
                   </button>
@@ -298,13 +321,10 @@ export default function ApplicationDevelopment() {
                         <div style={{ width: 50, height: 50, background: '#ccc' }} />
                       )}
                       <div className={styles.carddAppsDescription}>
-                        <p>ID: {element.id}</p>
+                     
                         <p>Name: {element.name}</p>
-                        <p>Description: {element.description}</p>
-                        <p>Whitepaper: <a href={element.whitepaperLink} target="_blank">Link</a></p>
-                        <p>Website: <a href={element.websiteLink} target="_blank">Link</a></p>
-                        <p>Tutorial: <a href={element.tutorialLink} target="_blank">Link</a></p>
-                        <p>Performance Metrics: <a href={element.performanceMetricsLink} target="_blank">Link</a></p>
+                        <p>Votes: {element.voteCount}</p>
+                    
                       </div>
                     </div>
                   </button>
@@ -379,30 +399,66 @@ export default function ApplicationDevelopment() {
             </div>
 
             {isOwner && (
-              <div className={styles.phaseContainer}>
-                <h3>Pending Approval</h3>
-                <div className={styles.dApps}>
-                  {pendingApproval.map((element, index) => (
-                    <div key={index} className={styles.carddApps}>
-                      <div className={styles.carddAppsDescription}>
-                        <p>ID: {element.id}</p>
-                        <p>Name: {element.name}</p>
-                        <p>Description: {element.description}</p>
-                        <p>Email: {element.email}</p> {/* Display email */}
-                        {element.logoUrl ? (
-                          <img src={element.logoUrl} alt="Logo" width={50} height={50} style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
-                        ) : (
-                          <div style={{ width: 50, height: 50, background: '#ccc' }} />
-                        )}
-                        <p>Whitepaper: <a href={element.whitepaperLink} target="_blank">Link</a></p>
-                        <button onClick={() => handleApproveElement(element.id)} className={styles.buttonG}>
-                          Approve
-                        </button>
+              <>
+                <div className={styles.phaseContainer}>
+                  <h3>Pending Approval</h3>
+                  <div className={styles.dApps}>
+                    {pendingApproval.map((element, index) => (
+                      <div key={index} className={styles.carddApps}>
+                        <div className={styles.carddAppsDescription}>
+                          <p>ID: {element.id}</p>
+                          <p>Name: {element.name}</p>
+                          <p>Description: {element.description}</p>
+                          <p>Email: {element.email}</p> {/* Display email */}
+                          {element.logoUrl ? (
+                            <img src={element.logoUrl} alt="Logo" width={50} height={50} style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
+                          ) : (
+                            <div style={{ width: 50, height: 50, background: '#ccc' }} />
+                          )}
+                          <p>Whitepaper: <a href={element.whitepaperLink} target="_blank">Link</a></p>
+                          <button onClick={() => handleApproveElement(element.id)} className={styles.buttonG}>
+                            Approve
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
+
+                <div className={styles.phaseContainer}>
+                  <h3>Pending Update</h3>
+                  <div className={styles.dApps}>
+                    {pendingUpdate.map((element, index) => (
+                      <div key={index} className={styles.carddApps}>
+                        <div className={styles.carddAppsDescription}>
+                          <p>ID: {element.id}</p>
+                          <p>Name: {element.name}</p>
+                          <p>Description: {element.description}</p>
+                          <p>Email: {element.email}</p> {/* Display email */}
+                          {element.logoUrl ? (
+                            <img src={element.logoUrl} alt="Logo" width={50} height={50} style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
+                          ) : (
+                            <div style={{ width: 50, height: 50, background: '#ccc' }} />
+                          )}
+                          <p>Whitepaper: <a href={element.whitepaperLink} target="_blank">Link</a></p>
+                          {element.websiteLink && (
+                            <p>Website: <a href={element.websiteLink} target="_blank">Link</a></p>
+                          )}
+                          {element.tutorialLink && (
+                            <p>Tutorial: <a href={element.tutorialLink} target="_blank">Link</a></p>
+                          )}
+                          {element.performanceMetricsLink && (
+                            <p>Performance Metrics: <a href={element.performanceMetricsLink} target="_blank">Link</a></p>
+                          )}
+                          <button onClick={() => handleUpdateElement(element.id)} className={styles.buttonG}>
+                            Update
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
             )}
           </>
         )}
