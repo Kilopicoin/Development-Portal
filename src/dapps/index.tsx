@@ -222,16 +222,14 @@ export default function ApplicationDevelopment() {
                 {theoryPhase.map((element, index) => (
                   <button key={index} className={styles.buttondApps} onClick={() => handleElementClick(element.id)}>
                     <div className={styles.carddApps}>
-                    {element.logoUrl ? (
+                      {element.logoUrl ? (
                         <img src={element.logoUrl} alt="Logo" width={50} height={50} style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
                       ) : (
                         <div style={{ width: 50, height: 50, background: '#ccc' }} />
                       )}
                       <div className={styles.carddAppsDescription}>
-                        <p>ID: {element.id}</p>
                         <p>Name: {element.name}</p>
-                        <p>Description: {element.description}</p>
-                        <p>Whitepaper: <a href={element.whitepaperLink} target="_blank">Link</a></p>
+                        <p>Votes: {element.voteCount}</p>
                       </div>
                     </div>
                   </button>

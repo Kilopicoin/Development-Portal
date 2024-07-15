@@ -1,7 +1,6 @@
 // use client
 'use client';
 import styles from "../styles/global.module.css";
-import Image from 'next/image';
 import { useDispatch } from 'react-redux';
 import { setdAppsNav } from '../store/globalSlice';
 import getContract from './contract';
@@ -86,8 +85,8 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
   };
 
   return (
-<>
-    <Head>
+    <>
+      <Head>
         <title>Kilopi - Application Development Protocol</title>
         <meta name="description" content="Application Development Protocol ensures Kilopi project keeps developing new applications and creates new utility areas for the LOP token." />
         <meta property="og:title" content="Kilopi - Application Development Protocol" />
@@ -97,47 +96,58 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
         {/* Add more meta tags as needed */}
       </Head>
 
-
-    <div className={styles.main}>
-      {loading && (
-        <div className={styles.loaderWrapper}>
-          <TailSpin color="#00BFFF" height={80} width={80} />
-        </div>
-      )}
-      {errorMessage && (
-        <Modal message={errorMessage} onClose={() => setErrorMessage(null)} />
-      )}
-      <h3>Application Development Detail Page</h3>
-      <button className={styles.buttonG} onClick={() => dispatch(setdAppsNav('Home'))}>
-        Back to Application Development Main Page
-      </button>
-      <div className={styles.dApps}>
-        {element && (
-          <div className={styles.buttondAppsDetail}>
-            <div className={styles.carddApps}>
-              <div className={styles.carddAppsDescription}>
-                <p>Name: {element.name}</p>
-                <p>Description: {element.description}</p>
-                <p>Whitepaper: <a href={element.whitepaperLink} target="_blank">Link</a></p>
-                {getPhase() !== 'Theory' && (
-                  <p>Website: <a href={element.websiteLink} target="_blank">Link</a></p>
-                )}
-                {getPhase() === 'Live' && (
-                  <p>Tutorial: <a href={element.tutorialLink} target="_blank">Link</a></p>
-                )}
-                {getPhase() === 'Prestige' && (
-                  <>
-                    <p>Tutorial: <a href={element.tutorialLink} target="_blank">Link</a></p>
-                    <p>Performance Metrics: <a href={element.performanceMetricsLink} target="_blank">Link</a></p>
-                  </>
-                )}
-                <p>Current Phase: {getPhase()}</p>
-              </div>
-            </div>
+      <div className={styles.main}>
+        {loading && (
+          <div className={styles.loaderWrapper}>
+            <TailSpin color="#00BFFF" height={80} width={80} />
           </div>
         )}
+        {errorMessage && (
+          <Modal message={errorMessage} onClose={() => setErrorMessage(null)} />
+        )}
+        <h3>Application Development Detail Page</h3>
+        <button className={styles.buttonG} onClick={() => dispatch(setdAppsNav('Home'))}>
+          Back to Application Development Main Page
+        </button>
+        <div className={styles.dApps}>
+          {element && (
+            <div className={styles.buttondAppsDetail}>
+              <div className={styles.carddApps}>
+                {element.logoUrl ? (
+                  <img
+                    src={element.logoUrl}
+                    alt="Logo"
+                    width={300}
+                    height={300}
+                    style={{ width: '200px', height: '200px', objectFit: 'contain' }} 
+                  />
+                ) : (
+                  <div style={{ width: 200, height: 200, background: '#ccc' }} />
+                )}
+                <div className={styles.carddAppsDescription}>
+                  <p>Name: {element.name}</p>
+                  <p>Email: {element.email}</p>
+                  <p>Description: {element.description}</p>
+                  <p>Whitepaper: <a href={element.whitepaperLink} target="_blank">Link</a></p>
+                  {getPhase() !== 'Theory' && (
+                    <p>Website: <a href={element.websiteLink} target="_blank">Link</a></p>
+                  )}
+                  {getPhase() === 'Live' && (
+                    <p>Tutorial: <a href={element.tutorialLink} target="_blank">Link</a></p>
+                  )}
+                  {getPhase() === 'Prestige' && (
+                    <>
+                      <p>Tutorial: <a href={element.tutorialLink} target="_blank">Link</a></p>
+                      <p>Performance Metrics: <a href={element.performanceMetricsLink} target="_blank">Link</a></p>
+                    </>
+                  )}
+                  <p>Current Phase: {getPhase()}</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
     </>
   );
 };
