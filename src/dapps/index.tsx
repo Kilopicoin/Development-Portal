@@ -3,7 +3,6 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { setdAppsNav } from '../store/globalSlice';
 import styles from "../styles/global.module.css";
-import Image from 'next/image';
 import Detail from './detail';
 import Head from 'next/head';
 import { useCallback, useEffect, useState } from 'react';
@@ -32,6 +31,8 @@ export default function ApplicationDevelopment() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [whitepaperLink, setWhitepaperLink] = useState('');
+  const [email, setEmail] = useState(''); // New state for email
+  const [logoUrl, setLogoUrl] = useState(''); // New state for logoUrl
 
   const [isMetamaskConnected, setIsMetamaskConnected] = useState(false);
   const [isCorrectNetwork, setIsCorrectNetwork] = useState(false);
@@ -101,6 +102,8 @@ export default function ApplicationDevelopment() {
           websiteLink: element.websiteLink,
           tutorialLink: element.tutorialLink,
           performanceMetricsLink: element.performanceMetricsLink,
+          email: element.email, // Add email
+          logoUrl: element.logoUrl, // Add logoUrl
           phase: Number(element.phase), // Ensure phase is a number
           voteCount: Number(element.voteCount), // Ensure voteCount is a number
         };
@@ -145,7 +148,7 @@ export default function ApplicationDevelopment() {
     setErrorMessage(null);
     try {
       const contract = await getSignerContract();
-      const tx = await contract.createElement(name, description, whitepaperLink);
+      const tx = await contract.createElement(name, description, whitepaperLink, email, logoUrl);
       await tx.wait();
       loadElements(); // Reload elements after creating a new one
     } catch (error) {
@@ -184,8 +187,8 @@ export default function ApplicationDevelopment() {
   };
 
   return (
-<>
-    <Head>
+    <>
+      <Head>
         <title>Kilopi - Application Development Protocol</title>
         <meta name="description" content="Application Development Protocol ensures Kilopi project keeps developing new applications and creates new utility areas for the LOP token." />
         <meta property="og:title" content="Kilopi - Application Development Protocol" />
@@ -195,177 +198,222 @@ export default function ApplicationDevelopment() {
         {/* Add more meta tags as needed */}
       </Head>
 
-
-    <div className={styles.main}>
-      {loading && (
-        <div className={styles.loaderWrapper}>
-          <TailSpin color="#00BFFF" height={80} width={80} />
-        </div>
-      )}
-      {errorMessage && (
-        <Modal message={errorMessage} onClose={() => setErrorMessage(null)} />
-      )}
-      {dAppsNav === "Home" && (
-        <>
-          <h2>Application Development Protocol</h2>
-          {!isMetamaskConnected && (
-            <button onClick={connectMetamask} className={styles.buttonG}>
-              Connect to MetaMask
-            </button>
-          )}
-
-          <div className={styles.phaseContainer}>
-            <h3>1 - Theory Phase</h3>
-            <div className={styles.dApps}>
-              {theoryPhase.map((element, index) => (
-                <button key={index} className={styles.buttondApps} onClick={() => handleElementClick(element.id)}>
-                  <div className={styles.carddApps}>
-                    <div className={styles.carddAppsDescription}>
-                      <p>ID: {element.id}</p>
-                      <p>Name: {element.name}</p>
-                      <p>Description: {element.description}</p>
-                      <p>Whitepaper: <a href={element.whitepaperLink} target="_blank">Link</a></p>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
+      <div className={styles.main}>
+        {loading && (
+          <div className={styles.loaderWrapper}>
+            <TailSpin color="#00BFFF" height={80} width={80} />
           </div>
-
-          <div className={styles.phaseContainer}>
-            <h3>2 - Development Phase</h3>
-            <div className={styles.dApps}>
-              {developmentPhase.map((element, index) => (
-                <button key={index} className={styles.buttondApps} onClick={() => handleElementClick(element.id)}>
-                  <div className={styles.carddApps}>
-                    <div className={styles.carddAppsDescription}>
-                      <p>ID: {element.id}</p>
-                      <p>Name: {element.name}</p>
-                      <p>Description: {element.description}</p>
-                      <p>Whitepaper: <a href={element.whitepaperLink} target="_blank">Link</a></p>
-                      <p>Website: <a href={element.websiteLink} target="_blank">Link</a></p>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className={styles.phaseContainer}>
-            <h3>3 - Live Phase</h3>
-            <div className={styles.dApps}>
-              {livePhase.map((element, index) => (
-                <button key={index} className={styles.buttondApps} onClick={() => handleElementClick(element.id)}>
-                  <div className={styles.carddApps}>
-                    <div className={styles.carddAppsDescription}>
-                      <p>ID: {element.id}</p>
-                      <p>Name: {element.name}</p>
-                      <p>Description: {element.description}</p>
-                      <p>Whitepaper: <a href={element.whitepaperLink} target="_blank">Link</a></p>
-                      <p>Website: <a href={element.websiteLink} target="_blank">Link</a></p>
-                      <p>Tutorial: <a href={element.tutorialLink} target="_blank">Link</a></p>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className={styles.phaseContainer}>
-            <h3>4 - Prestige Phase</h3>
-            <div className={styles.dApps}>
-              {prestigePhase.map((element, index) => (
-                <button key={index} className={styles.buttondApps} onClick={() => handleElementClick(element.id)}>
-                  <div className={styles.carddApps}>
-                    <div className={styles.carddAppsDescription}>
-                      <p>ID: {element.id}</p>
-                      <p>Name: {element.name}</p>
-                      <p>Description: {element.description}</p>
-                      <p>Whitepaper: <a href={element.whitepaperLink} target="_blank">Link</a></p>
-                      <p>Website: <a href={element.websiteLink} target="_blank">Link</a></p>
-                      <p>Tutorial: <a href={element.tutorialLink} target="_blank">Link</a></p>
-                      <p>Performance Metrics: <a href={element.performanceMetricsLink} target="_blank">Link</a></p>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className={styles.row}>
-            <button onClick={() => setShowCreateForm(!showCreateForm)} className={styles.buttonG}>
-              {showCreateForm ? 'Hide Create Form' : 'Create New Element'}
-            </button>
-            {showCreateForm && (
-              <div className={styles.formContainer}>
-                <form onSubmit={handleCreateElement} className={styles.form}>
-                  <h4>Create New Element</h4>
-                  <div className={styles.inputGroup}>
-                    <label htmlFor="name">Name:</label>
-                    <input
-                      type="text"
-                      id="name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className={styles.inputGroup}>
-                    <label htmlFor="description">Description:</label>
-                    <input
-                      type="text"
-                      id="description"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className={styles.inputGroup}>
-                    <label htmlFor="whitepaperLink">Whitepaper Link:</label>
-                    <input
-                      type="text"
-                      id="whitepaperLink"
-                      value={whitepaperLink}
-                      onChange={(e) => setWhitepaperLink(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <button type="submit" className={styles.buttonG} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                    {isMetamaskConnected && isCorrectNetwork ? 'Create New Element' : 'Metamask (Binance Chain) Needed'}
-                  </button>
-                </form>
-              </div>
+        )}
+        {errorMessage && (
+          <Modal message={errorMessage} onClose={() => setErrorMessage(null)} />
+        )}
+        {dAppsNav === "Home" && (
+          <>
+            <h2>Application Development Protocol</h2>
+            {!isMetamaskConnected && (
+              <button onClick={connectMetamask} className={styles.buttonG}>
+                Connect to MetaMask
+              </button>
             )}
-          </div>
 
-          {isOwner && (
             <div className={styles.phaseContainer}>
-              <h3>Pending Approval</h3>
-              <div className={styles.carddApps}>
-                {pendingApproval.map((element, index) => (
-                  <div key={index} >
-                    <div className={styles.carddAppsDescription}>
-                      <p>ID: {element.id}</p>
-                      <p>Name: {element.name}</p>
-                      <p>Description: {element.description}</p>
-                      <p>Whitepaper: <a href={element.whitepaperLink} target="_blank">Link</a></p>
-                      <button onClick={() => handleApproveElement(element.id)} className={styles.buttonG}>
-                        Approve
-                      </button>
+              <h3>1 - Theory Phase</h3>
+              <div className={styles.dApps}>
+                {theoryPhase.map((element, index) => (
+                  <button key={index} className={styles.buttondApps} onClick={() => handleElementClick(element.id)}>
+                    <div className={styles.carddApps}>
+                    {element.logoUrl ? (
+                        <img src={element.logoUrl} alt="Logo" width={50} height={50} style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
+                      ) : (
+                        <div style={{ width: 50, height: 50, background: '#ccc' }} />
+                      )}
+                      <div className={styles.carddAppsDescription}>
+                        <p>ID: {element.id}</p>
+                        <p>Name: {element.name}</p>
+                        <p>Description: {element.description}</p>
+                        <p>Whitepaper: <a href={element.whitepaperLink} target="_blank">Link</a></p>
+                      </div>
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
-          )}
-        </>
-      )}
-      {dAppsNav === "detail" && selectedElementId !== null && (
-        <>
-          <Detail elementId={selectedElementId} />
-        </>
-      )}
-    </div>
+
+            <div className={styles.phaseContainer}>
+              <h3>2 - Development Phase</h3>
+              <div className={styles.dApps}>
+                {developmentPhase.map((element, index) => (
+                  <button key={index} className={styles.buttondApps} onClick={() => handleElementClick(element.id)}>
+                    <div className={styles.carddApps}>
+                      {element.logoUrl ? (
+                        <img src={element.logoUrl} alt="Logo" width={50} height={50} style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
+                      ) : (
+                        <div style={{ width: 50, height: 50, background: '#ccc' }} />
+                      )}
+                      <div className={styles.carddAppsDescription}>
+                        <p>ID: {element.id}</p>
+                        <p>Name: {element.name}</p>
+                        <p>Description: {element.description}</p>
+                        <p>Whitepaper: <a href={element.whitepaperLink} target="_blank">Link</a></p>
+                        <p>Website: <a href={element.websiteLink} target="_blank">Link</a></p>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className={styles.phaseContainer}>
+              <h3>3 - Live Phase</h3>
+              <div className={styles.dApps}>
+                {livePhase.map((element, index) => (
+                  <button key={index} className={styles.buttondApps} onClick={() => handleElementClick(element.id)}>
+                    <div className={styles.carddApps}>
+                      {element.logoUrl ? (
+                        <img src={element.logoUrl} alt="Logo" width={50} height={50} style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
+                      ) : (
+                        <div style={{ width: 50, height: 50, background: '#ccc' }} />
+                      )}
+                      <div className={styles.carddAppsDescription}>
+                        <p>ID: {element.id}</p>
+                        <p>Name: {element.name}</p>
+                        <p>Description: {element.description}</p>
+                        <p>Whitepaper: <a href={element.whitepaperLink} target="_blank">Link</a></p>
+                        <p>Website: <a href={element.websiteLink} target="_blank">Link</a></p>
+                        <p>Tutorial: <a href={element.tutorialLink} target="_blank">Link</a></p>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className={styles.phaseContainer}>
+              <h3>4 - Prestige Phase</h3>
+              <div className={styles.dApps}>
+                {prestigePhase.map((element, index) => (
+                  <button key={index} className={styles.buttondApps} onClick={() => handleElementClick(element.id)}>
+                    <div className={styles.carddApps}>
+                      {element.logoUrl ? (
+                        <img src={element.logoUrl} alt="Logo" width={50} height={50} style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
+                      ) : (
+                        <div style={{ width: 50, height: 50, background: '#ccc' }} />
+                      )}
+                      <div className={styles.carddAppsDescription}>
+                        <p>ID: {element.id}</p>
+                        <p>Name: {element.name}</p>
+                        <p>Description: {element.description}</p>
+                        <p>Whitepaper: <a href={element.whitepaperLink} target="_blank">Link</a></p>
+                        <p>Website: <a href={element.websiteLink} target="_blank">Link</a></p>
+                        <p>Tutorial: <a href={element.tutorialLink} target="_blank">Link</a></p>
+                        <p>Performance Metrics: <a href={element.performanceMetricsLink} target="_blank">Link</a></p>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className={styles.row}>
+              <button onClick={() => setShowCreateForm(!showCreateForm)} className={styles.buttonG}>
+                {showCreateForm ? 'Hide Create Form' : 'Create New Element'}
+              </button>
+              {showCreateForm && (
+                <div className={styles.formContainer}>
+                  <form onSubmit={handleCreateElement} className={styles.form}>
+                    <h4>Create New Element</h4>
+                    <div className={styles.inputGroup}>
+                      <label htmlFor="name">Name:</label>
+                      <input
+                        type="text"
+                        id="name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label htmlFor="description">Description:</label>
+                      <input
+                        type="text"
+                        id="description"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label htmlFor="whitepaperLink">Whitepaper Link:</label>
+                      <input
+                        type="text"
+                        id="whitepaperLink"
+                        value={whitepaperLink}
+                        onChange={(e) => setWhitepaperLink(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label htmlFor="email">Email:</label>
+                      <input
+                        type="email"
+                        id="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label htmlFor="logoUrl">Logo URL:</label>
+                      <input
+                        type="text"
+                        id="logoUrl"
+                        value={logoUrl}
+                        onChange={(e) => setLogoUrl(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <button type="submit" className={styles.buttonG} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                      {isMetamaskConnected && isCorrectNetwork ? 'Create New Element' : 'Metamask (Binance Chain) Needed'}
+                    </button>
+                  </form>
+                </div>
+              )}
+            </div>
+
+            {isOwner && (
+              <div className={styles.phaseContainer}>
+                <h3>Pending Approval</h3>
+                <div className={styles.dApps}>
+                  {pendingApproval.map((element, index) => (
+                    <div key={index} className={styles.carddApps}>
+                      <div className={styles.carddAppsDescription}>
+                        <p>ID: {element.id}</p>
+                        <p>Name: {element.name}</p>
+                        <p>Description: {element.description}</p>
+                        <p>Email: {element.email}</p> {/* Display email */}
+                        {element.logoUrl ? (
+                          <img src={element.logoUrl} alt="Logo" width={50} height={50} style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
+                        ) : (
+                          <div style={{ width: 50, height: 50, background: '#ccc' }} />
+                        )}
+                        <p>Whitepaper: <a href={element.whitepaperLink} target="_blank">Link</a></p>
+                        <button onClick={() => handleApproveElement(element.id)} className={styles.buttonG}>
+                          Approve
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+        {dAppsNav === "detail" && selectedElementId !== null && (
+          <>
+            <Detail elementId={selectedElementId} />
+          </>
+        )}
+      </div>
     </>
   );
 }
