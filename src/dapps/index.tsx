@@ -26,23 +26,30 @@ export default function ApplicationDevelopment() {
   const [livePhase, setLivePhase] = useState<any[]>([]);
   const [prestigePhase, setPrestigePhase] = useState<any[]>([]);
   const [pendingApproval, setPendingApproval] = useState<any[]>([]);
-  const [pendingUpdate, setPendingUpdate] = useState<any[]>([]); // New state for pending update elements
+  const [pendingUpdate, setPendingUpdate] = useState<any[]>([]);
   const [selectedElementId, setSelectedElementId] = useState<number | null>(null);
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [whitepaperLink, setWhitepaperLink] = useState('');
-  const [email, setEmail] = useState(''); // New state for email
-  const [logoUrl, setLogoUrl] = useState(''); // New state for logoUrl
+  const [email, setEmail] = useState('');
+  const [logoUrl, setLogoUrl] = useState('');
 
   const [isMetamaskConnected, setIsMetamaskConnected] = useState(false);
   const [isCorrectNetwork, setIsCorrectNetwork] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [isOwner, setIsOwner] = useState(false); // State for checking owner
-  const [errorMessage, setErrorMessage] = useState<string | null>(null); // Error message state
-  const [showCreateForm, setShowCreateForm] = useState(false); // State for showing/hiding the create form
+  const [isOwner, setIsOwner] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showCreateForm, setShowCreateForm] = useState(false);
 
-  const harmonyTestnetChainId = '0x6357d2e0'; // Harmony Testnet chain ID in hexadecimal
+  const [stakeAmount, setStakeAmount] = useState('');
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [stakedTokens, setStakedTokens] = useState(BigInt(0)); // Use BigInt for stakedTokens
+  const [rewards, setRewards] = useState(BigInt(0)); // Use BigInt for rewards
+  const [votingPower, setVotingPower] = useState(BigInt(0)); // Use BigInt for votingPower
+  const [account, setAccount] = useState<string | null>(null); // State for account
+
+  const harmonyTestnetChainId = '0x6357d2e0';
 
   const checkMetamaskConnection = useCallback(async () => {
     if (typeof window.ethereum !== 'undefined') {
@@ -52,6 +59,8 @@ export default function ApplicationDevelopment() {
       setIsCorrectNetwork(chainId === harmonyTestnetChainId);
       if (accounts.length > 0) {
         await checkOwner(accounts[0]);
+        setAccount(accounts[0]);
+        loadStakingDetails(accounts[0]);
       }
     }
   }, [harmonyTestnetChainId]);
@@ -61,6 +70,28 @@ export default function ApplicationDevelopment() {
       const contract = await getContract();
       const owner = await contract.admin();
       setIsOwner(owner.toLowerCase() === account.toLowerCase());
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const loadStakingDetails = async (account: string) => {
+    try {
+      const contract = await getContract();
+      const staked = BigInt(await contract.stakes(account));
+      const power = BigInt(await contract.votingPower(account));
+      const lastClaimed = BigInt(await contract.lastClaimed(account));
+
+      // Convert BigInt to number for timeElapsed calculation
+      const currentTime = BigInt(Math.floor(Date.now() / 1000)); // current time in seconds
+      const timeElapsed = currentTime - lastClaimed; // time elapsed in seconds
+
+      // Calculate rewards
+      const reward = (staked * BigInt(3) / BigInt(100)) * timeElapsed / BigInt(365 * 24 * 60 * 60);
+
+      setStakedTokens(staked);
+      setVotingPower(power);
+      setRewards(reward);
     } catch (error) {
       console.error(error);
     }
@@ -90,12 +121,11 @@ export default function ApplicationDevelopment() {
       const development = [];
       const live = [];
       const prestige = [];
-      const pending = []; // Array for pending approval elements
-      const pendingUpdates = []; // Array for pending update elements
+      const pending = [];
+      const pendingUpdates = [];
 
       for (let i = 0; i < elementCount; i++) {
         const element = await contract.elements(i);
-        console.log('Element:', element); // Debugging line
         const elementWithId = {
           id: i,
           name: element.name,
@@ -104,13 +134,11 @@ export default function ApplicationDevelopment() {
           websiteLink: element.websiteLink,
           tutorialLink: element.tutorialLink,
           performanceMetricsLink: element.performanceMetricsLink,
-          email: element.email, // Add email
-          logoUrl: element.logoUrl, // Add logoUrl
-          phase: Number(element.phase), // Ensure phase is a number
-          voteCount: Number(element.voteCount), // Ensure voteCount is a number
+          email: element.email,
+          logoUrl: element.logoUrl,
+          phase: Number(element.phase),
+          voteCount: Number(element.voteCount),
         };
-
-        console.log('Element with ID:', elementWithId); // Debugging line
 
         if (elementWithId.phase === 1) {
           theory.push(elementWithId);
@@ -122,7 +150,7 @@ export default function ApplicationDevelopment() {
           prestige.push(elementWithId);
         }
 
-        if (elementWithId.phase === 0) { // Assuming phase 0 means pending approval
+        if (elementWithId.phase === 0) {
           pending.push(elementWithId);
         }
 
@@ -139,15 +167,8 @@ export default function ApplicationDevelopment() {
       setDevelopmentPhase(development);
       setLivePhase(live);
       setPrestigePhase(prestige);
-      setPendingApproval(pending); // Set the state for pending approval elements
-      setPendingUpdate(pendingUpdates); // Set the state for pending update elements
-
-      console.log('Theory Phase:', theory); // Debugging line
-      console.log('Development Phase:', development); // Debugging line
-      console.log('Live Phase:', live); // Debugging line
-      console.log('Prestige Phase:', prestige); // Debugging line
-      console.log('Pending Approval:', pending); // Debugging line
-      console.log('Pending Update:', pendingUpdates); // Debugging line
+      setPendingApproval(pending);
+      setPendingUpdate(pendingUpdates);
     } catch (error) {
       console.error(error);
     }
@@ -162,7 +183,7 @@ export default function ApplicationDevelopment() {
       const contract = await getSignerContract();
       const tx = await contract.createElement(name, description, whitepaperLink, email, logoUrl);
       await tx.wait();
-      loadElements(); // Reload elements after creating a new one
+      loadElements();
     } catch (error) {
       console.error(error);
     } finally {
@@ -179,9 +200,9 @@ export default function ApplicationDevelopment() {
     setLoading(true);
     try {
       const contract = await getSignerContract();
-      const tx = await contract.approveElement(elementId); // Call the approveElement function
+      const tx = await contract.approveElement(elementId);
       await tx.wait();
-      loadElements(); // Reload elements after approving one
+      loadElements();
     } catch (error) {
       console.error(error);
     } finally {
@@ -193,9 +214,37 @@ export default function ApplicationDevelopment() {
     setLoading(true);
     try {
       const contract = await getSignerContract();
-      const tx = await contract.confirmUpdate(elementId); // Call the confirmUpdate function
+      const tx = await contract.confirmUpdate(elementId);
       await tx.wait();
-      loadElements(); // Reload elements after confirming update
+      loadElements();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStakeTokens = async () => {
+    setLoading(true);
+    try {
+      const contract = await getSignerContract();
+      const tx = await contract.stakeTokens(ethers.parseUnits(stakeAmount, 18)); // Ensure stakeAmount is in correct units
+      await tx.wait();
+      loadStakingDetails(account!);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleWithdrawStake = async () => {
+    setLoading(true);
+    try {
+      const contract = await getSignerContract();
+      const tx = await contract.withdrawStake(ethers.parseUnits(withdrawAmount, 18)); // Ensure withdrawAmount is in correct units
+      await tx.wait();
+      loadStakingDetails(account!);
     } catch (error) {
       console.error(error);
     } finally {
@@ -242,6 +291,49 @@ export default function ApplicationDevelopment() {
               </button>
             )}
 
+            {isMetamaskConnected && (
+              <div className={styles.phaseContainer}>
+                <h3>Staking & Rewards</h3>
+                <div className={styles.carddApps}>
+                  <div className={styles.carddAppsDescription}>
+                    <div className={styles.inputGroup}>
+                      <label htmlFor="stakeAmount">Stake Amount (LOP):</label>
+                      <input
+                        type="text"
+                        id="stakeAmount"
+                        value={stakeAmount}
+                        onChange={(e) => setStakeAmount(e.target.value)}
+                      />
+                    </div>
+                    <button onClick={handleStakeTokens} className={styles.buttonG}>
+                      Stake Tokens
+                    </button>
+                    <div className={styles.inputGroup}>
+                      <label>Staked Tokens: {ethers.formatUnits(stakedTokens, 18)}</label>
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label>Rewards: {ethers.formatUnits(rewards, 18)}</label>
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label>Voting Power: {ethers.formatUnits(votingPower, 18)}</label>
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label htmlFor="withdrawAmount">Withdraw Amount (LOP):</label>
+                      <input
+                        type="text"
+                        id="withdrawAmount"
+                        value={withdrawAmount}
+                        onChange={(e) => setWithdrawAmount(e.target.value)}
+                      />
+                    </div>
+                    <button onClick={handleWithdrawStake} className={styles.buttonG}>
+                      Withdraw Stake
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className={styles.phaseContainer}>
               <h3>1 - Theory Phase</h3>
               <div className={styles.dApps}>
@@ -275,10 +367,8 @@ export default function ApplicationDevelopment() {
                         <div style={{ width: 50, height: 50, background: '#ccc' }} />
                       )}
                       <div className={styles.carddAppsDescription}>
-                  
                         <p>Name: {element.name}</p>
                         <p>Votes: {element.voteCount}</p>
-                   
                       </div>
                     </div>
                   </button>
@@ -298,10 +388,8 @@ export default function ApplicationDevelopment() {
                         <div style={{ width: 50, height: 50, background: '#ccc' }} />
                       )}
                       <div className={styles.carddAppsDescription}>
-                      
                         <p>Name: {element.name}</p>
                         <p>Votes: {element.voteCount}</p>
-                    
                       </div>
                     </div>
                   </button>
@@ -321,10 +409,8 @@ export default function ApplicationDevelopment() {
                         <div style={{ width: 50, height: 50, background: '#ccc' }} />
                       )}
                       <div className={styles.carddAppsDescription}>
-                     
                         <p>Name: {element.name}</p>
                         <p>Votes: {element.voteCount}</p>
-                    
                       </div>
                     </div>
                   </button>
@@ -391,7 +477,7 @@ export default function ApplicationDevelopment() {
                       />
                     </div>
                     <button type="submit" className={styles.buttonG} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                      {isMetamaskConnected && isCorrectNetwork ? 'Create New Element' : 'Metamask (Binance Chain) Needed'}
+                      {isMetamaskConnected && isCorrectNetwork ? 'Create New Element' : 'Metamask (Harmony Testnet) Needed'}
                     </button>
                   </form>
                 </div>
