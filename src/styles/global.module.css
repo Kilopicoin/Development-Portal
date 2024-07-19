@@ -132,6 +132,10 @@
     padding: 4rem;
   }
 
+  .dAppsX {
+    display: inline !important;
+  }
+
   .grid {
     grid-template-columns: 1fr;
     margin-bottom: 120px;
@@ -238,6 +242,8 @@
   .container {
     flex-direction: column;
   }
+
+  
 }
 
 .columnleft {
@@ -305,14 +311,16 @@
 }
 
 .buttondAppsX {
-  font-size: 14px;
-  padding: 1rem 1.2rem;
+  font-size: 16px;
   border-radius: var(--border-radius);
   background: rgba(var(--card-rgb), 0.1);
   border: 1px solid rgba(var(--card-border-rgb), 0.1);
   transition: background 200ms, border 200ms;
-  margin: 6px 0px;
-  margin: 9px;
+  padding-top: 12px;
+  padding-left: 12px;
+  padding-right: 12px;
+
+  margin: 6px 6px;
 }
 
 .buttondAppsDetail {
@@ -408,6 +416,13 @@
 .dApps {
   margin-top: 12px;
 }
+
+.dAppsX {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
 
 .elips {
   position: fixed;

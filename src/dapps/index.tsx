@@ -336,11 +336,16 @@ export default function ApplicationDevelopment() {
             {isMetamaskConnected && (
               <div className={styles.phaseContainer}>
                 <h3>Staking & Rewards</h3>
-                <div className={styles.dApps}>
-                <button className={styles.buttondAppsX} disabled>
+                <div className={styles.inputGroup}>
+                <label>Connected Wallet: {account}</label>
+                <label>Voting Power: {ethers.formatUnits(votingPower, 18)}</label>
+                </div>
+                <div className={styles.dAppsX}>
+                <div className={styles.buttondAppsX}>
                 
                   <div className={styles.carddApps}>
                     <div className={styles.inputGroup}>
+                      
                       <label htmlFor="stakeAmount">Stake Amount (LOP):</label>
                       <input
                         type="text"
@@ -354,15 +359,15 @@ export default function ApplicationDevelopment() {
                     </button>
                     </div>
                     </div>
-                    </button>
+                    </div>
 
-                    <button className={styles.buttondAppsX} disabled>
+                    <div className={styles.buttondAppsX}>
                     <div className={styles.carddApps}>
 
                     <div className={styles.inputGroup}>
                     <label>Staked Tokens: {ethers.formatUnits(stakedTokens, 18)}</label>
                     <label>Rewards: {ethers.formatUnits(rewards, 18)}</label>
-                      <label>Voting Power: {ethers.formatUnits(votingPower, 18)}</label>
+                      
                       <button
                         onClick={handleClaimRewards}
                         className={styles.buttonG}
@@ -374,11 +379,11 @@ export default function ApplicationDevelopment() {
                       </button>
                       </div>
                     </div>
-                    </button>
-                    <button className={styles.buttondAppsX} disabled>
+                    </div>
+                    <div className={styles.buttondAppsX}>
                     <div className={styles.carddApps}>
                     <div className={styles.inputGroup}>
-                      <label htmlFor="withdrawAmount">Withdraw Amount (LOP):</label>
+                      <label htmlFor="withdrawAmount">Unstake Amount (LOP):</label>
                       <input
                         type="text"
                         id="withdrawAmount"
@@ -386,12 +391,12 @@ export default function ApplicationDevelopment() {
                         onChange={(e) => setWithdrawAmount(e.target.value)}
                       />
                       <button onClick={handleWithdrawStake} className={styles.buttonG}>
-                      Withdraw Stake
+                      Unstake Tokens
                     </button>
                     </div>
                     </div>
                 
-                  </button>
+                  </div>
                 </div>
                 </div>
             

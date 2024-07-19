@@ -26,6 +26,11 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
   const [newTutorialLink, setNewTutorialLink] = useState<string>(''); // State for new tutorial link
   const [newPerformanceMetricsLink, setNewPerformanceMetricsLink] = useState<string>(''); // State for new performance metrics link
 
+  // New state variables for staking details
+  const [stakedTokens, setStakedTokens] = useState<bigint>(BigInt(0));
+  const [rewards, setRewards] = useState<bigint>(BigInt(0));
+  const [votingPower, setVotingPower] = useState<bigint>(BigInt(0));
+  
   const harmonyTestnetChainId = '0x6357d2e0'; // Harmony Testnet chain ID in hexadecimal
 
   const checkMetamaskConnection = useCallback(async () => {
@@ -39,8 +44,8 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
         const signer = await provider.getSigner();
         const address = await signer.getAddress();
         setAccount(address);
-
         await loadElement();
+        await loadStakingDetails(address); // Fetch staking details
       }
     }
   }, [harmonyTestnetChainId, elementId]);
@@ -71,6 +76,31 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
     setLoading(false);
   };
 
+  const loadStakingDetails = async (account: string) => {
+    setLoading(true);
+    try {
+      const contract = await getContract();
+      const staked = BigInt(await contract.stakes(account));
+      const power = BigInt(await contract.votingPower(account));
+      const lastClaimed = BigInt(await contract.lastClaimed(account));
+
+      // Convert bigint to number for timeElapsed calculation
+      const currentTime = BigInt(Math.floor(Date.now() / 1000)); // current time in seconds
+      const timeElapsed = currentTime - lastClaimed; // time elapsed in seconds
+
+      // Calculate rewards
+      const reward = (staked * BigInt(3) / BigInt(100)) * timeElapsed / BigInt(365 * 24 * 60 * 60);
+
+      setStakedTokens(staked);
+      setVotingPower(power);
+      setRewards(reward);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getPhase = () => {
     if (!element) return 'Unknown';
 
@@ -91,6 +121,16 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
         return 'Unknown';
     }
   };
+
+  const getVoteCount = () => {
+    if (!element) return 'Unknown';
+
+    const voteCount = Number(element.voteCount);
+        return voteCount;
+
+  };
+
+
 
   const handleUpdateElement = async () => {
     setLoading(true);
@@ -144,6 +184,17 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
         <button className={styles.buttonG} onClick={() => dispatch(setdAppsNav('Home'))}>
           Back to Application Development Main Page
         </button>
+
+        {isMetamaskConnected && (
+          <div className={styles.phaseContainer}>
+            <div className={styles.inputGroup}>
+              <label>Connected Wallet: {account}</label>
+              <label>Voting Power: {ethers.formatUnits(votingPower, 18)}</label>
+            </div>
+          </div>
+        )}
+
+
         <div className={styles.dApps}>
           {element && (
             <div className={styles.buttondAppsDetail}>
@@ -177,6 +228,7 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
                     </>
                   )}
                   <p>Current Phase: {getPhase()}</p>
+                  <p>Vote Count: {getVoteCount()}</p> {/* Display vote count */}
                 </div>
               </div>
               {element.creator.toLowerCase() === account?.toLowerCase() && getPhase() !== 'Prestige' && (
@@ -224,6 +276,8 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
             </div>
           )}
         </div>
+
+        
       </div>
     </>
   );
