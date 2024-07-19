@@ -1,4 +1,3 @@
-// use client
 'use client';
 import { useSelector, useDispatch } from 'react-redux';
 import { setdAppsNav } from '../store/globalSlice';
@@ -44,10 +43,14 @@ export default function ApplicationDevelopment() {
 
   const [stakeAmount, setStakeAmount] = useState('');
   const [withdrawAmount, setWithdrawAmount] = useState('');
-  const [stakedTokens, setStakedTokens] = useState(BigInt(0)); // Use BigInt for stakedTokens
-  const [rewards, setRewards] = useState(BigInt(0)); // Use BigInt for rewards
-  const [votingPower, setVotingPower] = useState(BigInt(0)); // Use BigInt for votingPower
+  const [stakedTokens, setStakedTokens] = useState<bigint>(BigInt(0)); // Use bigint for stakedTokens
+  const [rewards, setRewards] = useState<bigint>(BigInt(0)); // Use bigint for rewards
+  const [votingPower, setVotingPower] = useState<bigint>(BigInt(0)); // Use bigint for votingPower
   const [account, setAccount] = useState<string | null>(null); // State for account
+
+  const [lastClaimed, setLastClaimed] = useState<bigint>(BigInt(0));
+  const [claimCooldown, setClaimCooldown] = useState<number>(30 * 24 * 60 * 60); // Claim cooldown period in seconds (e.g., 24 hours)
+  const [timeLeftToClaim, setTimeLeftToClaim] = useState<number>(0);
 
   const harmonyTestnetChainId = '0x6357d2e0';
 
@@ -82,7 +85,7 @@ export default function ApplicationDevelopment() {
       const power = BigInt(await contract.votingPower(account));
       const lastClaimed = BigInt(await contract.lastClaimed(account));
 
-      // Convert BigInt to number for timeElapsed calculation
+      // Convert bigint to number for timeElapsed calculation
       const currentTime = BigInt(Math.floor(Date.now() / 1000)); // current time in seconds
       const timeElapsed = currentTime - lastClaimed; // time elapsed in seconds
 
@@ -92,8 +95,26 @@ export default function ApplicationDevelopment() {
       setStakedTokens(staked);
       setVotingPower(power);
       setRewards(reward);
+      setLastClaimed(lastClaimed);
+
+      const cooldownRemaining = Math.max(0, claimCooldown - Number(timeElapsed));
+      setTimeLeftToClaim(cooldownRemaining);
     } catch (error) {
       console.error(error);
+    }
+  };
+
+  const handleClaimRewards = async () => {
+    setLoading(true);
+    try {
+      const contract = await getSignerContract();
+      const tx = await contract.claimRewards();
+      await tx.wait();
+      loadStakingDetails(account!);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -111,6 +132,19 @@ export default function ApplicationDevelopment() {
       };
     }
   }, [checkMetamaskConnection]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (lastClaimed > BigInt(0)) {
+        const currentTime = BigInt(Math.floor(Date.now() / 1000)); // current time in seconds
+        const timeElapsed = currentTime - lastClaimed; // time elapsed in seconds
+        const cooldownRemaining = Math.max(0, claimCooldown - Number(timeElapsed));
+        setTimeLeftToClaim(cooldownRemaining);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [lastClaimed, claimCooldown]);
 
   const loadElements = async () => {
     setLoading(true);
@@ -261,6 +295,14 @@ export default function ApplicationDevelopment() {
     }
   };
 
+  const formatTimeLeft = (seconds: number) => {
+    const days = Math.floor(seconds / (24 * 3600));
+    const hours = Math.floor((seconds % (24 * 3600)) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+    return `${days}d ${hours}h ${minutes}m ${remainingSeconds}s`;
+  };
+
   return (
     <>
       <Head>
@@ -284,7 +326,7 @@ export default function ApplicationDevelopment() {
         )}
         {dAppsNav === "Home" && (
           <>
-            <h2>Application Development Protocol</h2>
+            
             {!isMetamaskConnected && (
               <button onClick={connectMetamask} className={styles.buttonG}>
                 Connect to MetaMask
@@ -294,8 +336,10 @@ export default function ApplicationDevelopment() {
             {isMetamaskConnected && (
               <div className={styles.phaseContainer}>
                 <h3>Staking & Rewards</h3>
-                <div className={styles.carddApps}>
-                  <div className={styles.carddAppsDescription}>
+                <div className={styles.dApps}>
+                <button className={styles.buttondAppsX} disabled>
+                
+                  <div className={styles.carddApps}>
                     <div className={styles.inputGroup}>
                       <label htmlFor="stakeAmount">Stake Amount (LOP):</label>
                       <input
@@ -304,19 +348,35 @@ export default function ApplicationDevelopment() {
                         value={stakeAmount}
                         onChange={(e) => setStakeAmount(e.target.value)}
                       />
-                    </div>
+                    
                     <button onClick={handleStakeTokens} className={styles.buttonG}>
                       Stake Tokens
                     </button>
-                    <div className={styles.inputGroup}>
-                      <label>Staked Tokens: {ethers.formatUnits(stakedTokens, 18)}</label>
                     </div>
-                    <div className={styles.inputGroup}>
-                      <label>Rewards: {ethers.formatUnits(rewards, 18)}</label>
                     </div>
+                    </button>
+
+                    <button className={styles.buttondAppsX} disabled>
+                    <div className={styles.carddApps}>
+
                     <div className={styles.inputGroup}>
+                    <label>Staked Tokens: {ethers.formatUnits(stakedTokens, 18)}</label>
+                    <label>Rewards: {ethers.formatUnits(rewards, 18)}</label>
                       <label>Voting Power: {ethers.formatUnits(votingPower, 18)}</label>
+                      <button
+                        onClick={handleClaimRewards}
+                        className={styles.buttonG}
+                        disabled={timeLeftToClaim > 0}
+                      >
+                        {timeLeftToClaim > 0
+                          ? `Claim available in ${formatTimeLeft(timeLeftToClaim)}`
+                          : 'Claim Rewards'}
+                      </button>
+                      </div>
                     </div>
+                    </button>
+                    <button className={styles.buttondAppsX} disabled>
+                    <div className={styles.carddApps}>
                     <div className={styles.inputGroup}>
                       <label htmlFor="withdrawAmount">Withdraw Amount (LOP):</label>
                       <input
@@ -325,14 +385,19 @@ export default function ApplicationDevelopment() {
                         value={withdrawAmount}
                         onChange={(e) => setWithdrawAmount(e.target.value)}
                       />
-                    </div>
-                    <button onClick={handleWithdrawStake} className={styles.buttonG}>
+                      <button onClick={handleWithdrawStake} className={styles.buttonG}>
                       Withdraw Stake
                     </button>
-                  </div>
+                    </div>
+                    </div>
+                
+                  </button>
                 </div>
-              </div>
+                </div>
+            
             )}
+
+<h2>Application Development Protocol</h2>
 
             <div className={styles.phaseContainer}>
               <h3>1 - Theory Phase</h3>
