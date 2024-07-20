@@ -25,6 +25,7 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
   const [newWebsiteLink, setNewWebsiteLink] = useState<string>(''); // State for new website link
   const [newTutorialLink, setNewTutorialLink] = useState<string>(''); // State for new tutorial link
   const [newPerformanceMetricsLink, setNewPerformanceMetricsLink] = useState<string>(''); // State for new performance metrics link
+  const [voteAmount, setVoteAmount] = useState<string>(''); // State for vote amount
 
   // New state variables for staking details
   const [stakedTokens, setStakedTokens] = useState<bigint>(BigInt(0));
@@ -126,11 +127,23 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
     if (!element) return 'Unknown';
 
     const voteCount = Number(element.voteCount);
-        return voteCount;
-
+    return voteCount;
   };
 
-
+  const handleVote = async () => {
+    setLoading(true);
+    try {
+      const contract = await getSignerContract();
+      const tx = await contract.voteOnElement(elementId, ethers.parseUnits(voteAmount, 18));
+      await tx.wait();
+      loadElement(); // Reload element data after voting
+    } catch (error) {
+      console.error(error);
+      setErrorMessage(error instanceof Error ? error.message : 'An unknown error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleUpdateElement = async () => {
     setLoading(true);
@@ -194,7 +207,6 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
           </div>
         )}
 
-
         <div className={styles.dApps}>
           {element && (
             <div className={styles.buttondAppsDetail}>
@@ -231,46 +243,83 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
                   <p>Vote Count: {getVoteCount()}</p> {/* Display vote count */}
                 </div>
               </div>
+
+              {isMetamaskConnected && (
+                <div className={styles.voteContainer}>
+                  <h4>Vote for this Element</h4>
+                  <div className={styles.inputGroup}>
+                    <label htmlFor="voteAmount">Vote Amount (LOP):</label>
+                    <input
+                      type="text"
+                      id="voteAmount"
+                      value={voteAmount}
+                      onChange={(e) => setVoteAmount(e.target.value)}
+                    />
+                    <button onClick={handleVote} className={styles.buttonG}>
+                      Vote
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {element.creator.toLowerCase() === account?.toLowerCase() && getPhase() !== 'Prestige' && (
                 <div className={styles.updateCard}>
                   <h4>Update Element</h4>
                   {getPhase() === 'Development' ? (
-                    <div className={styles.inputGroup}>
-                      <label htmlFor="tutorialLink">Tutorial Link:</label>
-                      <input
-                        type="text"
-                        id="tutorialLink"
-                        value={newTutorialLink}
-                        onChange={(e) => setNewTutorialLink(e.target.value)}
-                        required
-                      />
-                    </div>
+                    element.tutorialLink ? (
+                      <p>Update Request Pending Confirmation</p>
+                    ) : (
+                      <div className={styles.inputGroup}>
+                        <label htmlFor="tutorialLink">Tutorial Link:</label>
+                        <input
+                          type="text"
+                          id="tutorialLink"
+                          value={newTutorialLink}
+                          onChange={(e) => setNewTutorialLink(e.target.value)}
+                          required
+                        />
+                        <button onClick={handleUpdateElement} className={styles.buttonG}>
+                          Update Element
+                        </button>
+                      </div>
+                    )
                   ) : getPhase() === 'Live' ? (
-                    <div className={styles.inputGroup}>
-                      <label htmlFor="performanceMetricsLink">Performance Metrics Link:</label>
-                      <input
-                        type="text"
-                        id="performanceMetricsLink"
-                        value={newPerformanceMetricsLink}
-                        onChange={(e) => setNewPerformanceMetricsLink(e.target.value)}
-                        required
-                      />
-                    </div>
+                    element.performanceMetricsLink ? (
+                      <p>Update Request Pending Confirmation</p>
+                    ) : (
+                      <div className={styles.inputGroup}>
+                        <label htmlFor="performanceMetricsLink">Performance Metrics Link:</label>
+                        <input
+                          type="text"
+                          id="performanceMetricsLink"
+                          value={newPerformanceMetricsLink}
+                          onChange={(e) => setNewPerformanceMetricsLink(e.target.value)}
+                          required
+                        />
+                        <button onClick={handleUpdateElement} className={styles.buttonG}>
+                          Update Element
+                        </button>
+                      </div>
+                    )
                   ) : (
-                    <div className={styles.inputGroup}>
-                      <label htmlFor="websiteLink">Website Link:</label>
-                      <input
-                        type="text"
-                        id="websiteLink"
-                        value={newWebsiteLink}
-                        onChange={(e) => setNewWebsiteLink(e.target.value)}
-                        required
-                      />
-                    </div>
+                    element.websiteLink ? (
+                      <p>Update Request Pending Confirmation</p>
+                    ) : (
+                      <div className={styles.inputGroup}>
+                        <label htmlFor="websiteLink">Website Link:</label>
+                        <input
+                          type="text"
+                          id="websiteLink"
+                          value={newWebsiteLink}
+                          onChange={(e) => setNewWebsiteLink(e.target.value)}
+                          required
+                        />
+                        <button onClick={handleUpdateElement} className={styles.buttonG}>
+                          Update Element
+                        </button>
+                      </div>
+                    )
                   )}
-                  <button onClick={handleUpdateElement} className={styles.buttonG}>
-                    Update Element
-                  </button>
                 </div>
               )}
             </div>

@@ -174,26 +174,28 @@ export default function ApplicationDevelopment() {
           voteCount: Number(element.voteCount),
         };
 
-        if (elementWithId.phase === 1) {
-          theory.push(elementWithId);
-        } else if (elementWithId.phase === 2) {
-          development.push(elementWithId);
-        } else if (elementWithId.phase === 3) {
-          live.push(elementWithId);
-        } else if (elementWithId.phase === 4) {
-          prestige.push(elementWithId);
-        }
+        if (elementWithId.phase !== 5) { // Exclude elements in the Deleted phase
+          if (elementWithId.phase === 1) {
+            theory.push(elementWithId);
+          } else if (elementWithId.phase === 2) {
+            development.push(elementWithId);
+          } else if (elementWithId.phase === 3) {
+            live.push(elementWithId);
+          } else if (elementWithId.phase === 4) {
+            prestige.push(elementWithId);
+          }
 
-        if (elementWithId.phase === 0) {
-          pending.push(elementWithId);
-        }
+          if (elementWithId.phase === 0) {
+            pending.push(elementWithId);
+          }
 
-        if (
-          (elementWithId.phase === 1 && elementWithId.websiteLink) || 
-          (elementWithId.phase === 2 && elementWithId.tutorialLink) || 
-          (elementWithId.phase === 3 && elementWithId.performanceMetricsLink)
-        ) {
-          pendingUpdates.push(elementWithId);
+          if (
+            (elementWithId.phase === 1 && elementWithId.websiteLink) || 
+            (elementWithId.phase === 2 && elementWithId.tutorialLink) || 
+            (elementWithId.phase === 3 && elementWithId.performanceMetricsLink)
+          ) {
+            pendingUpdates.push(elementWithId);
+          }
         }
       }
 
@@ -244,11 +246,39 @@ export default function ApplicationDevelopment() {
     }
   };
 
+  const handleRejectElement = async (elementId: number) => {
+    setLoading(true);
+    try {
+      const contract = await getSignerContract();
+      const tx = await contract.rejectElement(elementId);
+      await tx.wait();
+      loadElements(); // Reload elements after rejection
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleUpdateElement = async (elementId: number) => {
     setLoading(true);
     try {
       const contract = await getSignerContract();
       const tx = await contract.confirmUpdate(elementId);
+      await tx.wait();
+      loadElements();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefuseUpdateElement = async (elementId: number) => {
+    setLoading(true);
+    try {
+      const contract = await getSignerContract();
+      const tx = await contract.refuseUpdate(elementId);
       await tx.wait();
       loadElements();
     } catch (error) {
@@ -575,6 +605,9 @@ export default function ApplicationDevelopment() {
                           <button onClick={() => handleApproveElement(element.id)} className={styles.buttonG}>
                             Approve
                           </button>
+                          <button onClick={() => handleRejectElement(element.id)} className={styles.buttonG}>
+                            Reject
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -608,6 +641,9 @@ export default function ApplicationDevelopment() {
                           )}
                           <button onClick={() => handleUpdateElement(element.id)} className={styles.buttonG}>
                             Update
+                          </button>
+                          <button onClick={() => handleRefuseUpdateElement(element.id)} className={styles.buttonG}>
+                            Refuse
                           </button>
                         </div>
                       </div>
