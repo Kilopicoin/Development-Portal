@@ -49,7 +49,7 @@ export default function ApplicationDevelopment() {
   const [account, setAccount] = useState<string | null>(null); // State for account
 
   const [lastClaimed, setLastClaimed] = useState<bigint>(BigInt(0));
-  const [claimCooldown, setClaimCooldown] = useState<number>(30 * 24 * 60 * 60); // Claim cooldown period in seconds (e.g., 24 hours)
+  const [claimCooldown, setClaimCooldown] = useState<number>(60); // Claim cooldown period in seconds (e.g., 24 hours) 30 * 24 * 60 * 60
   const [timeLeftToClaim, setTimeLeftToClaim] = useState<number>(0);
 
   const harmonyTestnetChainId = '0x6357d2e0';

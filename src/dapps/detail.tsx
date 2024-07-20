@@ -26,6 +26,7 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
   const [newTutorialLink, setNewTutorialLink] = useState<string>(''); // State for new tutorial link
   const [newPerformanceMetricsLink, setNewPerformanceMetricsLink] = useState<string>(''); // State for new performance metrics link
   const [voteAmount, setVoteAmount] = useState<string>(''); // State for vote amount
+  const [admin, setAdmin] = useState<string | null>(null); // State for admin
 
   // New state variables for staking details
   const [stakedTokens, setStakedTokens] = useState<bigint>(BigInt(0));
@@ -47,6 +48,7 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
         setAccount(address);
         await loadElement();
         await loadStakingDetails(address); // Fetch staking details
+        await loadAdmin(); // Load admin address
       }
     }
   }, [harmonyTestnetChainId, elementId]);
@@ -99,6 +101,16 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
       console.error(error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadAdmin = async () => {
+    try {
+      const contract = await getContract();
+      const adminAddress = await contract.admin();
+      setAdmin(adminAddress);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -167,6 +179,21 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
         setErrorMessage('An unknown error occurred');
       }
       console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRemoveElement = async () => {
+    setLoading(true);
+    try {
+      const contract = await getSignerContract();
+      const tx = await contract.removeElement(elementId);
+      await tx.wait();
+      dispatch(setdAppsNav('Home')); // Navigate back to home after removal
+    } catch (error) {
+      console.error(error);
+      setErrorMessage(error instanceof Error ? error.message : 'An unknown error occurred');
     } finally {
       setLoading(false);
     }
@@ -322,11 +349,18 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
                   )}
                 </div>
               )}
+
+              {admin?.toLowerCase() === account?.toLowerCase() && (
+                <div className={styles.adminActions}>
+                  <button onClick={handleRemoveElement} className={styles.buttonR}>
+                    Remove Element
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
 
-        
       </div>
     </>
   );
