@@ -9,6 +9,7 @@ import { ethers } from 'ethers'; // Correct import for ethers.js v6.x.x
 import { TailSpin } from 'react-loader-spinner'; // Correct import for Loader
 import getContract, { getSignerContract } from './contract'; // Import contract functions
 import Modal from '../modal/Modal'; // Import the Modal component
+import usdtABI from './lopTokenABI.json';
 
 interface RootState {
   global: {
@@ -38,6 +39,7 @@ export default function ApplicationDevelopment() {
   const [isCorrectNetwork, setIsCorrectNetwork] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
+  const [hasPendingApplication, setHasPendingApplication] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
 
@@ -53,6 +55,9 @@ export default function ApplicationDevelopment() {
   const [timeLeftToClaim, setTimeLeftToClaim] = useState<number>(0);
 
   const harmonyTestnetChainId = '0x6357d2e0';
+  const usdtContractAddress = '0x26057dDA39B774Dfa8f47626Cb7eCaDc4E7EFebf';
+  const MainContractAddress = '0x18a1ad8e50F765d6D5Fe6EB7944C6733c2a66F3E';
+  
 
   const checkMetamaskConnection = useCallback(async () => {
     if (typeof window.ethereum !== 'undefined') {
@@ -64,6 +69,7 @@ export default function ApplicationDevelopment() {
         await checkOwner(accounts[0]);
         setAccount(accounts[0]);
         loadStakingDetails(accounts[0]);
+        checkPendingApplication(accounts[0]);
       }
     }
   }, [harmonyTestnetChainId]);
@@ -73,6 +79,16 @@ export default function ApplicationDevelopment() {
       const contract = await getContract();
       const owner = await contract.admin();
       setIsOwner(owner.toLowerCase() === account.toLowerCase());
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const checkPendingApplication = async (account: string) => {
+    try {
+      const contract = await getContract();
+      const hasPending = await contract.hasPendingApplication(account);
+      setHasPendingApplication(hasPending);
     } catch (error) {
       console.error(error);
     }
@@ -108,7 +124,7 @@ export default function ApplicationDevelopment() {
     setLoading(true);
     try {
       const contract = await getSignerContract();
-      const tx = await contract.claimRewards();
+      const tx = await contract.claimMonthlyReward();
       await tx.wait();
       loadStakingDetails(account!);
     } catch (error) {
@@ -291,7 +307,18 @@ export default function ApplicationDevelopment() {
   const handleStakeTokens = async () => {
     setLoading(true);
     try {
+
       const contract = await getSignerContract();
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+
+      const usdtContract = new ethers.Contract(usdtContractAddress, usdtABI.abi, signer);
+
+      const approveTx = await usdtContract.approve(MainContractAddress, ethers.parseUnits(stakeAmount, 18));
+      await approveTx.wait();
+
+      
       const tx = await contract.stakeTokens(ethers.parseUnits(stakeAmount, 18)); // Ensure stakeAmount is in correct units
       await tx.wait();
       loadStakingDetails(account!);
@@ -519,68 +546,74 @@ export default function ApplicationDevelopment() {
             </div>
 
             <div className={styles.row}>
-              <button onClick={() => setShowCreateForm(!showCreateForm)} className={styles.buttonG}>
-                {showCreateForm ? 'Hide Create Form' : 'Create New Element'}
-              </button>
-              {showCreateForm && (
-                <div className={styles.formContainer}>
-                  <form onSubmit={handleCreateElement} className={styles.form}>
-                    <h4>Create New Element</h4>
-                    <div className={styles.inputGroup}>
-                      <label htmlFor="name">Name:</label>
-                      <input
-                        type="text"
-                        id="name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                      />
+              {!hasPendingApplication ? (
+                <>
+                  <button onClick={() => setShowCreateForm(!showCreateForm)} className={styles.buttonG}>
+                    {showCreateForm ? 'Hide Create Form' : 'Create New Element'}
+                  </button>
+                  {showCreateForm && (
+                    <div className={styles.formContainer}>
+                      <form onSubmit={handleCreateElement} className={styles.form}>
+                        <h4>Create New Element</h4>
+                        <div className={styles.inputGroup}>
+                          <label htmlFor="name">Name:</label>
+                          <input
+                            type="text"
+                            id="name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className={styles.inputGroup}>
+                          <label htmlFor="description">Description:</label>
+                          <input
+                            type="text"
+                            id="description"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className={styles.inputGroup}>
+                          <label htmlFor="whitepaperLink">Whitepaper Link:</label>
+                          <input
+                            type="text"
+                            id="whitepaperLink"
+                            value={whitepaperLink}
+                            onChange={(e) => setWhitepaperLink(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className={styles.inputGroup}>
+                          <label htmlFor="email">Email:</label>
+                          <input
+                            type="email"
+                            id="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className={styles.inputGroup}>
+                          <label htmlFor="logoUrl">Logo URL:</label>
+                          <input
+                            type="text"
+                            id="logoUrl"
+                            value={logoUrl}
+                            onChange={(e) => setLogoUrl(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <button type="submit" className={styles.buttonG} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                          {isMetamaskConnected && isCorrectNetwork ? 'Create New Element' : 'Metamask (Harmony Testnet) Needed'}
+                        </button>
+                      </form>
                     </div>
-                    <div className={styles.inputGroup}>
-                      <label htmlFor="description">Description:</label>
-                      <input
-                        type="text"
-                        id="description"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className={styles.inputGroup}>
-                      <label htmlFor="whitepaperLink">Whitepaper Link:</label>
-                      <input
-                        type="text"
-                        id="whitepaperLink"
-                        value={whitepaperLink}
-                        onChange={(e) => setWhitepaperLink(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className={styles.inputGroup}>
-                      <label htmlFor="email">Email:</label>
-                      <input
-                        type="email"
-                        id="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className={styles.inputGroup}>
-                      <label htmlFor="logoUrl">Logo URL:</label>
-                      <input
-                        type="text"
-                        id="logoUrl"
-                        value={logoUrl}
-                        onChange={(e) => setLogoUrl(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <button type="submit" className={styles.buttonG} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                      {isMetamaskConnected && isCorrectNetwork ? 'Create New Element' : 'Metamask (Harmony Testnet) Needed'}
-                    </button>
-                  </form>
-                </div>
+                  )}
+                </>
+              ) : (
+                <p>You have a pending application, you will receive an email</p>
               )}
             </div>
 
