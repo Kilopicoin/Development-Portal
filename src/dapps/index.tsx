@@ -51,12 +51,12 @@ export default function ApplicationDevelopment() {
   const [account, setAccount] = useState<string | null>(null); // State for account
 
   const [lastClaimed, setLastClaimed] = useState<bigint>(BigInt(0));
-  const [claimCooldown, setClaimCooldown] = useState<number>(60); // Claim cooldown period in seconds (e.g., 24 hours) 30 * 24 * 60 * 60
+  const [claimCooldown, setClaimCooldown] = useState<number>(5 * 60); // Claim cooldown period in seconds (e.g., 24 hours) 30 * 24 * 60 * 60
   const [timeLeftToClaim, setTimeLeftToClaim] = useState<number>(0);
 
   const harmonyTestnetChainId = '0x6357d2e0';
-  const usdtContractAddress = '0x26057dDA39B774Dfa8f47626Cb7eCaDc4E7EFebf';
-  const MainContractAddress = '0x18a1ad8e50F765d6D5Fe6EB7944C6733c2a66F3E';
+  const usdtContractAddress = '0x598Ee7D574FC8Ae12845ED58f4b36Af4692C6FD3';
+  const MainContractAddress = '0x5Dca92244b24f084b5bE0e4D3081E89A6C2d75E9';
   
 
   const checkMetamaskConnection = useCallback(async () => {
@@ -94,25 +94,40 @@ export default function ApplicationDevelopment() {
     }
   };
 
+  const loadClaimableReward = async (account: string) => {
+    try {
+        const contract = await getContract();
+        const claimableReward = await contract.getClaimableReward(account);
+        setRewards(BigInt(claimableReward));
+    } catch (error) {
+        console.error(error);
+    }
+  };
+
+  const loadLastClaimedDate = async (account: string) => {
+    try {
+        const contract = await getContract();
+        const lastClaimedDate = await contract.getLastClaimedDate(account);
+        setLastClaimed(BigInt(lastClaimedDate));
+    } catch (error) {
+        console.error(error);
+    }
+  };
+
   const loadStakingDetails = async (account: string) => {
     try {
       const contract = await getContract();
       const staked = BigInt(await contract.stakes(account));
       const power = BigInt(await contract.votingPower(account));
-      const lastClaimed = BigInt(await contract.lastClaimed(account));
-
-      // Convert bigint to number for timeElapsed calculation
-      const currentTime = BigInt(Math.floor(Date.now() / 1000)); // current time in seconds
-      const timeElapsed = currentTime - lastClaimed; // time elapsed in seconds
-
-      // Calculate rewards
-      const reward = (staked * BigInt(3) / BigInt(100)) * timeElapsed / BigInt(365 * 24 * 60 * 60);
 
       setStakedTokens(staked);
       setVotingPower(power);
-      setRewards(reward);
-      setLastClaimed(lastClaimed);
 
+      await loadClaimableReward(account);
+      await loadLastClaimedDate(account);
+
+      const currentTime = BigInt(Math.floor(Date.now() / 1000)); // current time in seconds
+      const timeElapsed = currentTime - lastClaimed; // time elapsed in seconds
       const cooldownRemaining = Math.max(0, claimCooldown - Number(timeElapsed));
       setTimeLeftToClaim(cooldownRemaining);
     } catch (error) {
@@ -187,7 +202,7 @@ export default function ApplicationDevelopment() {
           email: element.email,
           logoUrl: element.logoUrl,
           phase: Number(element.phase),
-          voteCount: Number(element.voteCount),
+          voteCount: Number(element.voteCount) / 10 **18,
         };
 
         if (elementWithId.phase !== 5) { // Exclude elements in the Deleted phase
@@ -360,6 +375,11 @@ export default function ApplicationDevelopment() {
     return `${days}d ${hours}h ${minutes}m ${remainingSeconds}s`;
   };
 
+  const formatDate = (timestamp: bigint) => {
+    const date = new Date(Number(timestamp) * 1000);
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+  };
+
   return (
     <>
       <Head>
@@ -395,7 +415,7 @@ export default function ApplicationDevelopment() {
                 <h3>Staking & Rewards</h3>
                 <div className={styles.inputGroup}>
                 <label>Connected Wallet: {account}</label>
-                <label>Voting Power: {ethers.formatUnits(votingPower, 18)}</label>
+                <label>Voting Power: {parseFloat(ethers.formatUnits(votingPower, 18)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</label>
                 </div>
                 <div className={styles.dAppsX}>
                 <div className={styles.buttondAppsX}>
@@ -422,8 +442,9 @@ export default function ApplicationDevelopment() {
                     <div className={styles.carddApps}>
 
                     <div className={styles.inputGroup}>
-                    <label>Staked Tokens: {ethers.formatUnits(stakedTokens, 18)}</label>
-                    <label>Rewards: {ethers.formatUnits(rewards, 18)}</label>
+                    <label>Staked Tokens: {parseFloat(ethers.formatUnits(stakedTokens, 18)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</label>
+
+                    <label>Rewards: {parseFloat(ethers.formatUnits(rewards, 18)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</label>
                       
                       <button
                         onClick={handleClaimRewards}
@@ -434,6 +455,7 @@ export default function ApplicationDevelopment() {
                           ? `Claim available in ${formatTimeLeft(timeLeftToClaim)}`
                           : 'Claim Rewards'}
                       </button>
+                      <label>Last Claimed: {lastClaimed > 0 ? formatDate(lastClaimed) : 'Never claimed'}</label>
                       </div>
                     </div>
                     </div>
