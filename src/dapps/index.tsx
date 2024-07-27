@@ -51,13 +51,13 @@ export default function ApplicationDevelopment() {
   const [account, setAccount] = useState<string | null>(null); // State for account
 
   const [lastClaimed, setLastClaimed] = useState<bigint>(BigInt(0));
+  const [startingDate, setStartingDate] = useState<bigint>(BigInt(0));
   const [claimCooldown, setClaimCooldown] = useState<number>(5 * 60); // Claim cooldown period in seconds (e.g., 24 hours) 30 * 24 * 60 * 60
   const [timeLeftToClaim, setTimeLeftToClaim] = useState<number>(0);
 
   const harmonyTestnetChainId = '0x6357d2e0';
-  const usdtContractAddress = '0x598Ee7D574FC8Ae12845ED58f4b36Af4692C6FD3';
-  const MainContractAddress = '0x5Dca92244b24f084b5bE0e4D3081E89A6C2d75E9';
-  
+  const usdtContractAddress = '0x330Fc02478cd34375cA181751cdd334022089257';
+  const MainContractAddress = '0x6955d771773691F6370CB5168a15E789e8Ce2aB0';
 
   const checkMetamaskConnection = useCallback(async () => {
     if (typeof window.ethereum !== 'undefined') {
@@ -114,6 +114,16 @@ export default function ApplicationDevelopment() {
     }
   };
 
+  const loadStartingDate = async (account: string) => {
+    try {
+        const contract = await getContract();
+        const startingDate = await contract.startingDate(account);
+        setStartingDate(BigInt(startingDate));
+    } catch (error) {
+        console.error(error);
+    }
+  };
+
   const loadStakingDetails = async (account: string) => {
     try {
       const contract = await getContract();
@@ -125,6 +135,7 @@ export default function ApplicationDevelopment() {
 
       await loadClaimableReward(account);
       await loadLastClaimedDate(account);
+      await loadStartingDate(account);
 
       const currentTime = BigInt(Math.floor(Date.now() / 1000)); // current time in seconds
       const timeElapsed = currentTime - lastClaimed; // time elapsed in seconds
@@ -202,7 +213,7 @@ export default function ApplicationDevelopment() {
           email: element.email,
           logoUrl: element.logoUrl,
           phase: Number(element.phase),
-          voteCount: Number(element.voteCount) / 10 **18,
+          voteCount: Number(element.voteCount) / 10 ** 18,
         };
 
         if (elementWithId.phase !== 5) { // Exclude elements in the Deleted phase
@@ -221,8 +232,8 @@ export default function ApplicationDevelopment() {
           }
 
           if (
-            (elementWithId.phase === 1 && elementWithId.websiteLink) || 
-            (elementWithId.phase === 2 && elementWithId.tutorialLink) || 
+            (elementWithId.phase === 1 && elementWithId.websiteLink) ||
+            (elementWithId.phase === 2 && elementWithId.tutorialLink) ||
             (elementWithId.phase === 3 && elementWithId.performanceMetricsLink)
           ) {
             pendingUpdates.push(elementWithId);
@@ -322,7 +333,6 @@ export default function ApplicationDevelopment() {
   const handleStakeTokens = async () => {
     setLoading(true);
     try {
-
       const contract = await getSignerContract();
 
       const provider = new ethers.BrowserProvider(window.ethereum);
@@ -333,7 +343,6 @@ export default function ApplicationDevelopment() {
       const approveTx = await usdtContract.approve(MainContractAddress, ethers.parseUnits(stakeAmount, 18));
       await approveTx.wait();
 
-      
       const tx = await contract.stakeTokens(ethers.parseUnits(stakeAmount, 18)); // Ensure stakeAmount is in correct units
       await tx.wait();
       loadStakingDetails(account!);
@@ -456,6 +465,7 @@ export default function ApplicationDevelopment() {
                           : 'Claim Rewards'}
                       </button>
                       <label>Last Claimed: {lastClaimed > 0 ? formatDate(lastClaimed) : 'Never claimed'}</label>
+                      <label>Starting Date: {startingDate > 0 ? formatDate(startingDate) : 'N/A'}</label>
                       </div>
                     </div>
                     </div>
