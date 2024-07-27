@@ -56,8 +56,9 @@ export default function ApplicationDevelopment() {
   const [timeLeftToClaim, setTimeLeftToClaim] = useState<number>(0);
 
   const harmonyTestnetChainId = '0x6357d2e0';
-  const usdtContractAddress = '0x330Fc02478cd34375cA181751cdd334022089257';
-  const MainContractAddress = '0x6955d771773691F6370CB5168a15E789e8Ce2aB0';
+  const usdtContractAddress = '0x4684b56e31a75D74311F95a187fDbD34e2483159';
+  const MainContractAddress = '0x3117B86C8FdCa144102868D44339054Ec66e4aA7';
+  const ELEMENT_CREATION_COST = 10000; // Cost for creating an element in LOP tokens
 
   const checkMetamaskConnection = useCallback(async () => {
     if (typeof window.ethereum !== 'undefined') {
@@ -258,12 +259,20 @@ export default function ApplicationDevelopment() {
     setLoading(true);
     setErrorMessage(null);
     try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+
+      const usdtContract = new ethers.Contract(usdtContractAddress, usdtABI.abi, signer);
+      const approveTx = await usdtContract.approve(MainContractAddress, ethers.parseUnits(ELEMENT_CREATION_COST.toString(), 18));
+      await approveTx.wait();
+
       const contract = await getSignerContract();
       const tx = await contract.createElement(name, description, whitepaperLink, email, logoUrl);
       await tx.wait();
       loadElements();
     } catch (error) {
       console.error(error);
+      setErrorMessage(null);
     } finally {
       setLoading(false);
     }
