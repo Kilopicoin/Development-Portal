@@ -685,3 +685,23 @@
   margin-top: 20px; /* Space between phase sections */
 }
 
+
+.voteInputContainer {
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.voteInputWrapper {
+  display: flex;
+  align-items: center;
+}
+
+.voteInput {
+  flex: 1;
+
+}
+
+

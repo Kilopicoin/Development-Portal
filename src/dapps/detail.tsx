@@ -145,8 +145,15 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
   const handleVote = async () => {
     setLoading(true);
     try {
+      const voteAmountInBigInt = BigInt(ethers.parseUnits(voteAmount, 18).toString());
+      if (voteAmountInBigInt > votingPower) {
+        setErrorMessage("You do not have enough Voting Power.");
+        setLoading(false);
+        return;
+      }
+      
       const contract = await getSignerContract();
-      const tx = await contract.voteOnElement(elementId, ethers.parseUnits(voteAmount, 18));
+      const tx = await contract.voteOnElement(elementId, voteAmountInBigInt);
       await tx.wait();
       loadElement(); // Reload element data after voting
     } catch (error) {
@@ -197,6 +204,10 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleMaxVote = () => {
+    setVoteAmount(ethers.formatUnits(votingPower, 18).toString());
   };
 
   return (
@@ -274,14 +285,20 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
               {isMetamaskConnected && (
                 <div className={styles.voteContainer}>
                   <h4>Vote for this Element</h4>
-                  <div className={styles.inputGroup}>
+                  <div className={`${styles.inputGroup} ${styles.voteInputContainer}`}>
                     <label htmlFor="voteAmount">Vote Amount (LOP):</label>
-                    <input
-                      type="text"
-                      id="voteAmount"
-                      value={voteAmount}
-                      onChange={(e) => setVoteAmount(e.target.value)}
-                    />
+                    <div className={styles.voteInputWrapper}>
+                      <input
+                        type="text"
+                        id="voteAmount"
+                        className={styles.voteInput}
+                        value={voteAmount}
+                        onChange={(e) => setVoteAmount(e.target.value)}
+                      />
+                      <button onClick={handleMaxVote} className={styles.buttonG}>
+                        Max
+                      </button>
+                    </div>
                     <button onClick={handleVote} className={styles.buttonG}>
                       Vote
                     </button>
