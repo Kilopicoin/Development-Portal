@@ -145,7 +145,17 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
   const handleVote = async () => {
     setLoading(true);
     try {
-      const voteAmountInBigInt = BigInt(ethers.parseUnits(voteAmount, 18).toString());
+      const voteAmountNumber = parseFloat(voteAmount);
+      if (isNaN(voteAmountNumber) || voteAmountNumber < 1) {
+        setErrorMessage("The minimum vote amount is 1.");
+        setLoading(false);
+        return;
+      }
+
+      const voteAmountInBigInt = BigInt(ethers.parseUnits(voteAmount, -2).toString());
+
+      
+      
       if (voteAmountInBigInt > votingPower) {
         setErrorMessage("You do not have enough Voting Power.");
         setLoading(false);
@@ -207,7 +217,7 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
   };
 
   const handleMaxVote = () => {
-    setVoteAmount(ethers.formatUnits(votingPower, 18).toString());
+    setVoteAmount(parseFloat(ethers.formatUnits(votingPower, -2)).toString());
   };
 
   return (
@@ -240,7 +250,7 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
           <div className={styles.phaseContainer}>
             <div className={styles.inputGroup}>
               <label>Connected Wallet: {account}</label>
-              <label>Voting Power: {ethers.formatUnits(votingPower, 18)}</label>
+              <label>Voting Power: {parseFloat(ethers.formatUnits(votingPower, -2)).toString()}</label>
             </div>
           </div>
         )}

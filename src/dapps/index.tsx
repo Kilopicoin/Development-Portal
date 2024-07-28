@@ -56,8 +56,8 @@ export default function ApplicationDevelopment() {
   const [timeLeftToClaim, setTimeLeftToClaim] = useState<number>(0);
 
   const harmonyTestnetChainId = '0x6357d2e0';
-  const usdtContractAddress = '0x49c6B5D15f12AF4380aD7Cd572970a88Bdf7c501';
-  const MainContractAddress = '0xeBfF104E1F2Ebf26f2588bdb3CD0C44b9636969d';
+  const usdtContractAddress = '0xf3d67482b9BcDA78646408bCABB19821c78C5554';
+  const MainContractAddress = '0x235911C733FF1DB1dAA0F71fc1a40523B92cC198';
   const ELEMENT_CREATION_COST = 10000; // Cost for creating an element in LOP tokens
 
   const checkMetamaskConnection = useCallback(async () => {
@@ -451,7 +451,7 @@ export default function ApplicationDevelopment() {
                 <h3>Staking & Rewards</h3>
                 <div className={styles.inputGroup}>
                 <label>Connected Wallet: {account}</label>
-                <label>Voting Power: {parseFloat(ethers.formatUnits(votingPower)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</label>
+                <label>Voting Power: {parseFloat(ethers.formatUnits(votingPower, -2)).toString()}</label>
                 </div>
                 <div className={styles.dAppsX}>
                 <div className={styles.buttondAppsX}>
