@@ -56,8 +56,8 @@ export default function ApplicationDevelopment() {
   const [timeLeftToClaim, setTimeLeftToClaim] = useState<number>(0);
 
   const harmonyTestnetChainId = '0x6357d2e0';
-  const usdtContractAddress = '0xdb567bac8f94a04f1F56F48a456De504D92d8a8A';
-  const MainContractAddress = '0x0DF7F37a4cE81773994834Aec5B95478230aC611';
+  const usdtContractAddress = '0x49c6B5D15f12AF4380aD7Cd572970a88Bdf7c501';
+  const MainContractAddress = '0xeBfF104E1F2Ebf26f2588bdb3CD0C44b9636969d';
   const ELEMENT_CREATION_COST = 10000; // Cost for creating an element in LOP tokens
 
   const checkMetamaskConnection = useCallback(async () => {
@@ -148,6 +148,11 @@ export default function ApplicationDevelopment() {
   };
 
   const handleClaimRewards = async () => {
+    if (rewards === BigInt(0)) {
+      setErrorMessage('No Rewards to Collect');
+      return;
+    }
+
     setLoading(true);
     try {
       const contract = await getSignerContract();
@@ -261,20 +266,20 @@ export default function ApplicationDevelopment() {
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-  
+
       const usdtContract = new ethers.Contract(usdtContractAddress, usdtABI.abi, signer);
       const balance = BigInt(await usdtContract.balanceOf(account));
-      const elementCreationCost = BigInt(ethers.parseUnits(ELEMENT_CREATION_COST.toString(), 18).toString());
-  
+      const elementCreationCost = BigInt(ethers.parseUnits(ELEMENT_CREATION_COST.toString(), 6).toString());
+
       if (balance < elementCreationCost) {
         setErrorMessage("Insufficient tokens to create a new element.");
         setLoading(false);
         return;
       }
-  
+
       const approveTx = await usdtContract.approve(MainContractAddress, elementCreationCost);
       await approveTx.wait();
-  
+
       const contract = await getSignerContract();
       const tx = await contract.createElement(name, description, whitepaperLink, email, logoUrl);
       await tx.wait();
@@ -290,7 +295,6 @@ export default function ApplicationDevelopment() {
       setLoading(false);
     }
   };
-  
 
   const handleElementClick = (elementId: number) => {
     setSelectedElementId(elementId);
@@ -363,10 +367,10 @@ export default function ApplicationDevelopment() {
 
       const usdtContract = new ethers.Contract(usdtContractAddress, usdtABI.abi, signer);
 
-      const approveTx = await usdtContract.approve(MainContractAddress, ethers.parseUnits(stakeAmount, 18));
+      const approveTx = await usdtContract.approve(MainContractAddress, ethers.parseUnits(stakeAmount, 6));
       await approveTx.wait();
 
-      const tx = await contract.stakeTokens(ethers.parseUnits(stakeAmount, 18)); // Ensure stakeAmount is in correct units
+      const tx = await contract.stakeTokens(ethers.parseUnits(stakeAmount, 6)); // Ensure stakeAmount is in correct units
       await tx.wait();
       loadStakingDetails(account!);
     } catch (error) {
@@ -380,7 +384,7 @@ export default function ApplicationDevelopment() {
     setLoading(true);
     try {
       const contract = await getSignerContract();
-      const tx = await contract.withdrawStake(ethers.parseUnits(withdrawAmount, 18)); // Ensure withdrawAmount is in correct units
+      const tx = await contract.withdrawStake(ethers.parseUnits(withdrawAmount, 6)); // Ensure withdrawAmount is in correct units
       await tx.wait();
       loadStakingDetails(account!);
     } catch (error) {
@@ -447,7 +451,7 @@ export default function ApplicationDevelopment() {
                 <h3>Staking & Rewards</h3>
                 <div className={styles.inputGroup}>
                 <label>Connected Wallet: {account}</label>
-                <label>Voting Power: {parseFloat(ethers.formatUnits(votingPower, 18)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</label>
+                <label>Voting Power: {parseFloat(ethers.formatUnits(votingPower)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</label>
                 </div>
                 <div className={styles.dAppsX}>
                 <div className={styles.buttondAppsX}>
@@ -474,9 +478,9 @@ export default function ApplicationDevelopment() {
                     <div className={styles.carddApps}>
 
                     <div className={styles.inputGroup}>
-                    <label>Staked Tokens: {parseFloat(ethers.formatUnits(stakedTokens, 18)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</label>
+                    <label>Staked Tokens: {parseFloat(ethers.formatUnits(stakedTokens, 6)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</label>
 
-                    <label>Rewards: {parseFloat(ethers.formatUnits(rewards, 18)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</label>
+                    <label>Rewards: {parseFloat(ethers.formatUnits(rewards, 6)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</label>
                       
                       <button
                         onClick={handleClaimRewards}
@@ -488,7 +492,7 @@ export default function ApplicationDevelopment() {
                           : 'Claim Rewards'}
                       </button>
                       <label>Last Claimed: {lastClaimed > 0 ? formatDate(lastClaimed) : 'Never claimed'}</label>
-                      <label>Starting Date: {startingDate > 0 ? formatDate(startingDate) : 'N/A'}</label>
+                      <label>Starting Date: {startingDate > 0 ? formatDate(startingDate) : 'Not started yet'}</label>
                       </div>
                     </div>
                     </div>
