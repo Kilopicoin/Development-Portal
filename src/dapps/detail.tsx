@@ -46,7 +46,6 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
         const signer = await provider.getSigner();
         const address = await signer.getAddress();
         setAccount(address);
-        await loadElement();
         await loadStakingDetails(address); // Fetch staking details
         await loadAdmin(); // Load admin address
       }
@@ -55,6 +54,7 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
 
   useEffect(() => {
     checkMetamaskConnection();
+    loadElement();
 
     if (typeof window.ethereum !== 'undefined') {
       window.ethereum.on('accountsChanged', checkMetamaskConnection);
@@ -152,10 +152,7 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
         return;
       }
 
-      const voteAmountInBigInt = BigInt(ethers.parseUnits(voteAmount, -2).toString());
-
-      
-      
+      const voteAmountInBigInt = BigInt(ethers.parseUnits(voteAmount, 0).toString());
       if (voteAmountInBigInt > votingPower) {
         setErrorMessage("You do not have enough Voting Power.");
         setLoading(false);
@@ -217,7 +214,7 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
   };
 
   const handleMaxVote = () => {
-    setVoteAmount(parseFloat(ethers.formatUnits(votingPower, -2)).toString());
+    setVoteAmount(ethers.formatUnits(votingPower, 0).toString());
   };
 
   return (
@@ -250,7 +247,7 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
           <div className={styles.phaseContainer}>
             <div className={styles.inputGroup}>
               <label>Connected Wallet: {account}</label>
-              <label>Voting Power: {parseFloat(ethers.formatUnits(votingPower, -2)).toString()}</label>
+              <label>Voting Power: {ethers.formatUnits(votingPower, 0)}</label>
             </div>
           </div>
         )}
@@ -316,7 +313,7 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
                 </div>
               )}
 
-              {element.creator.toLowerCase() === account?.toLowerCase() && getPhase() !== 'Prestige' && (
+              {isMetamaskConnected && element.creator.toLowerCase() === account?.toLowerCase() && getPhase() !== 'Prestige' && (
                 <div className={styles.updateCard}>
                   <h4>Update Element</h4>
                   {getPhase() === 'Development' ? (
@@ -377,7 +374,7 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
                 </div>
               )}
 
-              {admin?.toLowerCase() === account?.toLowerCase() && (
+              {isMetamaskConnected && admin?.toLowerCase() === account?.toLowerCase() && (
                 <div className={styles.adminActions}>
                   <button onClick={handleRemoveElement} className={styles.buttonR}>
                     Remove Element

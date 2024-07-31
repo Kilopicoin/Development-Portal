@@ -608,14 +608,13 @@ export default function ApplicationDevelopment() {
               {!hasPendingApplication ? (
                 <>
                   <button onClick={() => setShowCreateForm(!showCreateForm)} className={styles.buttonG}>
-                    {showCreateForm ? 'Hide Create Form' : 'Create New Element'}
+                    {showCreateForm ? 'Hide Create Form' : 'Create New Project'}
                   </button>
                   {showCreateForm && (
                     <div className={styles.formContainer}>
                       <form onSubmit={handleCreateElement} className={styles.form}>
-                        <h4>Create New Element</h4>
                         <div className={styles.inputGroup}>
-                          <label htmlFor="name">Name:</label>
+                          <label htmlFor="name">Project Name:</label>
                           <input
                             type="text"
                             id="name"
@@ -625,7 +624,7 @@ export default function ApplicationDevelopment() {
                           />
                         </div>
                         <div className={styles.inputGroup}>
-                          <label htmlFor="description">Description:</label>
+                          <label htmlFor="description">Short Description:</label>
                           <input
                             type="text"
                             id="description"
@@ -636,6 +635,8 @@ export default function ApplicationDevelopment() {
                         </div>
                         <div className={styles.inputGroup}>
                           <label htmlFor="whitepaperLink">Whitepaper Link:</label>
+                          <label>Whitepaper must have;</label>
+                          <label>Blockchain Choice, Application's Clear Explanation, Tokenomics, Benefits for Kilopi, Roadmap, Team</label>
                           <input
                             type="text"
                             id="whitepaperLink"
@@ -655,7 +656,7 @@ export default function ApplicationDevelopment() {
                           />
                         </div>
                         <div className={styles.inputGroup}>
-                          <label htmlFor="logoUrl">Logo URL:</label>
+                          <label htmlFor="logoUrl">Logo URL (Approx. 200x200 and no-background):</label>
                           <input
                             type="text"
                             id="logoUrl"
@@ -665,7 +666,7 @@ export default function ApplicationDevelopment() {
                           />
                         </div>
                         <button type="submit" className={styles.buttonG} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                          {isMetamaskConnected && isCorrectNetwork ? 'Create New Element' : 'Metamask (Harmony Testnet) Needed'}
+                          {isMetamaskConnected && isCorrectNetwork ? 'Create New Project' : 'Metamask (Harmony Testnet) Needed'}
                         </button>
                       </form>
                     </div>
