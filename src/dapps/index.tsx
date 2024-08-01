@@ -39,6 +39,7 @@ export default function ApplicationDevelopment() {
   const [isCorrectNetwork, setIsCorrectNetwork] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
+  const [isSecondOwner, setIsSecondOwner] = useState(false);
   const [hasPendingApplication, setHasPendingApplication] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -55,9 +56,15 @@ export default function ApplicationDevelopment() {
   const [claimCooldown, setClaimCooldown] = useState<number>(5 * 60); // Claim cooldown period in seconds (e.g., 24 hours) 30 * 24 * 60 * 60
   const [timeLeftToClaim, setTimeLeftToClaim] = useState<number>(0);
 
+  const [approveElementEnabled, setApproveElementEnabled] = useState(true);
+  const [rejectElementEnabled, setRejectElementEnabled] = useState(true);
+  const [removeElementEnabled, setRemoveElementEnabled] = useState(true);
+  const [confirmUpdateEnabled, setConfirmUpdateEnabled] = useState(true);
+  const [refuseUpdateEnabled, setRefuseUpdateEnabled] = useState(true);
+
   const harmonyTestnetChainId = '0x6357d2e0';
-  const usdtContractAddress = '0xf3d67482b9BcDA78646408bCABB19821c78C5554';
-  const MainContractAddress = '0x235911C733FF1DB1dAA0F71fc1a40523B92cC198';
+  const usdtContractAddress = '0x53fb4415Cdc545e154a8E43FA19d4E658Db18e7A';
+  const MainContractAddress = '0x417847521c1d6D164cB212911f2a27ba9608CA75';
   const ELEMENT_CREATION_COST = 10000; // Cost for creating an element in LOP tokens
 
   const checkMetamaskConnection = useCallback(async () => {
@@ -79,7 +86,9 @@ export default function ApplicationDevelopment() {
     try {
       const contract = await getContract();
       const owner = await contract.admin();
+      const secondOwner = await contract.secondAdmin();
       setIsOwner(owner.toLowerCase() === account.toLowerCase());
+      setIsSecondOwner(secondOwner.toLowerCase() === account.toLowerCase());
     } catch (error) {
       console.error(error);
     }
@@ -166,9 +175,23 @@ export default function ApplicationDevelopment() {
     }
   };
 
+  const loadFunctionStatus = async () => {
+    try {
+      const contract = await getContract();
+      setApproveElementEnabled(await contract.functionStatus("approveElement"));
+      setRejectElementEnabled(await contract.functionStatus("rejectElement"));
+      setRemoveElementEnabled(await contract.functionStatus("removeElement"));
+      setConfirmUpdateEnabled(await contract.functionStatus("confirmUpdate"));
+      setRefuseUpdateEnabled(await contract.functionStatus("refuseUpdate"));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     loadElements();
     checkMetamaskConnection();
+    loadFunctionStatus();
 
     if (typeof window.ethereum !== 'undefined') {
       window.ethereum.on('accountsChanged', checkMetamaskConnection);
@@ -394,6 +417,20 @@ export default function ApplicationDevelopment() {
     }
   };
 
+  const handleToggleFunctionStatus = async (functionName: string, status: boolean) => {
+    setLoading(true);
+    try {
+      const contract = await getSignerContract();
+      const tx = await contract.toggleFunctionStatus(functionName, status);
+      await tx.wait();
+      loadFunctionStatus();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const connectMetamask = async () => {
     try {
       await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -518,7 +555,7 @@ export default function ApplicationDevelopment() {
             
             )}
 
-<h2>Application Development Protocol</h2>
+            <h2>Application Development Protocol</h2>
 
             <div className={styles.phaseContainer}>
               <h3>1 - Theory Phase</h3>
@@ -745,6 +782,64 @@ export default function ApplicationDevelopment() {
                 </div>
               </>
             )}
+
+            {isSecondOwner && (
+              <div className={styles.row}>
+                <div className={styles.formContainerWrapper}>
+                  <div className={styles.formContainer}>
+                    <div className={styles.form}>
+                      <h4>Toggle Approve Element</h4>
+                      <p>Current State: {approveElementEnabled ? "Enabled" : "Disabled"}</p>
+                      <button className={styles.buttonG} onClick={() => handleToggleFunctionStatus("approveElement", !approveElementEnabled)} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                        {isMetamaskConnected && isCorrectNetwork ? (approveElementEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className={styles.formContainer}>
+                    <div className={styles.form}>
+                      <h4>Toggle Reject Element</h4>
+                      <p>Current State: {rejectElementEnabled ? "Enabled" : "Disabled"}</p>
+                      <button className={styles.buttonG} onClick={() => handleToggleFunctionStatus("rejectElement", !rejectElementEnabled)} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                        {isMetamaskConnected && isCorrectNetwork ? (rejectElementEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className={styles.formContainer}>
+                    <div className={styles.form}>
+                      <h4>Toggle Remove Element</h4>
+                      <p>Current State: {removeElementEnabled ? "Enabled" : "Disabled"}</p>
+                      <button className={styles.buttonG} onClick={() => handleToggleFunctionStatus("removeElement", !removeElementEnabled)} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                        {isMetamaskConnected && isCorrectNetwork ? (removeElementEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className={styles.formContainer}>
+                    <div className={styles.form}>
+                      <h4>Toggle Confirm Update</h4>
+                      <p>Current State: {confirmUpdateEnabled ? "Enabled" : "Disabled"}</p>
+                      <button className={styles.buttonG} onClick={() => handleToggleFunctionStatus("confirmUpdate", !confirmUpdateEnabled)} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                        {isMetamaskConnected && isCorrectNetwork ? (confirmUpdateEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className={styles.formContainer}>
+                    <div className={styles.form}>
+                      <h4>Toggle Refuse Update</h4>
+                      <p>Current State: {refuseUpdateEnabled ? "Enabled" : "Disabled"}</p>
+                      <button className={styles.buttonG} onClick={() => handleToggleFunctionStatus("refuseUpdate", !refuseUpdateEnabled)} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                        {isMetamaskConnected && isCorrectNetwork ? (refuseUpdateEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            )}
+
           </>
         )}
         {dAppsNav === "detail" && selectedElementId !== null && (
