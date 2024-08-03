@@ -33,7 +33,7 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
   const [rewards, setRewards] = useState<bigint>(BigInt(0));
   const [votingPower, setVotingPower] = useState<bigint>(BigInt(0));
   
-  const harmonyTestnetChainId = '0x6357d2e0'; // Harmony Testnet chain ID in hexadecimal
+  const harmonyTestnetChainId = '0x61'; // Harmony Testnet chain ID in hexadecimal
 
   const checkMetamaskConnection = useCallback(async () => {
     if (typeof window.ethereum !== 'undefined') {

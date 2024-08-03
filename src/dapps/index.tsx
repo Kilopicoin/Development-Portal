@@ -68,9 +68,9 @@ export default function ApplicationDevelopment() {
   const [newOwnerAddress, setNewOwnerAddress] = useState<string>(''); // New state for new owner address
   const [newSecondOwnerAddress, setNewSecondOwnerAddress] = useState<string>(''); // New state for new second owner address
 
-  const harmonyTestnetChainId = '0x6357d2e0';
-  const usdtContractAddress = '0x3DE1eBb34f1b12e000272B5B6Ae0bD10c4F1C779';
-  const MainContractAddress = '0x1019104A84cA62133547F1E483FFcEd0d8066901';
+  const harmonyTestnetChainId = '0x61';
+  const usdtContractAddress = '0x294008313a84A281F00636b8Ac5eB426aBAaA50D';
+  const MainContractAddress = '0x20E7a4C1298342023f5A233b23c6a5E0C87d5ACC';
   const ELEMENT_CREATION_COST = 10000; // Cost for creating an element in LOP tokens
 
   const checkMetamaskConnection = useCallback(async () => {
