@@ -32,7 +32,10 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
   const [stakedTokens, setStakedTokens] = useState<bigint>(BigInt(0));
   const [rewards, setRewards] = useState<bigint>(BigInt(0));
   const [votingPower, setVotingPower] = useState<bigint>(BigInt(0));
-  
+
+  // State for function status
+  const [removeElementEnabled, setRemoveElementEnabled] = useState(true);
+
   const harmonyTestnetChainId = '0x61'; // Harmony Testnet chain ID in hexadecimal
 
   const checkMetamaskConnection = useCallback(async () => {
@@ -55,6 +58,7 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
   useEffect(() => {
     checkMetamaskConnection();
     loadElement();
+    loadFunctionStatus();
 
     if (typeof window.ethereum !== 'undefined') {
       window.ethereum.on('accountsChanged', checkMetamaskConnection);
@@ -114,6 +118,15 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
     }
   };
 
+  const loadFunctionStatus = async () => {
+    try {
+      const contract = await getContract();
+      setRemoveElementEnabled(await contract.functionStatus("removeElement"));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const getPhase = () => {
     if (!element) return 'Unknown';
 
@@ -158,7 +171,7 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
         setLoading(false);
         return;
       }
-      
+
       const contract = await getSignerContract();
       const tx = await contract.voteOnElement(elementId, voteAmountInBigInt);
       await tx.wait();
@@ -201,6 +214,12 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
   const handleRemoveElement = async () => {
     setLoading(true);
     try {
+      if (!removeElementEnabled) {
+        setErrorMessage("Remove Element function is currently disabled.");
+        setLoading(false);
+        return;
+      }
+
       const contract = await getSignerContract();
       const tx = await contract.removeElement(elementId);
       await tx.wait();

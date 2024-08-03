@@ -69,8 +69,8 @@ export default function ApplicationDevelopment() {
   const [newSecondOwnerAddress, setNewSecondOwnerAddress] = useState<string>(''); // New state for new second owner address
 
   const harmonyTestnetChainId = '0x61';
-  const usdtContractAddress = '0x294008313a84A281F00636b8Ac5eB426aBAaA50D';
-  const MainContractAddress = '0x20E7a4C1298342023f5A233b23c6a5E0C87d5ACC';
+  const usdtContractAddress = '0x66D5D65b300c3491E4D32AEE70AC32B829FF2A2d';
+  const MainContractAddress = '0x7d73BA13C83218A9Af3bD8423696e99f1947E107';
   const ELEMENT_CREATION_COST = 10000; // Cost for creating an element in LOP tokens
 
   const checkMetamaskConnection = useCallback(async () => {
@@ -335,6 +335,10 @@ export default function ApplicationDevelopment() {
   };
 
   const handleApproveElement = async (elementId: number) => {
+    if (!approveElementEnabled) {
+      setErrorMessage("Approve Element function is currently disabled.");
+      return;
+    }
     setLoading(true);
     try {
       const contract = await getSignerContract();
@@ -349,6 +353,10 @@ export default function ApplicationDevelopment() {
   };
 
   const handleRejectElement = async (elementId: number) => {
+    if (!rejectElementEnabled) {
+      setErrorMessage("Reject Element function is currently disabled.");
+      return;
+    }
     setLoading(true);
     try {
       const contract = await getSignerContract();
@@ -363,6 +371,10 @@ export default function ApplicationDevelopment() {
   };
 
   const handleUpdateElement = async (elementId: number) => {
+    if (!confirmUpdateEnabled) {
+      setErrorMessage("Confirm Update function is currently disabled.");
+      return;
+    }
     setLoading(true);
     try {
       const contract = await getSignerContract();
@@ -377,6 +389,10 @@ export default function ApplicationDevelopment() {
   };
 
   const handleRefuseUpdateElement = async (elementId: number) => {
+    if (!refuseUpdateEnabled) {
+      setErrorMessage("Refuse Update function is currently disabled.");
+      return;
+    }
     setLoading(true);
     try {
       const contract = await getSignerContract();
@@ -431,7 +447,7 @@ export default function ApplicationDevelopment() {
     setLoading(true);
     try {
       const contract = await getSignerContract();
-  
+
       let tx;
       if (functionName === "changeSecondAdmin") {
         // If toggling changeSecondAdmin, use the toggleFunctionStatusByAdmin function
@@ -440,7 +456,7 @@ export default function ApplicationDevelopment() {
         // For all other functions, use the regular toggleFunctionStatus function
         tx = await contract.toggleFunctionStatus(functionName, status);
       }
-  
+
       await tx.wait();
       loadFunctionStatus();
     } catch (error) {
@@ -449,12 +465,17 @@ export default function ApplicationDevelopment() {
       setLoading(false);
     }
   };
-  
 
   const handleChangeOwnerAddress = async () => {
     setLoading(true);
     setErrorMessage(null);
     try {
+      if (!changeAdminEnabled) {
+        setErrorMessage("Change Admin function is currently disabled.");
+        setLoading(false);
+        return;
+      }
+
       const contract = await getSignerContract();
       const tx = await contract.changeAdmin(newOwnerAddress);
       await tx.wait();
@@ -475,6 +496,12 @@ export default function ApplicationDevelopment() {
     setLoading(true);
     setErrorMessage(null);
     try {
+      if (!changeSecondAdminEnabled) {
+        setErrorMessage("Change Second Admin function is currently disabled.");
+        setLoading(false);
+        return;
+      }
+
       const contract = await getSignerContract();
       const tx = await contract.changeSecondAdmin(newSecondOwnerAddress);
       await tx.wait();
