@@ -40,6 +40,7 @@ export default function ApplicationDevelopment() {
   const [loading, setLoading] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const [isSecondOwner, setIsSecondOwner] = useState(false);
+  const [isThirdOwner, setIsThirdOwner] = useState(false); // New state for checking third owner
   const [hasPendingApplication, setHasPendingApplication] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -61,10 +62,15 @@ export default function ApplicationDevelopment() {
   const [removeElementEnabled, setRemoveElementEnabled] = useState(true);
   const [confirmUpdateEnabled, setConfirmUpdateEnabled] = useState(true);
   const [refuseUpdateEnabled, setRefuseUpdateEnabled] = useState(true);
+  const [changeSecondAdminEnabled, setChangeSecondAdminEnabled] = useState(true); // State for toggling changeSecondAdmin function
+  const [changeAdminEnabled, setChangeAdminEnabled] = useState(true); // State for toggling changeAdmin function
+
+  const [newOwnerAddress, setNewOwnerAddress] = useState<string>(''); // New state for new owner address
+  const [newSecondOwnerAddress, setNewSecondOwnerAddress] = useState<string>(''); // New state for new second owner address
 
   const harmonyTestnetChainId = '0x6357d2e0';
-  const usdtContractAddress = '0x53fb4415Cdc545e154a8E43FA19d4E658Db18e7A';
-  const MainContractAddress = '0x417847521c1d6D164cB212911f2a27ba9608CA75';
+  const usdtContractAddress = '0x3DE1eBb34f1b12e000272B5B6Ae0bD10c4F1C779';
+  const MainContractAddress = '0x1019104A84cA62133547F1E483FFcEd0d8066901';
   const ELEMENT_CREATION_COST = 10000; // Cost for creating an element in LOP tokens
 
   const checkMetamaskConnection = useCallback(async () => {
@@ -87,8 +93,10 @@ export default function ApplicationDevelopment() {
       const contract = await getContract();
       const owner = await contract.admin();
       const secondOwner = await contract.secondAdmin();
+      const thirdOwner = await contract.thirdAdmin(); // Get third admin from contract
       setIsOwner(owner.toLowerCase() === account.toLowerCase());
       setIsSecondOwner(secondOwner.toLowerCase() === account.toLowerCase());
+      setIsThirdOwner(thirdOwner.toLowerCase() === account.toLowerCase()); // Set third admin state
     } catch (error) {
       console.error(error);
     }
@@ -183,6 +191,8 @@ export default function ApplicationDevelopment() {
       setRemoveElementEnabled(await contract.functionStatus("removeElement"));
       setConfirmUpdateEnabled(await contract.functionStatus("confirmUpdate"));
       setRefuseUpdateEnabled(await contract.functionStatus("refuseUpdate"));
+      setChangeSecondAdminEnabled(await contract.functionStatus("changeSecondAdmin")); // Load changeSecondAdmin function status
+      setChangeAdminEnabled(await contract.functionStatus("changeAdmin")); // Load changeAdmin function status
     } catch (error) {
       console.error(error);
     }
@@ -425,6 +435,46 @@ export default function ApplicationDevelopment() {
       await tx.wait();
       loadFunctionStatus();
     } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChangeOwnerAddress = async () => {
+    setLoading(true);
+    setErrorMessage(null);
+    try {
+      const contract = await getSignerContract();
+      const tx = await contract.changeAdmin(newOwnerAddress);
+      await tx.wait();
+      // Add any additional logic if needed
+    } catch (error) {
+      if (error instanceof Error) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage("An unknown error occurred");
+      }
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChangeSecondOwnerAddress = async () => {
+    setLoading(true);
+    setErrorMessage(null);
+    try {
+      const contract = await getSignerContract();
+      const tx = await contract.changeSecondAdmin(newSecondOwnerAddress);
+      await tx.wait();
+      // Add any additional logic if needed
+    } catch (error) {
+      if (error instanceof Error) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage("An unknown error occurred");
+      }
       console.error(error);
     } finally {
       setLoading(false);
@@ -780,6 +830,17 @@ export default function ApplicationDevelopment() {
                     ))}
                   </div>
                 </div>
+                
+                <div className={styles.formContainer}>
+                    <div className={styles.form}>
+                      <h4>Toggle Change Second Admin</h4>
+                      <p>Current State: {changeSecondAdminEnabled ? "Enabled" : "Disabled"}</p>
+                      <button className={styles.buttonG} onClick={() => handleToggleFunctionStatus("changeSecondAdmin", !changeSecondAdminEnabled)} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                        {isMetamaskConnected && isCorrectNetwork ? (changeSecondAdminEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
+                      </button>
+                    </div>
+                  </div>
+                
               </>
             )}
 
@@ -835,7 +896,62 @@ export default function ApplicationDevelopment() {
                       </button>
                     </div>
                   </div>
+                  
+                  <div className={styles.formContainer}>
+                    <div className={styles.form}>
+                      <h4>Toggle Change Admin</h4>
+                      <p>Current State: {changeAdminEnabled ? "Enabled" : "Disabled"}</p>
+                      <button className={styles.buttonG} onClick={() => handleToggleFunctionStatus("changeAdmin", !changeAdminEnabled)} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                        {isMetamaskConnected && isCorrectNetwork ? (changeAdminEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
+                      </button>
+                    </div>
+                  </div>
 
+                </div>
+              </div>
+            )}
+
+            {isThirdOwner && (
+              <div className={styles.row}>
+                <div className={styles.formContainerWrapper}>
+                  <div className={styles.formContainer}>
+                    <div className={styles.form}>
+                      <h4>Change Owner Address</h4>
+                      <div className={styles.inputGroup}>
+                        <label htmlFor="newOwnerAddress">New Owner Address:</label>
+                        <input
+                          type="text"
+                          id="newOwnerAddress"
+                          value={newOwnerAddress}
+                          onChange={(e) => setNewOwnerAddress(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <button className={styles.buttonG} onClick={handleChangeOwnerAddress} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                        {isMetamaskConnected && isCorrectNetwork ? 'Change Owner Address' : 'Metamask (Harmony Testnet) Needed'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className={styles.formContainer}>
+                    <div className={styles.form}>
+                      <h4>Change Second Owner Address</h4>
+                      <div className={styles.inputGroup}>
+                        <label htmlFor="newSecondOwnerAddress">New Second Owner Address:</label>
+                        <input
+                          type="text"
+                          id="newSecondOwnerAddress"
+                          value={newSecondOwnerAddress}
+                          onChange={(e) => setNewSecondOwnerAddress(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <button className={styles.buttonG} onClick={handleChangeSecondOwnerAddress} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                        {isMetamaskConnected && isCorrectNetwork ? 'Change Second Owner Address' : 'Metamask (Harmony Testnet) Needed'}
+                      </button>
+                    </div>
+                  </div>
+                  
                 </div>
               </div>
             )}
