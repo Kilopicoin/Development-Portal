@@ -431,7 +431,16 @@ export default function ApplicationDevelopment() {
     setLoading(true);
     try {
       const contract = await getSignerContract();
-      const tx = await contract.toggleFunctionStatus(functionName, status);
+  
+      let tx;
+      if (functionName === "changeSecondAdmin") {
+        // If toggling changeSecondAdmin, use the toggleFunctionStatusByAdmin function
+        tx = await contract.toggleFunctionStatusByAdmin(functionName, status);
+      } else {
+        // For all other functions, use the regular toggleFunctionStatus function
+        tx = await contract.toggleFunctionStatus(functionName, status);
+      }
+  
       await tx.wait();
       loadFunctionStatus();
     } catch (error) {
@@ -440,6 +449,7 @@ export default function ApplicationDevelopment() {
       setLoading(false);
     }
   };
+  
 
   const handleChangeOwnerAddress = async () => {
     setLoading(true);
