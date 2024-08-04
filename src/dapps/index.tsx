@@ -68,9 +68,15 @@ export default function ApplicationDevelopment() {
   const [newOwnerAddress, setNewOwnerAddress] = useState<string>(''); // New state for new owner address
   const [newSecondOwnerAddress, setNewSecondOwnerAddress] = useState<string>(''); // New state for new second owner address
 
+  // New state variables for the admin card
+  const [totalStakedTokens, setTotalStakedTokens] = useState<bigint>(BigInt(0));
+  const [totalTokenBalance, setTotalTokenBalance] = useState<bigint>(BigInt(0));
+  const [calculatedValue, setCalculatedValue] = useState<bigint>(BigInt(0));
+  const [generalStatus, setGeneralStatus] = useState<boolean>(false);
+
   const harmonyTestnetChainId = '0x61';
-  const usdtContractAddress = '0x66D5D65b300c3491E4D32AEE70AC32B829FF2A2d';
-  const MainContractAddress = '0x7d73BA13C83218A9Af3bD8423696e99f1947E107';
+  const usdtContractAddress = '0x3F46bDD852ca0ab2bd64d951A98fBC1bc2937E1f';
+  const MainContractAddress = '0xa506D05541c794e1b2213b85e03359C2C55FBd3f';
   const ELEMENT_CREATION_COST = 10000; // Cost for creating an element in LOP tokens
 
   const checkMetamaskConnection = useCallback(async () => {
@@ -114,31 +120,31 @@ export default function ApplicationDevelopment() {
 
   const loadClaimableReward = async (account: string) => {
     try {
-        const contract = await getContract();
-        const claimableReward = await contract.getClaimableReward(account);
-        setRewards(BigInt(claimableReward));
+      const contract = await getContract();
+      const claimableReward = await contract.getClaimableReward(account);
+      setRewards(BigInt(claimableReward));
     } catch (error) {
-        console.error(error);
+      console.error(error);
     }
   };
 
   const loadLastClaimedDate = async (account: string) => {
     try {
-        const contract = await getContract();
-        const lastClaimedDate = await contract.getLastClaimedDate(account);
-        setLastClaimed(BigInt(lastClaimedDate));
+      const contract = await getContract();
+      const lastClaimedDate = await contract.getLastClaimedDate(account);
+      setLastClaimed(BigInt(lastClaimedDate));
     } catch (error) {
-        console.error(error);
+      console.error(error);
     }
   };
 
   const loadStartingDate = async (account: string) => {
     try {
-        const contract = await getContract();
-        const startingDate = await contract.startingDate(account);
-        setStartingDate(BigInt(startingDate));
+      const contract = await getContract();
+      const startingDate = await contract.startingDate(account);
+      setStartingDate(BigInt(startingDate));
     } catch (error) {
-        console.error(error);
+      console.error(error);
     }
   };
 
@@ -159,6 +165,23 @@ export default function ApplicationDevelopment() {
       const timeElapsed = currentTime - lastClaimed; // time elapsed in seconds
       const cooldownRemaining = Math.max(0, claimCooldown - Number(timeElapsed));
       setTimeLeftToClaim(cooldownRemaining);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const loadContractDetails = async () => {
+    try {
+      const contract = await getContract();
+      const totalStaked = BigInt(await contract.getTotalStakedTokens());
+      const tokenBalance = BigInt(await contract.getTotalTokenBalance());
+      const calculated = totalStaked + ((totalStaked * BigInt(3)) / BigInt(100)) - tokenBalance;
+      const status = await contract.generalStatus();
+
+      setTotalStakedTokens(totalStaked);
+      setTotalTokenBalance(tokenBalance);
+      setCalculatedValue(calculated);
+      setGeneralStatus(status);
     } catch (error) {
       console.error(error);
     }
@@ -202,6 +225,7 @@ export default function ApplicationDevelopment() {
     loadElements();
     checkMetamaskConnection();
     loadFunctionStatus();
+    loadContractDetails();
 
     if (typeof window.ethereum !== 'undefined') {
       window.ethereum.on('accountsChanged', checkMetamaskConnection);
@@ -407,6 +431,10 @@ export default function ApplicationDevelopment() {
   };
 
   const handleStakeTokens = async () => {
+    if (!generalStatus) {
+      setErrorMessage("New Staking is Disabled Currently");
+      return;
+    }
     setLoading(true);
     try {
       const contract = await getSignerContract();
@@ -518,6 +546,20 @@ export default function ApplicationDevelopment() {
     }
   };
 
+  const handleChangeGeneralStatus = async () => {
+    setLoading(true);
+    try {
+      const contract = await getSignerContract();
+      const tx = await contract.changeGeneralStatus();
+      await tx.wait();
+      loadContractDetails();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const connectMetamask = async () => {
     try {
       await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -563,7 +605,6 @@ export default function ApplicationDevelopment() {
         )}
         {dAppsNav === "Home" && (
           <>
-            
             {!isMetamaskConnected && (
               <button onClick={connectMetamask} className={styles.buttonG}>
                 Connect to MetaMask
@@ -574,72 +615,68 @@ export default function ApplicationDevelopment() {
               <div className={styles.phaseContainer}>
                 <h3>Staking & Rewards</h3>
                 <div className={styles.inputGroup}>
-                <label>Connected Wallet: {account}</label>
-                <label>Voting Power: {parseFloat(ethers.formatUnits(votingPower, -2)).toString()}</label>
+                  <label>Connected Wallet: {account}</label>
+                  <label>Voting Power: {parseFloat(ethers.formatUnits(votingPower, -2)).toString()}</label>
                 </div>
                 <div className={styles.dAppsX}>
-                <div className={styles.buttondAppsX}>
-                
-                  <div className={styles.carddApps}>
-                    <div className={styles.inputGroup}>
-                      
-                      <label htmlFor="stakeAmount">Stake Amount (LOP):</label>
-                      <input
-                        type="text"
-                        id="stakeAmount"
-                        value={stakeAmount}
-                        onChange={(e) => setStakeAmount(e.target.value)}
-                      />
-                    
-                    <button onClick={handleStakeTokens} className={styles.buttonG}>
-                      Stake Tokens
-                    </button>
-                    </div>
-                    </div>
-                    </div>
-
-                    <div className={styles.buttondAppsX}>
+                  <div className={styles.buttondAppsX}>
                     <div className={styles.carddApps}>
-
-                    <div className={styles.inputGroup}>
-                    <label>Staked Tokens: {parseFloat(ethers.formatUnits(stakedTokens, 6)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</label>
-
-                    <label>Rewards: {parseFloat(ethers.formatUnits(rewards, 6)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</label>
-                      
-                      <button
-                        onClick={handleClaimRewards}
-                        className={styles.buttonG}
-                        disabled={timeLeftToClaim > 0}
-                      >
-                        {timeLeftToClaim > 0
-                          ? `Claim available in ${formatTimeLeft(timeLeftToClaim)}`
-                          : 'Claim Rewards'}
-                      </button>
-                      <label>Last Claimed: {lastClaimed > 0 ? formatDate(lastClaimed) : 'Never claimed'}</label>
-                      <label>Starting Date: {startingDate > 0 ? formatDate(startingDate) : 'Not started yet'}</label>
+                      <div className={styles.inputGroup}>
+                        <label htmlFor="stakeAmount">Stake Amount (LOP):</label>
+                        <input
+                          type="text"
+                          id="stakeAmount"
+                          value={stakeAmount}
+                          onChange={(e) => setStakeAmount(e.target.value)}
+                        />
+                        <button onClick={handleStakeTokens} className={styles.buttonG}>
+                          Stake Tokens
+                        </button>
+                        {!generalStatus && (
+                          <p className={styles.warning}>New Staking is Disabled Currently</p>
+                        )}
                       </div>
                     </div>
-                    </div>
-                    <div className={styles.buttondAppsX}>
+                  </div>
+
+                  <div className={styles.buttondAppsX}>
                     <div className={styles.carddApps}>
-                    <div className={styles.inputGroup}>
-                      <label htmlFor="withdrawAmount">Unstake Amount (LOP):</label>
-                      <input
-                        type="text"
-                        id="withdrawAmount"
-                        value={withdrawAmount}
-                        onChange={(e) => setWithdrawAmount(e.target.value)}
-                      />
-                      <button onClick={handleWithdrawStake} className={styles.buttonG}>
-                      Unstake Tokens
-                    </button>
+                      <div className={styles.inputGroup}>
+                        <label>Staked Tokens: {parseFloat(ethers.formatUnits(stakedTokens, 6)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</label>
+                        <label>Rewards: {parseFloat(ethers.formatUnits(rewards, 6)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</label>
+
+                        <button
+                          onClick={handleClaimRewards}
+                          className={styles.buttonG}
+                          disabled={timeLeftToClaim > 0}
+                        >
+                          {timeLeftToClaim > 0
+                            ? `Claim available in ${formatTimeLeft(timeLeftToClaim)}`
+                            : 'Claim Rewards'}
+                        </button>
+                        <label>Last Claimed: {lastClaimed > 0 ? formatDate(lastClaimed) : 'Never claimed'}</label>
+                        <label>Starting Date: {startingDate > 0 ? formatDate(startingDate) : 'Not started yet'}</label>
+                      </div>
                     </div>
+                  </div>
+                  <div className={styles.buttondAppsX}>
+                    <div className={styles.carddApps}>
+                      <div className={styles.inputGroup}>
+                        <label htmlFor="withdrawAmount">Unstake Amount (LOP):</label>
+                        <input
+                          type="text"
+                          id="withdrawAmount"
+                          value={withdrawAmount}
+                          onChange={(e) => setWithdrawAmount(e.target.value)}
+                        />
+                        <button onClick={handleWithdrawStake} className={styles.buttonG}>
+                          Unstake Tokens
+                        </button>
+                      </div>
                     </div>
-                
                   </div>
                 </div>
-                </div>
-            
+              </div>
             )}
 
             <h2>Application Development Protocol</h2>
@@ -879,6 +916,30 @@ export default function ApplicationDevelopment() {
                   </div>
                 
               </>
+            )}
+
+            {isOwner && (
+              <div className={styles.formContainer}>
+                <div className={styles.form}>
+                  <h3>Admin Information</h3>
+                  <p>Smart Contract Address: {MainContractAddress}</p>
+                  <p>Total Staked Tokens: {parseFloat(ethers.formatUnits(totalStakedTokens, 6)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <p>LOP Token Balance of Smart Contract: {parseFloat(ethers.formatUnits(totalTokenBalance, 6)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <p>Estimated Debt: {parseFloat(ethers.formatUnits(calculatedValue, 6)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                </div>
+              </div>
+            )}
+
+            {isOwner && (
+              <div className={styles.formContainer}>
+                <div className={styles.form}>
+                  <h3>General Status</h3>
+                  <p>New Staking Allowance: {generalStatus ? "Enabled" : "Disabled"}</p>
+                  <button className={styles.buttonG} onClick={handleChangeGeneralStatus} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                    {isMetamaskConnected && isCorrectNetwork ? 'Change New Staking Allowance' : 'Metamask (Harmony Testnet) Needed'}
+                  </button>
+                </div>
+              </div>
             )}
 
             {isSecondOwner && (
