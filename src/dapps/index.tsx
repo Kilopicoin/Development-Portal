@@ -75,8 +75,8 @@ export default function ApplicationDevelopment() {
   const [generalStatus, setGeneralStatus] = useState<boolean>(false);
 
   const harmonyTestnetChainId = '0x61';
-  const usdtContractAddress = '0x3F46bDD852ca0ab2bd64d951A98fBC1bc2937E1f';
-  const MainContractAddress = '0xa506D05541c794e1b2213b85e03359C2C55FBd3f';
+  const usdtContractAddress = '0xe53d831675F49fB6CA411934F8B16d02506bb58e';
+  const MainContractAddress = '0xD500d62912213853ebaB7164Ebe770ba081376fd';
   const ELEMENT_CREATION_COST = 10000; // Cost for creating an element in LOP tokens
 
   const checkMetamaskConnection = useCallback(async () => {
