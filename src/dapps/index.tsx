@@ -79,6 +79,10 @@ export default function ApplicationDevelopment() {
   const MainContractAddress = '0xA1C9c9cCCb07327214801414800b85918D46C321';
   const ELEMENT_CREATION_COST = 10000; // Cost for creating an element in LOP tokens
 
+ 
+
+
+
   const checkMetamaskConnection = useCallback(async () => {
     if (typeof window.ethereum !== 'undefined') {
       const accounts = await window.ethereum.request({ method: 'eth_accounts' });
@@ -107,6 +111,8 @@ export default function ApplicationDevelopment() {
       console.error(error);
     }
   };
+
+  
 
   const checkPendingApplication = async (account: string) => {
     try {
@@ -186,6 +192,19 @@ export default function ApplicationDevelopment() {
       console.error(error);
     }
   };
+
+  const [showGettingStarted, setShowGettingStarted] = useState(false);
+  const [showUsingPlatform, setShowUsingPlatform] = useState(false);
+  const [showUserRisks, setShowUserRisks] = useState(false);
+  const [showExampleUserFlow, setShowExampleUserFlow] = useState(false);
+
+  const toggleSection = (section: string) => {
+    if (section === "GettingStarted") setShowGettingStarted(!showGettingStarted);
+    if (section === "UsingPlatform") setShowUsingPlatform(!showUsingPlatform);
+    if (section === "UserRisks") setShowUserRisks(!showUserRisks);
+    if (section === "ExampleUserFlow") setShowExampleUserFlow(!showExampleUserFlow);
+  };
+  
 
   const handleClaimRewards = async () => {
     if (rewards === BigInt(0)) {
@@ -435,8 +454,20 @@ export default function ApplicationDevelopment() {
       setErrorMessage("New Staking is Disabled Currently");
       return;
     }
+
     setLoading(true);
+
     try {
+      const contractZ = await getContract();
+      const claimableReward = await contractZ.getClaimableReward(account);
+      setRewards(BigInt(claimableReward));
+
+      if (claimableReward > BigInt(0)) {
+        setErrorMessage("Please claim your rewards first.");
+        setLoading(false);
+        return;
+      }
+      
       const contract = await getSignerContract();
 
       const provider = new ethers.BrowserProvider(window.ethereum);
@@ -460,6 +491,18 @@ export default function ApplicationDevelopment() {
   const handleWithdrawStake = async () => {
     setLoading(true);
     try {
+
+      const contractZ = await getContract();
+      const claimableReward = await contractZ.getClaimableReward(account);
+      setRewards(BigInt(claimableReward));
+
+
+      if (claimableReward > BigInt(0)) {
+        setErrorMessage("Please claim your rewards first.");
+        setLoading(false);
+        return;
+      }
+
       const contract = await getSignerContract();
       const tx = await contract.withdrawStake(ethers.parseUnits(withdrawAmount, 6)); // Ensure withdrawAmount is in correct units
       await tx.wait();
@@ -1061,6 +1104,103 @@ export default function ApplicationDevelopment() {
             <Detail elementId={selectedElementId} />
           </>
         )}
+
+
+
+{!isOwner && !isSecondOwner && !isThirdOwner && (
+  <div className={styles.infoButtons}>
+    <button onClick={() => toggleSection("GettingStarted")} className={styles.buttonG}>
+      Getting Started
+    </button>
+    {showGettingStarted && (
+      <div className={styles.infoContent}>
+        <h4>Getting Started</h4>
+        <p><strong>Step 1: Connect Your Wallet</strong></p>
+        <p><strong>Install Metamask:</strong></p>
+        <p>If you haven&apos;t already, download and install the Metamask wallet extension for your browser.</p>
+        <p><strong>Connect to Harmony Testnet:</strong></p>
+        <p>Open Metamask.</p>
+        <p>Click on the network dropdown at the top and select &quot;Harmony Testnet&quot;.</p>
+        <p>If Harmony Testnet is not listed, you can add it manually by clicking on &quot;Add Network&quot; and entering the following details:</p>
+        <p>Network Name: Harmony Testnet</p>
+        <p>New RPC URL: https://api.s0.b.hmny.io/</p>
+        <p>Chain ID: 1666700000</p>
+        <p>Symbol: ONE</p>
+        <p>Block Explorer URL: https://explorer.pops.one/</p>
+      </div>
+    )}
+    <button onClick={() => toggleSection("UsingPlatform")} className={styles.buttonG}>
+      Using the Platform
+    </button>
+    {showUsingPlatform && (
+      <div className={styles.infoContent}>
+        <h4>Using the Platform</h4>
+        <p><strong>Exploring Phases</strong></p>
+        <p><strong>Navigate to Application Phases:</strong></p>
+        <p>Go to the &quot;Application Development Protocol&quot; section on the platform&apos;s main page.</p>
+        <p>Applications are categorized into four phases: Theory, Development, Live, and Prestige.</p>
+        <p><strong>View Application Details:</strong></p>
+        <p>Click on any application card to view detailed information about the application, including its current phase, description, and voting status.</p>
+        <p><strong>Staking and Voting</strong></p>
+        <p><strong>Stake Tokens:</strong></p>
+        <p>Enter the amount of LOP tokens you want to stake. Minimum stake amount: 1 LOP.</p>
+        <p>Ensure you have sufficient LOP balance in your Metamask wallet.</p>
+        <p><strong>Vote for an Application:</strong></p>
+        <p>Select an application you support and enter the amount of your voting power you want to allocate.</p>
+        <p>Confirm the voting transaction in Metamask.</p>
+      </div>
+    )}
+    <button onClick={() => toggleSection("UserRisks")} className={styles.buttonG}>
+      User Risks and Considerations
+    </button>
+    {showUserRisks && (
+      <div className={styles.infoContent}>
+        <h4>User Risks and Considerations</h4>
+        <p><strong>Staking Risks</strong></p>
+        <p><strong>Locked Funds:</strong></p>
+        <p>Staked tokens are locked in the contract until you decide to unstake them. Be aware that your tokens will be inaccessible during this period.</p>
+        <p><strong>Project Risks:</strong></p>
+        <p>If an application fails or is removed, your voting power will not be refunded.</p>
+        <p><strong>Voting Risks</strong></p>
+        <p><strong>Use Voting Power Wisely:</strong></p>
+        <p>Once allocated, your voting power cannot be recovered unless the application progresses to the next phase or is successful.</p>
+        <p><strong>Responsibility:</strong></p>
+        <p>By participating in this protocol, you accept all associated risks and confirm your responsibility for your actions.</p>
+      </div>
+    )}
+    <button onClick={() => toggleSection("ExampleUserFlow")} className={styles.buttonG}>
+      Example User Flow
+    </button>
+    {showExampleUserFlow && (
+      <div className={styles.infoContent}>
+        <h4>Example User Flow</h4>
+        <p><strong>Step 1: Connect Wallet</strong></p>
+        <p>Connect your Metamask wallet to the Harmony Testnet on the platform.</p>
+        <p><strong>Step 2: Explore Applications</strong></p>
+        <p>Browse the applications in various phases and select one that interests you.</p>
+        <p><strong>Step 3: Stake Tokens</strong></p>
+        <p><strong>Enter Stake Amount:</strong></p>
+        <p>Enter the amount of LOP tokens you wish to stake.</p>
+        <p>Confirm the staking transaction in Metamask.</p>
+        <p><strong>Step 4: Vote for Application</strong></p>
+        <p>Decide how much voting power you want to allocate to your selected application.</p>
+        <p><strong>Step 5: Monitor Application Progress</strong></p>
+        <p>Regularly check the application details to monitor its progress and your voting impact.</p>
+      </div>
+    )}
+    <button
+      className={styles.buttonG}
+      onClick={() => window.open('https://youtu.be/-iHwMgerX6s?si=M9pHkyVeBldkE3MI', '_blank')}
+    >
+      Tutorial Video
+    </button>
+  </div>
+)}
+
+
+
+
+
       </div>
     </>
   );

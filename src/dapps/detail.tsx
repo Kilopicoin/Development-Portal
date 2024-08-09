@@ -1,4 +1,3 @@
-// use client
 'use client';
 import styles from "../styles/global.module.css";
 import { useDispatch } from 'react-redux';
@@ -176,6 +175,7 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
       const tx = await contract.voteOnElement(elementId, voteAmountInBigInt);
       await tx.wait();
       loadElement(); // Reload element data after voting
+      await loadStakingDetails(account!); // Reload staking details to update voting power
     } catch (error) {
       console.error(error);
       setErrorMessage(error instanceof Error ? error.message : 'An unknown error occurred');
