@@ -54,7 +54,7 @@ export default function ApplicationDevelopment() {
 
   const [lastClaimed, setLastClaimed] = useState<bigint>(BigInt(0));
   const [startingDate, setStartingDate] = useState<bigint>(BigInt(0));
-  const [claimCooldown, setClaimCooldown] = useState<number>(5 * 60); // Claim cooldown period in seconds (e.g., 24 hours) 30 * 24 * 60 * 60
+  const [claimCooldown, setClaimCooldown] = useState<number>(60 * 60 * 24 * 30); // Claim cooldown period in seconds (e.g., 24 hours) 30 * 24 * 60 * 60
   const [timeLeftToClaim, setTimeLeftToClaim] = useState<number>(0);
 
   const [approveElementEnabled, setApproveElementEnabled] = useState(true);
@@ -74,9 +74,9 @@ export default function ApplicationDevelopment() {
   const [calculatedValue, setCalculatedValue] = useState<bigint>(BigInt(0));
   const [generalStatus, setGeneralStatus] = useState<boolean>(false);
 
-  const harmonyTestnetChainId = '0x61';
-  const usdtContractAddress = '0xf2c1687C10b2c4ceF3Be82ddD15DceEed3f1bF6D';
-  const MainContractAddress = '0xA1C9c9cCCb07327214801414800b85918D46C321';
+  const harmonyTestnetChainId = '0x38';
+  const usdtContractAddress = '0x20B4620a767D6dCcBB9314104D5Cf0d08d1F7045';
+  const MainContractAddress = '0xA0CBA87Dc51a66Cab6a43eaEa3A66B607Fc57e4e';
   const ELEMENT_CREATION_COST = 10000; // Cost for creating an element in LOP tokens
 
  
