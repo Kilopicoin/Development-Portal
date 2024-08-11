@@ -197,14 +197,20 @@ export default function ApplicationDevelopment() {
   const [showUsingPlatform, setShowUsingPlatform] = useState(false);
   const [showUserRisks, setShowUserRisks] = useState(false);
   const [showExampleUserFlow, setShowExampleUserFlow] = useState(false);
+  const [ExampleCreatorFlow, setExampleCreatorFlow] = useState(false);
 
   const toggleSection = (section: string) => {
     if (section === "GettingStarted") setShowGettingStarted(!showGettingStarted);
     if (section === "UsingPlatform") setShowUsingPlatform(!showUsingPlatform);
     if (section === "UserRisks") setShowUserRisks(!showUserRisks);
     if (section === "ExampleUserFlow") setShowExampleUserFlow(!showExampleUserFlow);
+    if (section === "ExampleCreatorFlow") setExampleCreatorFlow(!ExampleCreatorFlow);
   };
   
+  
+
+
+
 
   const handleClaimRewards = async () => {
     if (rewards === BigInt(0)) {
@@ -869,6 +875,9 @@ export default function ApplicationDevelopment() {
                             required
                           />
                         </div>
+                        <div className={styles.inputGroup}>
+                        <label htmlFor="logoUrl">Creating new project requires 10.000,00 LOP tokens</label>
+                        </div>
                         <button type="submit" className={styles.buttonG} disabled={!isMetamaskConnected || !isCorrectNetwork}>
                           {isMetamaskConnected && isCorrectNetwork ? 'Create New Project' : 'Metamask (Harmony Testnet) Needed'}
                         </button>
@@ -1118,15 +1127,15 @@ export default function ApplicationDevelopment() {
         <p><strong>Step 1: Connect Your Wallet</strong></p>
         <p><strong>Install Metamask:</strong></p>
         <p>If you haven&apos;t already, download and install the Metamask wallet extension for your browser.</p>
-        <p><strong>Connect to Harmony Testnet:</strong></p>
+        <p><strong>Connect to Binance Smart Chain:</strong></p>
         <p>Open Metamask.</p>
-        <p>Click on the network dropdown at the top and select &quot;Harmony Testnet&quot;.</p>
-        <p>If Harmony Testnet is not listed, you can add it manually by clicking on &quot;Add Network&quot; and entering the following details:</p>
-        <p>Network Name: Harmony Testnet</p>
-        <p>New RPC URL: https://api.s0.b.hmny.io/</p>
-        <p>Chain ID: 1666700000</p>
-        <p>Symbol: ONE</p>
-        <p>Block Explorer URL: https://explorer.pops.one/</p>
+        <p>Click on the network dropdown at the top and select &quot;BSC (Binance Smart Chain)&quot;.</p>
+        <p>If Binance Smart Chain is not listed, you can add it manually by clicking on &quot;Add Network&quot; and entering the following details:</p>
+        <p>Network Name: BNB Smart Chain</p>
+        <p>New RPC URL: https://bsc-dataseed.binance.org/</p>
+        <p>Chain ID: 56</p>
+        <p>Symbol: BNB</p>
+        <p>Block Explorer URL: https://bscscan.com/</p>
       </div>
     )}
     <button onClick={() => toggleSection("UsingPlatform")} className={styles.buttonG}>
@@ -1145,6 +1154,8 @@ export default function ApplicationDevelopment() {
         <p><strong>Stake Tokens:</strong></p>
         <p>Enter the amount of LOP tokens you want to stake. Minimum stake amount: 1 LOP.</p>
         <p>Ensure you have sufficient LOP balance in your Metamask wallet.</p>
+        <p><strong>Receive Rewards:</strong></p>
+        <p>Wait for at least one month and claim your both rewards and voting power.</p>
         <p><strong>Vote for an Application:</strong></p>
         <p>Select an application you support and enter the amount of your voting power you want to allocate.</p>
         <p>Confirm the voting transaction in Metamask.</p>
@@ -1163,7 +1174,7 @@ export default function ApplicationDevelopment() {
         <p>If an application fails or is removed, your voting power will not be refunded.</p>
         <p><strong>Voting Risks</strong></p>
         <p><strong>Use Voting Power Wisely:</strong></p>
-        <p>Once allocated, your voting power cannot be recovered unless the application progresses to the next phase or is successful.</p>
+        <p>Once allocated, your voting power cannot be recovered.</p>
         <p><strong>Responsibility:</strong></p>
         <p>By participating in this protocol, you accept all associated risks and confirm your responsibility for your actions.</p>
       </div>
@@ -1175,19 +1186,51 @@ export default function ApplicationDevelopment() {
       <div className={styles.infoContent}>
         <h4>Example User Flow</h4>
         <p><strong>Step 1: Connect Wallet</strong></p>
-        <p>Connect your Metamask wallet to the Harmony Testnet on the platform.</p>
+        <p>Connect your Metamask wallet to the BSC Binance Smart Chain on the platform.</p>
         <p><strong>Step 2: Explore Applications</strong></p>
         <p>Browse the applications in various phases and select one that interests you.</p>
         <p><strong>Step 3: Stake Tokens</strong></p>
         <p><strong>Enter Stake Amount:</strong></p>
         <p>Enter the amount of LOP tokens you wish to stake.</p>
         <p>Confirm the staking transaction in Metamask.</p>
+        <p><strong>Receive Rewards:</strong></p>
+        <p>Wait for at least one month and claim your both rewards and voting power.</p>
+        <p>Rewards Rate for users: 1st year: 0.6%, 2nd year: 1.2%, 3rd and 3+ years: 1.8%.</p>
         <p><strong>Step 4: Vote for Application</strong></p>
         <p>Decide how much voting power you want to allocate to your selected application.</p>
         <p><strong>Step 5: Monitor Application Progress</strong></p>
         <p>Regularly check the application details to monitor its progress and your voting impact.</p>
       </div>
     )}
+
+
+
+<button onClick={() => toggleSection("ExampleCreatorFlow")} className={styles.buttonG}>
+      Example Application Creator Flow
+    </button>
+    {ExampleCreatorFlow && (
+      <div className={styles.infoContent}>
+        <h4>Example Application Creator Flow</h4>
+        <p><strong>Step 1: Connect Wallet</strong></p>
+        <p>Connect your Metamask wallet to the BSC Binance Smart Chain on the platform.</p>
+        <p><strong>Step 2: Create New Project</strong></p>
+        <p>Click Create New Project button, fill the inputs correctly and click Create New Project button.</p>
+        <p><strong>Step 3: Check your email</strong></p>
+        <p>You will receive an email containing necessary information about your application.</p>
+        <p>Follow the instructions in your email.</p>
+        <p><strong>Updating your project:</strong></p>
+        <p>Keep email conversation with the Kilopi management and update your project with the developments.</p>
+        <p><strong>Step 4: Follow your wallet balance with LOP tokens</strong></p>
+        <p>Every time a user claims LOP token rewards, you will receive your portion according to your application's vote amount.</p>
+        <p>Rewards Rate for creators: 1st year: 0.4%, 2nd year: 0.8%, 3rd and 3+ years: 1.2%.</p>
+        <p><strong>Step 5: Develop your application to a better version</strong></p>
+        <p>Keep working on your application, gather more users, receive more votes and increase your rewards.</p>
+      </div>
+    )}
+
+
+
+
     <button
       className={styles.buttonG}
       onClick={() => window.open('https://youtu.be/-iHwMgerX6s?si=M9pHkyVeBldkE3MI', '_blank')}
