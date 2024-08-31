@@ -6,12 +6,12 @@ import Dapps from '../dapps/index';
 import Marketing from '../marketing/index';
 import Exchanges from '../exchanges/index';
 import { useSelector, useDispatch } from 'react-redux';
-import { setdAppsNav, setMarketingNav, setExchangesNav } from '../store/globalSlice';
+import { setDappsNav, setMarketingNav, setExchangesNav } from '../store/globalSlice';
 import Head from 'next/head';
 
 interface RootState {
   global: {
-    DAppsNav: string;
+    DappsNav: string;
     MarketingNav: string;
     ExchangesNav: string;
   };
@@ -19,7 +19,7 @@ interface RootState {
 
 export default function Home() {
 
-  const dAppsNav = useSelector((state: RootState) => state.global.DAppsNav);
+  const dAppsNav = useSelector((state: RootState) => state.global.DappsNav);
   const marketingNav = useSelector((state: RootState) => state.global.MarketingNav);
   const exchangesNav = useSelector((state: RootState) => state.global.ExchangesNav);
   const dispatch = useDispatch();
@@ -70,7 +70,7 @@ There 3 major categories in this manner. Application Development, Marketing and 
                                                                         setnav("dapps")
                                                                       } 
                                                                       if ( dAppsNav === "detail" ) {
-                                                                        dispatch(setdAppsNav('Home'));
+                                                                        dispatch(setDappsNav('Home'));
                                                                       }
 
                                                                      }  }>Application Development Protocol

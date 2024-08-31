@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  dAppsNav: 'Home',
+  DappsNav: 'Home',
   MarketingNav: 'Home',
   ExchangesNav: 'Home'
 };
@@ -10,8 +10,8 @@ const globalSlice = createSlice({
   name: 'globalSlice',
   initialState,
   reducers: {
-    setdAppsNav: (state, action) => {
-      state.dAppsNav = action.payload;
+    setDappsNav: (state, action) => {
+      state.DappsNav = action.payload;
     },
     setMarketingNav: (state, action) => {
       state.MarketingNav = action.payload;
@@ -22,6 +22,6 @@ const globalSlice = createSlice({
   },
 });
 
-export const { setdAppsNav, setMarketingNav, setExchangesNav } = globalSlice.actions;
+export const { setDappsNav, setMarketingNav, setExchangesNav } = globalSlice.actions;
 
 export default globalSlice.reducer;

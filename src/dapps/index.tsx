@@ -1,6 +1,6 @@
 'use client';
 import { useSelector, useDispatch } from 'react-redux';
-import { setdAppsNav } from '../store/globalSlice';
+import { setDappsNav } from '../store/globalSlice';
 import styles from "../styles/global.module.css";
 import Detail from './detail';
 import Head from 'next/head';
@@ -13,12 +13,12 @@ import usdtABI from './lopTokenABI.json';
 
 interface RootState {
   global: {
-    dAppsNav: string;
+    DappsNav: string;
   };
 }
 
 export default function ApplicationDevelopment() {
-  const dAppsNav = useSelector((state: RootState) => state.global.dAppsNav);
+  const DappsNav = useSelector((state: RootState) => state.global.DappsNav);
   const dispatch = useDispatch();
 
   const [theoryPhase, setTheoryPhase] = useState<any[]>([]);
@@ -380,7 +380,7 @@ export default function ApplicationDevelopment() {
 
   const handleElementClick = (elementId: number) => {
     setSelectedElementId(elementId);
-    dispatch(setdAppsNav('detail'));
+    dispatch(setDappsNav('detail'));
   };
 
   const handleApproveElement = async (elementId: number) => {
@@ -652,7 +652,7 @@ export default function ApplicationDevelopment() {
         {errorMessage && (
           <Modal message={errorMessage} onClose={() => setErrorMessage(null)} />
         )}
-        {dAppsNav === "Home" && (
+        {DappsNav === "Home" && (
           <>
             {!isMetamaskConnected && (
               <button onClick={connectMetamask} className={styles.buttonG}>
@@ -846,7 +846,7 @@ export default function ApplicationDevelopment() {
                         <div className={styles.inputGroup}>
                           <label htmlFor="whitepaperLink">Whitepaper Link:</label>
                           <label>Whitepaper must have;</label>
-                          <label>Blockchain Choice, Application's Clear Explanation, Tokenomics, Benefits for Kilopi, Roadmap, Team</label>
+                          <label>Blockchain Choice, Application&apos;s Clear Explanation, Tokenomics, Benefits for Kilopi, Roadmap, Team</label>
                           <input
                             type="text"
                             id="whitepaperLink"
@@ -879,7 +879,7 @@ export default function ApplicationDevelopment() {
                         <label htmlFor="logoUrl">Creating new project requires 10.000,00 LOP tokens</label>
                         </div>
                         <button type="submit" className={styles.buttonG} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                          {isMetamaskConnected && isCorrectNetwork ? 'Create New Project' : 'Metamask (Harmony Testnet) Needed'}
+                          {isMetamaskConnected && isCorrectNetwork ? 'Create New Project' : 'Metamask (Binance Smart Chain) Needed'}
                         </button>
                       </form>
                     </div>
@@ -890,233 +890,10 @@ export default function ApplicationDevelopment() {
               )}
             </div>
 
-            {isOwner && (
-              <>
-                <div className={styles.phaseContainer}>
-                  <h3>Pending Approval</h3>
-                  <div className={styles.dApps}>
-                    {pendingApproval.map((element, index) => (
-                      <div key={index} className={styles.carddApps}>
-                        <div className={styles.carddAppsDescription}>
-                          <p>ID: {element.id}</p>
-                          <p>Name: {element.name}</p>
-                          <p>Description: {element.description}</p>
-                          <p>Email: {element.email}</p> {/* Display email */}
-                          {element.logoUrl ? (
-                            <img src={element.logoUrl} alt="Logo" width={50} height={50} style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
-                          ) : (
-                            <div style={{ width: 50, height: 50, background: '#ccc' }} />
-                          )}
-                          <p>Whitepaper: <a href={element.whitepaperLink} target="_blank">Link</a></p>
-                          <button onClick={() => handleApproveElement(element.id)} className={styles.buttonG}>
-                            Approve
-                          </button>
-                          <button onClick={() => handleRejectElement(element.id)} className={styles.buttonG}>
-                            Reject
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className={styles.phaseContainer}>
-                  <h3>Pending Update</h3>
-                  <div className={styles.dApps}>
-                    {pendingUpdate.map((element, index) => (
-                      <div key={index} className={styles.carddApps}>
-                        <div className={styles.carddAppsDescription}>
-                          <p>ID: {element.id}</p>
-                          <p>Name: {element.name}</p>
-                          <p>Description: {element.description}</p>
-                          <p>Email: {element.email}</p> {/* Display email */}
-                          {element.logoUrl ? (
-                            <img src={element.logoUrl} alt="Logo" width={50} height={50} style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
-                          ) : (
-                            <div style={{ width: 50, height: 50, background: '#ccc' }} />
-                          )}
-                          <p>Whitepaper: <a href={element.whitepaperLink} target="_blank">Link</a></p>
-                          {element.websiteLink && (
-                            <p>Website: <a href={element.websiteLink} target="_blank">Link</a></p>
-                          )}
-                          {element.tutorialLink && (
-                            <p>Tutorial: <a href={element.tutorialLink} target="_blank">Link</a></p>
-                          )}
-                          {element.performanceMetricsLink && (
-                            <p>Performance Metrics: <a href={element.performanceMetricsLink} target="_blank">Link</a></p>
-                          )}
-                          <button onClick={() => handleUpdateElement(element.id)} className={styles.buttonG}>
-                            Update
-                          </button>
-                          <button onClick={() => handleRefuseUpdateElement(element.id)} className={styles.buttonG}>
-                            Refuse
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className={styles.formContainer}>
-                    <div className={styles.form}>
-                      <h4>Toggle Change Second Admin</h4>
-                      <p>Current State: {changeSecondAdminEnabled ? "Enabled" : "Disabled"}</p>
-                      <button className={styles.buttonG} onClick={() => handleToggleFunctionStatus("changeSecondAdmin", !changeSecondAdminEnabled)} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                        {isMetamaskConnected && isCorrectNetwork ? (changeSecondAdminEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
-                      </button>
-                    </div>
-                  </div>
-                
-              </>
-            )}
-
-            {isOwner && (
-              <div className={styles.formContainer}>
-                <div className={styles.form}>
-                  <h3>Admin Information</h3>
-                  <p>Smart Contract Address: {MainContractAddress}</p>
-                  <p>Total Staked Tokens: {parseFloat(ethers.formatUnits(totalStakedTokens, 6)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                  <p>LOP Token Balance of Smart Contract: {parseFloat(ethers.formatUnits(totalTokenBalance, 6)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                  <p>Estimated Debt: {parseFloat(ethers.formatUnits(calculatedValue, 6)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                </div>
-              </div>
-            )}
-
-            {isOwner && (
-              <div className={styles.formContainer}>
-                <div className={styles.form}>
-                  <h3>General Status</h3>
-                  <p>New Staking Allowance: {generalStatus ? "Enabled" : "Disabled"}</p>
-                  <button className={styles.buttonG} onClick={handleChangeGeneralStatus} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                    {isMetamaskConnected && isCorrectNetwork ? 'Change New Staking Allowance' : 'Metamask (Harmony Testnet) Needed'}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {isSecondOwner && (
-              <div className={styles.row}>
-                <div className={styles.formContainerWrapper}>
-                  <div className={styles.formContainer}>
-                    <div className={styles.form}>
-                      <h4>Toggle Approve Element</h4>
-                      <p>Current State: {approveElementEnabled ? "Enabled" : "Disabled"}</p>
-                      <button className={styles.buttonG} onClick={() => handleToggleFunctionStatus("approveElement", !approveElementEnabled)} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                        {isMetamaskConnected && isCorrectNetwork ? (approveElementEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className={styles.formContainer}>
-                    <div className={styles.form}>
-                      <h4>Toggle Reject Element</h4>
-                      <p>Current State: {rejectElementEnabled ? "Enabled" : "Disabled"}</p>
-                      <button className={styles.buttonG} onClick={() => handleToggleFunctionStatus("rejectElement", !rejectElementEnabled)} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                        {isMetamaskConnected && isCorrectNetwork ? (rejectElementEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className={styles.formContainer}>
-                    <div className={styles.form}>
-                      <h4>Toggle Remove Element</h4>
-                      <p>Current State: {removeElementEnabled ? "Enabled" : "Disabled"}</p>
-                      <button className={styles.buttonG} onClick={() => handleToggleFunctionStatus("removeElement", !removeElementEnabled)} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                        {isMetamaskConnected && isCorrectNetwork ? (removeElementEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className={styles.formContainer}>
-                    <div className={styles.form}>
-                      <h4>Toggle Confirm Update</h4>
-                      <p>Current State: {confirmUpdateEnabled ? "Enabled" : "Disabled"}</p>
-                      <button className={styles.buttonG} onClick={() => handleToggleFunctionStatus("confirmUpdate", !confirmUpdateEnabled)} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                        {isMetamaskConnected && isCorrectNetwork ? (confirmUpdateEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className={styles.formContainer}>
-                    <div className={styles.form}>
-                      <h4>Toggle Refuse Update</h4>
-                      <p>Current State: {refuseUpdateEnabled ? "Enabled" : "Disabled"}</p>
-                      <button className={styles.buttonG} onClick={() => handleToggleFunctionStatus("refuseUpdate", !refuseUpdateEnabled)} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                        {isMetamaskConnected && isCorrectNetwork ? (refuseUpdateEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <div className={styles.formContainer}>
-                    <div className={styles.form}>
-                      <h4>Toggle Change Admin</h4>
-                      <p>Current State: {changeAdminEnabled ? "Enabled" : "Disabled"}</p>
-                      <button className={styles.buttonG} onClick={() => handleToggleFunctionStatus("changeAdmin", !changeAdminEnabled)} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                        {isMetamaskConnected && isCorrectNetwork ? (changeAdminEnabled ? 'Disable' : 'Enable') : 'Metamask (Harmony Testnet) Needed'}
-                      </button>
-                    </div>
-                  </div>
-
-                </div>
-              </div>
-            )}
-
-            {isThirdOwner && (
-              <div className={styles.row}>
-                <div className={styles.formContainerWrapper}>
-                  <div className={styles.formContainer}>
-                    <div className={styles.form}>
-                      <h4>Change Owner Address</h4>
-                      <div className={styles.inputGroup}>
-                        <label htmlFor="newOwnerAddress">New Owner Address:</label>
-                        <input
-                          type="text"
-                          id="newOwnerAddress"
-                          value={newOwnerAddress}
-                          onChange={(e) => setNewOwnerAddress(e.target.value)}
-                          required
-                        />
-                      </div>
-                      <button className={styles.buttonG} onClick={handleChangeOwnerAddress} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                        {isMetamaskConnected && isCorrectNetwork ? 'Change Owner Address' : 'Metamask (Harmony Testnet) Needed'}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className={styles.formContainer}>
-                    <div className={styles.form}>
-                      <h4>Change Second Owner Address</h4>
-                      <div className={styles.inputGroup}>
-                        <label htmlFor="newSecondOwnerAddress">New Second Owner Address:</label>
-                        <input
-                          type="text"
-                          id="newSecondOwnerAddress"
-                          value={newSecondOwnerAddress}
-                          onChange={(e) => setNewSecondOwnerAddress(e.target.value)}
-                          required
-                        />
-                      </div>
-                      <button className={styles.buttonG} onClick={handleChangeSecondOwnerAddress} disabled={!isMetamaskConnected || !isCorrectNetwork}>
-                        {isMetamaskConnected && isCorrectNetwork ? 'Change Second Owner Address' : 'Metamask (Harmony Testnet) Needed'}
-                      </button>
-                    </div>
-                  </div>
-                  
-                </div>
-              </div>
-            )}
-
-          </>
-        )}
-        {dAppsNav === "detail" && selectedElementId !== null && (
-          <>
-            <Detail elementId={selectedElementId} />
-          </>
-        )}
 
 
 
-{!isOwner && !isSecondOwner && !isThirdOwner && (
+            {!isOwner && !isSecondOwner && !isThirdOwner && (
   <div className={styles.infoButtons}>
     <button onClick={() => toggleSection("GettingStarted")} className={styles.buttonG}>
       Getting Started
@@ -1221,7 +998,7 @@ export default function ApplicationDevelopment() {
         <p><strong>Updating your project:</strong></p>
         <p>Keep email conversation with the Kilopi management and update your project with the developments.</p>
         <p><strong>Step 4: Follow your wallet balance with LOP tokens</strong></p>
-        <p>Every time a user claims LOP token rewards, you will receive your portion according to your application's vote amount.</p>
+        <p>Every time a user claims LOP token rewards, you will receive your portion according to your application&apos;s vote amount.</p>
         <p>Rewards Rate for creators: 1st year: 0.4%, 2nd year: 0.8%, 3rd and 3+ years: 1.2%.</p>
         <p><strong>Step 5: Develop your application to a better version</strong></p>
         <p>Keep working on your application, gather more users, receive more votes and increase your rewards.</p>
@@ -1242,6 +1019,238 @@ export default function ApplicationDevelopment() {
 
 
 
+
+
+            {isOwner && (
+              <>
+                <div className={styles.phaseContainer}>
+                  <h3>Pending Approval</h3>
+                  <div className={styles.dApps}>
+                    {pendingApproval.map((element, index) => (
+                      <div key={index} className={styles.carddApps}>
+                        <div className={styles.carddAppsDescription}>
+                          <p>ID: {element.id}</p>
+                          <p>Name: {element.name}</p>
+                          <p>Description: {element.description}</p>
+                          <p>Email: {element.email}</p> {/* Display email */}
+                          {element.logoUrl ? (
+                            <img src={element.logoUrl} alt="Logo" width={50} height={50} style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
+                          ) : (
+                            <div style={{ width: 50, height: 50, background: '#ccc' }} />
+                          )}
+                          <p>Whitepaper: <a href={element.whitepaperLink} target="_blank">Link</a></p>
+                          <button onClick={() => handleApproveElement(element.id)} className={styles.buttonG}>
+                            Approve
+                          </button>
+                          <button onClick={() => handleRejectElement(element.id)} className={styles.buttonG}>
+                            Reject
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className={styles.phaseContainer}>
+                  <h3>Pending Update</h3>
+                  <div className={styles.dApps}>
+                    {pendingUpdate.map((element, index) => (
+                      <div key={index} className={styles.carddApps}>
+                        <div className={styles.carddAppsDescription}>
+                          <p>ID: {element.id}</p>
+                          <p>Name: {element.name}</p>
+                          <p>Description: {element.description}</p>
+                          <p>Email: {element.email}</p> {/* Display email */}
+                          {element.logoUrl ? (
+                            <img src={element.logoUrl} alt="Logo" width={50} height={50} style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
+                          ) : (
+                            <div style={{ width: 50, height: 50, background: '#ccc' }} />
+                          )}
+                          <p>Whitepaper: <a href={element.whitepaperLink} target="_blank">Link</a></p>
+                          {element.websiteLink && (
+                            <p>Website: <a href={element.websiteLink} target="_blank">Link</a></p>
+                          )}
+                          {element.tutorialLink && (
+                            <p>Tutorial: <a href={element.tutorialLink} target="_blank">Link</a></p>
+                          )}
+                          {element.performanceMetricsLink && (
+                            <p>Performance Metrics: <a href={element.performanceMetricsLink} target="_blank">Link</a></p>
+                          )}
+                          <button onClick={() => handleUpdateElement(element.id)} className={styles.buttonG}>
+                            Update
+                          </button>
+                          <button onClick={() => handleRefuseUpdateElement(element.id)} className={styles.buttonG}>
+                            Refuse
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className={styles.formContainer}>
+                    <div className={styles.form}>
+                      <h4>Toggle Change Second Admin</h4>
+                      <p>Current State: {changeSecondAdminEnabled ? "Enabled" : "Disabled"}</p>
+                      <button className={styles.buttonG} onClick={() => handleToggleFunctionStatus("changeSecondAdmin", !changeSecondAdminEnabled)} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                        {isMetamaskConnected && isCorrectNetwork ? (changeSecondAdminEnabled ? 'Disable' : 'Enable') : 'Metamask (Binance Smart Chain) Needed'}
+                      </button>
+                    </div>
+                  </div>
+                
+              </>
+            )}
+
+            {isOwner && (
+              <div className={styles.formContainer}>
+                <div className={styles.form}>
+                  <h3>Admin Information</h3>
+                  <p>Smart Contract Address: {MainContractAddress}</p>
+                  <p>Total Staked Tokens: {parseFloat(ethers.formatUnits(totalStakedTokens, 6)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <p>LOP Token Balance of Smart Contract: {parseFloat(ethers.formatUnits(totalTokenBalance, 6)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <p>Estimated Debt: {parseFloat(ethers.formatUnits(calculatedValue, 6)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                </div>
+              </div>
+            )}
+
+            {isOwner && (
+              <div className={styles.formContainer}>
+                <div className={styles.form}>
+                  <h3>General Status</h3>
+                  <p>New Staking Allowance: {generalStatus ? "Enabled" : "Disabled"}</p>
+                  <button className={styles.buttonG} onClick={handleChangeGeneralStatus} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                    {isMetamaskConnected && isCorrectNetwork ? 'Change New Staking Allowance' : 'Metamask (Binance Smart Chain) Needed'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {isSecondOwner && (
+              <div className={styles.row}>
+                <div className={styles.formContainerWrapper}>
+                  <div className={styles.formContainer}>
+                    <div className={styles.form}>
+                      <h4>Toggle Approve Element</h4>
+                      <p>Current State: {approveElementEnabled ? "Enabled" : "Disabled"}</p>
+                      <button className={styles.buttonG} onClick={() => handleToggleFunctionStatus("approveElement", !approveElementEnabled)} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                        {isMetamaskConnected && isCorrectNetwork ? (approveElementEnabled ? 'Disable' : 'Enable') : 'Metamask (Binance Smart Chain) Needed'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className={styles.formContainer}>
+                    <div className={styles.form}>
+                      <h4>Toggle Reject Element</h4>
+                      <p>Current State: {rejectElementEnabled ? "Enabled" : "Disabled"}</p>
+                      <button className={styles.buttonG} onClick={() => handleToggleFunctionStatus("rejectElement", !rejectElementEnabled)} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                        {isMetamaskConnected && isCorrectNetwork ? (rejectElementEnabled ? 'Disable' : 'Enable') : 'Metamask (HBinance Smart Chain) Needed'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className={styles.formContainer}>
+                    <div className={styles.form}>
+                      <h4>Toggle Remove Element</h4>
+                      <p>Current State: {removeElementEnabled ? "Enabled" : "Disabled"}</p>
+                      <button className={styles.buttonG} onClick={() => handleToggleFunctionStatus("removeElement", !removeElementEnabled)} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                        {isMetamaskConnected && isCorrectNetwork ? (removeElementEnabled ? 'Disable' : 'Enable') : 'Metamask (Binance Smart Chain) Needed'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className={styles.formContainer}>
+                    <div className={styles.form}>
+                      <h4>Toggle Confirm Update</h4>
+                      <p>Current State: {confirmUpdateEnabled ? "Enabled" : "Disabled"}</p>
+                      <button className={styles.buttonG} onClick={() => handleToggleFunctionStatus("confirmUpdate", !confirmUpdateEnabled)} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                        {isMetamaskConnected && isCorrectNetwork ? (confirmUpdateEnabled ? 'Disable' : 'Enable') : 'Metamask (Binance Smart Chain) Needed'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className={styles.formContainer}>
+                    <div className={styles.form}>
+                      <h4>Toggle Refuse Update</h4>
+                      <p>Current State: {refuseUpdateEnabled ? "Enabled" : "Disabled"}</p>
+                      <button className={styles.buttonG} onClick={() => handleToggleFunctionStatus("refuseUpdate", !refuseUpdateEnabled)} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                        {isMetamaskConnected && isCorrectNetwork ? (refuseUpdateEnabled ? 'Disable' : 'Enable') : 'Metamask (Binance Smart Chain) Needed'}
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className={styles.formContainer}>
+                    <div className={styles.form}>
+                      <h4>Toggle Change Admin</h4>
+                      <p>Current State: {changeAdminEnabled ? "Enabled" : "Disabled"}</p>
+                      <button className={styles.buttonG} onClick={() => handleToggleFunctionStatus("changeAdmin", !changeAdminEnabled)} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                        {isMetamaskConnected && isCorrectNetwork ? (changeAdminEnabled ? 'Disable' : 'Enable') : 'Metamask (Binance Smart Chain) Needed'}
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            )}
+
+            {isThirdOwner && (
+              <div className={styles.row}>
+                <div className={styles.formContainerWrapper}>
+                  <div className={styles.formContainer}>
+                    <div className={styles.form}>
+                      <h4>Change Owner Address</h4>
+                      <div className={styles.inputGroup}>
+                        <label htmlFor="newOwnerAddress">New Owner Address:</label>
+                        <input
+                          type="text"
+                          id="newOwnerAddress"
+                          value={newOwnerAddress}
+                          onChange={(e) => setNewOwnerAddress(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <button className={styles.buttonG} onClick={handleChangeOwnerAddress} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                        {isMetamaskConnected && isCorrectNetwork ? 'Change Owner Address' : 'Metamask (Binance Smart Chain) Needed'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className={styles.formContainer}>
+                    <div className={styles.form}>
+                      <h4>Change Second Owner Address</h4>
+                      <div className={styles.inputGroup}>
+                        <label htmlFor="newSecondOwnerAddress">New Second Owner Address:</label>
+                        <input
+                          type="text"
+                          id="newSecondOwnerAddress"
+                          value={newSecondOwnerAddress}
+                          onChange={(e) => setNewSecondOwnerAddress(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <button className={styles.buttonG} onClick={handleChangeSecondOwnerAddress} disabled={!isMetamaskConnected || !isCorrectNetwork}>
+                        {isMetamaskConnected && isCorrectNetwork ? 'Change Second Owner Address' : 'Metamask (Binance Smart Chain) Needed'}
+                      </button>
+                    </div>
+                  </div>
+                  
+                </div>
+              </div>
+            )}
+
+          </>
+        )}
+        
+
+
+
+
+
+
+{DappsNav === "detail" && selectedElementId !== null && (
+          <>
+            <Detail elementId={selectedElementId} />
+          </>
+        )}
 
 
       </div>

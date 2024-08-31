@@ -1,7 +1,7 @@
 'use client';
 import styles from "../styles/global.module.css";
 import { useDispatch } from 'react-redux';
-import { setdAppsNav } from '../store/globalSlice';
+import { setDappsNav } from '../store/globalSlice';
 import getContract, { getSignerContract } from './contract';
 import { useCallback, useEffect, useState } from 'react';
 import { ethers } from 'ethers'; // Correct import for ethers.js v6.x.x
@@ -223,7 +223,7 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
       const contract = await getSignerContract();
       const tx = await contract.removeElement(elementId);
       await tx.wait();
-      dispatch(setdAppsNav('Home')); // Navigate back to home after removal
+      dispatch(setDappsNav('Home')); // Navigate back to home after removal
     } catch (error) {
       console.error(error);
       setErrorMessage(error instanceof Error ? error.message : 'An unknown error occurred');
@@ -258,7 +258,7 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
           <Modal message={errorMessage} onClose={() => setErrorMessage(null)} />
         )}
         <h3>Application Development Detail Page</h3>
-        <button className={styles.buttonG} onClick={() => dispatch(setdAppsNav('Home'))}>
+        <button className={styles.buttonG} onClick={() => dispatch(setDappsNav('Home'))}>
           Back to Application Development Main Page
         </button>
 

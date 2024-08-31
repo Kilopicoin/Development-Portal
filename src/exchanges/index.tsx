@@ -12,7 +12,6 @@ import Head from 'next/head';
 
 interface RootState {
   global: {
-    MarketingNav: string;
     ExchangesNav: string;
   };
 }
