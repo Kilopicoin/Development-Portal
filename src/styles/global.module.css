@@ -133,6 +133,9 @@
     flex-direction: column;
   }
 
+  .button {
+    color: white;
+  }
 
   .content {
     padding: 4rem;
@@ -248,7 +251,6 @@
   .container {
     flex-direction: column;
   }
-
   
 }
 
@@ -256,7 +258,7 @@
   box-sizing: border-box;
   padding: 20px;
   text-align: center;
-  background-color: #060620;
+  background-color: #101010;
   flex: 0.25;
   color: #ffffff;
 }
@@ -265,7 +267,7 @@
   box-sizing: border-box;
   padding: 20px;
   text-align: center;
-  background: linear-gradient(to left, rgb(92, 79, 117), #060620);
+  background: linear-gradient(to left, rgb(28, 28, 30), #101010);
   flex: 0.75;
   display: flex;
   flex-direction: column;
@@ -273,36 +275,44 @@
 }
 
 .button {
-  font-size: 16px;
-  padding: 1rem 1.2rem;
-  border-radius: var(--border-radius);
-  background-color: #051731;
-  border: 1px solid rgba(var(--card-border-rgb), 0.3);
-  transition: background 200ms, border 200ms;
-  width: 100%;
-  margin: 6px 0px;
+  background: linear-gradient(135deg, #1992a1, #2c2857);
+  color: white;
+  border: none;
+  padding: 1.15rem 1.75rem;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  border-radius: 50px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: background 0.3s, box-shadow 0.3s, transform 0.3s;
+  font-weight: bold;
 }
 
 .buttonG {
-  font-size: 16px;
-  padding: 1rem 1.2rem;
-  border-radius: var(--border-radius);
-  background-color: #0f2c55;
-  border: 1px solid rgba(var(--card-border-rgb), 0.3);
-  transition: background 200ms, border 200ms;
+  background: linear-gradient(135deg, #1992a1, #2c2857);
+  color: white;
+  border: none;
+  padding: 1.05rem 1.65rem;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  border-radius: 50px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: background 0.3s, box-shadow 0.3s, transform 0.3s;
+  font-weight: bold;
   margin: 6px 0px;
 }
 
 .buttonG:hover {
-  cursor: pointer;
-  background-color: #264b7e;
-  color: #fff;
+  background: linear-gradient(135deg, #42abb9, #726cad);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
 }
 
 .button:hover {
-  cursor: pointer;
-  background-color: #0c274d;
-  color: #fff;
+  background: linear-gradient(135deg, #42abb9, #726cad);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
 }
 
 .buttondApps {
