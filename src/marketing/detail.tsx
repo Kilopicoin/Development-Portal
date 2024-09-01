@@ -35,7 +35,7 @@ const Detail: React.FC<DetailProps> = ({ elementId }) => {
   // State for function status
   const [removeElementEnabled, setRemoveElementEnabled] = useState(true);
 
-  const harmonyTestnetChainId = '0x38'; // Harmony Testnet chain ID in hexadecimal
+  const harmonyTestnetChainId = '0x61'; // Harmony Testnet chain ID in hexadecimal
 
   const checkMetamaskConnection = useCallback(async () => {
     if (typeof window.ethereum !== 'undefined') {
