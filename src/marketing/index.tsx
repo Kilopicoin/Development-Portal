@@ -73,9 +73,9 @@ export default function ApplicationDevelopment() {
   const [calculatedValue, setCalculatedValue] = useState<bigint>(BigInt(0));
   const [generalStatus, setGeneralStatus] = useState<boolean>(false);
 
-  const harmonyTestnetChainId = '0x61';
-  const usdtContractAddress = '0x7E6E8a28DEd7551370Edc54a794D165F6Ec85Ab2';
-  const MainContractAddress = '0xD123C72C7caf103c072FE6D978A589683E0D59e2';
+  const harmonyTestnetChainId = '0x38';
+  const usdtContractAddress = '0x20B4620a767D6dCcBB9314104D5Cf0d08d1F7045';
+  const MainContractAddress = '0x2A24E7D6E0D3759daCfe26AD8b2fe14C32541f9F';
   const ELEMENT_CREATION_COST = 10000; // Cost for creating an element in LOP tokens
 
  
