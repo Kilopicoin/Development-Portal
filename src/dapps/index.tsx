@@ -1010,7 +1010,7 @@ export default function ApplicationDevelopment() {
 
     <button
       className={styles.buttonG}
-      onClick={() => window.open('https://youtu.be/-iHwMgerX6s?si=M9pHkyVeBldkE3MI', '_blank')}
+      onClick={() => window.open('https://youtu.be/Y_uqoyrbVBg?si=nAvqWMg6V1gpYwFY', '_blank')}
     >
       Tutorial Video
     </button>
